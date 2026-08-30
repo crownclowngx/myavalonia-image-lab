@@ -36,5 +36,8 @@
     <TabItem Header="小波实验室">
       <ContentControl x:Name="WaveletPreview" />
     </TabItem>
+    <TabItem Header="频域滤波">
+      <ContentControl x:Name="FrequencyFilterPreview" />
+    </TabItem>
   </TabControl>
 </Window>

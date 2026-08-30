@@ -34,7 +34,7 @@ ImageLab 的长期边界是：
 
 ## 当前能力基线
 
-当前 V1 已经提供十个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”“卷积核实验台”和“小波实验室”。底层已经具备：
+当前 V1 已经提供十一个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”“卷积核实验台”“小波实验室”和“频域滤波”。底层已经具备：
 
 - 自有 RGBA8888 `PixelImage` 与受限图像尺寸模型。
 - RGB 与 YCbCr 亮度投影和重建。
@@ -49,7 +49,7 @@ ImageLab 的长期边界是：
 - 水印检测、提取、验证、有限 Payload 预览和完整 Payload 导出。
 
 频域分析器已经提供六通道全局 FFT、幅度/相位、逐块 DCT、径向能量、频点检查和理想径向频带重建；任意
-遮罩编辑、参数化滤波器和原尺寸处理仍属于后续能力。
+自由遮罩编辑和超过 2048² 的原尺寸处理仍属于后续能力；参数化径向滤波器已由 Frequency Filter V1 实现。
 
 ## 建议的主要 Document
 
@@ -207,7 +207,7 @@ V1 已按[专用实现与证据入口](design/wavelet-lab/README.md)完成为第
 采用 Haar/CDF 5/3、六单通道、多级 packed 金字塔、硬/软阈值、有限质量扫描及同条件 DCT/DWT 水印对比。
 自动门禁为 Debug/Release 333/333、零跳过，构建零警告/零错误；不使用 AIFLOW，也未增加 Windows CI 或执行发布门禁。
 
-### 9. Frequency Filter／频域滤波
+### 9. Frequency Filter／频域滤波（V1 本地开发封板）
 
 在全局 FFT 基础上提供可解释的低通、高通、带通和带阻实验：
 
@@ -216,6 +216,11 @@ V1 已按[专用实现与证据入口](design/wavelet-lab/README.md)完成为第
 - 幅度谱、滤波遮罩和逆变换结果联动。
 - Ringing、模糊和边缘增强等副作用可视化。
 - 与等价空间域卷积进行性能和结果比较。
+
+V1 已按[专用实现与证据入口](design/frequency-filter/README.md)完成：复用 Spectrum Inspector 的有界全局 FFT 与
+Convolution Playground 的 raw double 空间卷积，提供标准径向响应、90%–10% 派生过渡带、代理/预算内原尺寸、
+有限截断空间核近似和副作用诊断。Debug/Release 为 362/362、零跳过，构建零警告/零错误；不使用 AIFLOW，
+未新增 Windows CI，也未执行发布门禁。
 
 ### 10. Frequency Mask Editor／频谱遮罩编辑器
 

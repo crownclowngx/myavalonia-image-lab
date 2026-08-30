@@ -44,4 +44,8 @@ public static class PluginIds
     /// <summary>“小波实验室”多尺度分解、去噪与载体比较的多实例持久身份。</summary>
     public static readonly DocumentTypeId WaveletLabDocument =
         new("myavalonia.plugin.image.lab.document.wavelet-lab");
+
+    /// <summary>“频域滤波”径向滤波、副作用诊断与空间近似的多实例持久身份。</summary>
+    public static readonly DocumentTypeId FrequencyFilterDocument =
+        new("myavalonia.plugin.image.lab.document.frequency-filter");
 }

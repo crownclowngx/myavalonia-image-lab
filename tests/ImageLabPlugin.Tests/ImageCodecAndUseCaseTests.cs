@@ -34,6 +34,7 @@ using ImageLabPlugin.Domain.Robustness.Operators;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
+using ImageLabPlugin.Features.FrequencyFilter;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -75,7 +76,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十一个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -96,6 +97,7 @@ public sealed class ImageCodecAndUseCaseTests
         var waveletView = new WaveletLabView();
         var waveletPyramid = new WaveletPyramidControl();
         var waveletChart = new WaveletScanChartControl();
+        var frequencyFilterView = new FrequencyFilterView();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -120,6 +122,7 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(waveletView.Content);
         Assert.NotNull(waveletPyramid);
         Assert.NotNull(waveletChart);
+        Assert.NotNull(frequencyFilterView.Content);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -134,7 +137,8 @@ public sealed class ImageCodecAndUseCaseTests
             new RobustnessLabView(),
             new BitPlaneViewerView(),
             new LsbSteganographyLabView(),
-            new ConvolutionPlaygroundView()
+            new ConvolutionPlaygroundView(),
+            new FrequencyFilterView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -152,7 +156,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(32, numericInputs.Count);
+        Assert.Equal(36, numericInputs.Count);
     }
 
     [Fact]

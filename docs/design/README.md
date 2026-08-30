@@ -13,6 +13,7 @@
 | [LSB 隐写与统计实验](lsb-steganography-lab/README.md) | 在像素低位写入有限载荷并观察脆弱性 | ILSB Frame、槽位、统计、BER、报告和资源边界 |
 | [卷积核实验台](convolution-playground/README.md) | 编辑卷积核并联动观察空间结果与频率响应 | 真卷积、边界、归一化、双核梯度、解释与门禁 |
 | [小波实验室](wavelet-lab/README.md) | 观察多尺度子带、重建、阈值去噪和载体差异 | Haar/CDF 5/3、packed 金字塔、有限扫描、DCT/DWT Adapter |
+| [频域滤波](frequency-filter/README.md) | 低通、高通、带通和带阻实验 | Ideal/Butterworth/Gaussian、IFFT、副作用与空间近似 |
 
 跨能力的架构、领域边界、工作台命令、工作流和发布资料见 [公共设计资料](shared/README.md)。
 
@@ -21,6 +22,7 @@
 | 能力 | 当前状态 | 计划入口 |
 | --- | --- | --- |
 | Wavelet Lab／小波实验室 | V1 本地开发封板 | [专用实现与证据入口](wavelet-lab/README.md) |
+| Frequency Filter／频域滤波 | V1 本地开发封板 | [专用实现与证据入口](frequency-filter/README.md) |
 
 ## 每个能力目录的约定
 
@@ -32,4 +34,4 @@
 - `testing.md`：自动测试、本地命令、已证明与未证明的结论。
 - `history/`：各阶段实际实施记录，不作为当前入口文档。
 
-九项产品能力均已完成开发实现与本地自动门禁，Module 当前登记十个 Persistable Document。上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。
+十项产品能力均已完成开发实现与本地自动门禁，Module 当前登记十一个 Persistable Document。上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。

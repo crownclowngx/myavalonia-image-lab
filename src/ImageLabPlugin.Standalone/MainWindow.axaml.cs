@@ -9,6 +9,7 @@ using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
+using ImageLabPlugin.Features.FrequencyFilter;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -26,6 +27,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _lsbScope;
     private IServiceScope? _convolutionScope;
     private IServiceScope? _waveletScope;
+    private IServiceScope? _frequencyFilterScope;
 
     public MainWindow()
     {
@@ -44,6 +46,7 @@ public sealed partial class MainWindow : Window
         _lsbScope = services.CreateScope();
         _convolutionScope = services.CreateScope();
         _waveletScope = services.CreateScope();
+        _frequencyFilterScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -64,6 +67,8 @@ public sealed partial class MainWindow : Window
         var convolutionView = _convolutionScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundView>();
         var waveletDocument = _waveletScope.ServiceProvider.GetRequiredService<WaveletLabDocument>();
         var waveletView = _waveletScope.ServiceProvider.GetRequiredService<WaveletLabView>();
+        var frequencyFilterDocument = _frequencyFilterScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
+        var frequencyFilterView = _frequencyFilterScope.ServiceProvider.GetRequiredService<FrequencyFilterView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -83,6 +88,8 @@ public sealed partial class MainWindow : Window
         convolutionDocument.InitializeAsync(new NewDocumentActivation("卷积核实验台"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         waveletDocument.InitializeAsync(new NewDocumentActivation("小波实验室"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        frequencyFilterDocument.InitializeAsync(new NewDocumentActivation("频域滤波"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -104,6 +111,8 @@ public sealed partial class MainWindow : Window
         ConvolutionPreview.Content = convolutionView;
         waveletView.DataContext = waveletDocument;
         WaveletPreview.Content = waveletView;
+        frequencyFilterView.DataContext = frequencyFilterDocument;
+        FrequencyFilterPreview.Content = frequencyFilterView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -116,6 +125,7 @@ public sealed partial class MainWindow : Window
             lsbDocument.Dispose();
             convolutionDocument.Dispose();
             waveletDocument.Dispose();
+            frequencyFilterDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -126,6 +136,7 @@ public sealed partial class MainWindow : Window
             _lsbScope?.Dispose();
             _convolutionScope?.Dispose();
             _waveletScope?.Dispose();
+            _frequencyFilterScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -136,6 +147,7 @@ public sealed partial class MainWindow : Window
             _lsbScope = null;
             _convolutionScope = null;
             _waveletScope = null;
+            _frequencyFilterScope = null;
         };
     }
 }

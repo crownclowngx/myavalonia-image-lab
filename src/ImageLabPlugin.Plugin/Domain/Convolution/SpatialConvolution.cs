@@ -48,11 +48,25 @@ internal sealed class SpatialConvolver
         ConvolutionKernel kernel, BorderDefinition border, KernelNormalizationDefinition normalization,
         double bias, CancellationToken cancellationToken = default)
     {
+        if (!double.IsFinite(bias)) throw new ArgumentOutOfRangeException(nameof(bias), "偏置必须有限。");
+        var raw = ConvolveRaw(source, width, height, kernel, border, normalization, cancellationToken);
+        return Quantize(raw.ValueSpan, width, height, raw.Divisor, bias, cancellationToken);
+    }
+
+    /// <summary>只执行卷积数学核心并返回未经偏置、舍入或 byte 裁切的结果。</summary>
+    /// <remarks>
+    /// 频域滤波的空间近似必须在 raw double 层比较；如果先量化，两条路径的负值和过冲都会被裁掉，
+    /// 误差会被人为缩小。原有 <see cref="Convolve"/> 继续调用本方法后量化，因此既有产品行为不变，
+    /// 也没有复制第二套卷积循环。
+    /// </remarks>
+    public RawConvolutionResult ConvolveRaw(ReadOnlySpan<double> source, int width, int height,
+        ConvolutionKernel kernel, BorderDefinition border, KernelNormalizationDefinition normalization,
+        CancellationToken cancellationToken = default)
+    {
         if (width <= 0 || height <= 0 || source.Length != checked(width * height))
             throw new ArgumentException("输入平面长度与宽高不一致。", nameof(source));
         ArgumentNullException.ThrowIfNull(kernel); ArgumentNullException.ThrowIfNull(border);
         border.Validate();
-        if (!double.IsFinite(bias)) throw new ArgumentOutOfRangeException(nameof(bias), "偏置必须有限。");
         var divisor = ConvolutionNormalizer.ResolveDivisor(kernel, normalization);
         var raw = new double[source.Length];
         var coefficients = kernel.CoefficientSpan;
@@ -81,7 +95,7 @@ internal sealed class SpatialConvolver
                 raw[(y * width) + x] = accumulator / divisor;
             }
         }
-        return Quantize(raw, width, height, divisor, bias, cancellationToken);
+        return new RawConvolutionResult(width, height, raw, divisor);
     }
 
     internal static ConvolutionPlaneResult Quantize(ReadOnlySpan<double> raw, int width, int height,
@@ -104,6 +118,28 @@ internal sealed class SpatialConvolver
         var stats = raw.Length == 0 ? ConvolutionStatistics.Empty : new(rawMin, rawMax, biasedMin, biasedMax, low, high);
         return new ConvolutionPlaneResult(width, height, raw, bytes, divisor, stats);
     }
+}
+
+/// <summary>空间卷积数学核心的不可变结果；构造时复制缓冲，调用方不能修改比较证据。</summary>
+internal sealed class RawConvolutionResult
+{
+    private readonly double[] _values;
+
+    public RawConvolutionResult(int width, int height, ReadOnlySpan<double> values, double divisor)
+    {
+        if (width <= 0 || height <= 0 || values.Length != checked(width * height))
+            throw new ArgumentException("raw 卷积缓冲长度与宽高不一致。", nameof(values));
+        Width = width;
+        Height = height;
+        Divisor = divisor;
+        _values = values.ToArray();
+    }
+
+    public int Width { get; }
+    public int Height { get; }
+    public double Divisor { get; }
+    public ReadOnlyMemory<double> Values => new((double[])_values.Clone());
+    internal ReadOnlySpan<double> ValueSpan => _values;
 }
 
 /// <summary>只负责将两个线性梯度平面组合成非线性 Magnitude。</summary>

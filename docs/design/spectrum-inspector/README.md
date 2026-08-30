@@ -11,3 +11,5 @@
 - 追溯实施过程：查看 [G0–G7 历史记录](history/README.md)。
 
 分析和导出的对象可能是缩小后的“分析代理”，不是原尺寸图片；界面状态栏会明确显示两者尺寸。
+
+参数化 Ideal/Butterworth/Gaussian 滤波已在独立的[频域滤波](../frequency-filter/README.md)中实现；本 Document 继续只负责频谱观察和 0/1 频带重建，不反向调用另一个 Feature。

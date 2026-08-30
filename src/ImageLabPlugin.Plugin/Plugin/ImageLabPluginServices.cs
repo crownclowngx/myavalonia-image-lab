@@ -29,6 +29,8 @@ using ImageLabPlugin.Domain.Convolution;
 using ImageLabPlugin.Application.Wavelets;
 using ImageLabPlugin.Domain.Wavelets;
 using ImageLabPlugin.Infrastructure.Wavelets;
+using ImageLabPlugin.Application.FrequencyFiltering;
+using ImageLabPlugin.Domain.FrequencyFiltering;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -50,6 +52,7 @@ public static class ImageLabPluginServices
         AddLsbSteganographyServices(services);
         AddConvolutionServices(services);
         AddWaveletServices(services);
+        AddFrequencyFilterServices(services);
         return services;
     }
 
@@ -257,5 +260,25 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRunWatermarkCarrierBenchmarkUseCase, RunWatermarkCarrierBenchmarkUseCase>();
         services.AddSingleton<IExportWaveletImageUseCase, ExportWaveletImageUseCase>();
         services.AddSingleton<IExportWaveletReportUseCase, ExportWaveletReportUseCase>();
+    }
+
+    /// <summary>登记无状态频域滤波数值服务和五个窄应用用例；每实例状态只存在于 Document/Session。</summary>
+    private static void AddFrequencyFilterServices(IServiceCollection services)
+    {
+        services.AddSingleton<RadialFilterResponse>();
+        services.AddSingleton<FrequencySpectrumBuilder>();
+        services.AddSingleton<FrequencyFilterMaskFactory>();
+        services.AddSingleton<FrequencyFilterEngine>();
+        services.AddSingleton<FrequencySignalProjector>();
+        services.AddSingleton<FrequencySideEffectAnalyzer>();
+        services.AddSingleton<FrequencyDifferenceProjector>();
+        services.AddSingleton<FrequencyImpulseResponseFactory>();
+        services.AddSingleton<FrequencySpatialComparator>();
+        services.AddSingleton<IPrepareFrequencyFilterSessionUseCase, PrepareFrequencyFilterSessionUseCase>();
+        services.AddSingleton<ApplyFrequencyFilterUseCase>();
+        services.AddSingleton<IApplyFrequencyFilterUseCase>(static provider => provider.GetRequiredService<ApplyFrequencyFilterUseCase>());
+        services.AddSingleton<ICompareFrequencySpatialUseCase, CompareFrequencySpatialUseCase>();
+        services.AddSingleton<IRenderFullFrequencyFilterUseCase, RenderFullFrequencyFilterUseCase>();
+        services.AddSingleton<IExportFrequencyFilterImageUseCase, ExportFrequencyFilterImageUseCase>();
     }
 }

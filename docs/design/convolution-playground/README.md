@@ -28,3 +28,4 @@
 - 频率响应只描述归一化后的线性核，不包含边界、偏置、裁切和 YCbCr 回写。
 - 分析代理不是完整尺寸结果；JPEG 不作为输出格式。
 - 本轮没有 AIFLOW、Workflow Action、Workbench Command、Windows CI、ZIP 或发布验收。
+- [频域滤波](../frequency-filter/README.md)只复用 `SpatialConvolver.ConvolveRaw` 做 padded/Wrap/raw-double 有限核近似；它不调用本 Document，也不把截断核宣称为完整响应的精确等价物。

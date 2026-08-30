@@ -10,6 +10,7 @@ using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
+using ImageLabPlugin.Features.FrequencyFilter;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -79,6 +80,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.WaveletLabDocument,
                 "小波实验室",
                 "分解、观察并重建多尺度小波子带，实验阈值去噪及 DCT/DWT 水印差异",
+                "图像分析"));
+        registration.AddPersistableDocument<FrequencyFilterDocument, FrequencyFilterView>(
+            new DocumentDescriptor(
+                PluginIds.FrequencyFilterDocument,
+                "频域滤波",
+                "使用 Ideal、Butterworth 或 Gaussian 径向响应实验低通、高通、带通、带阻及空间有限核近似",
                 "图像分析"));
     }
 }

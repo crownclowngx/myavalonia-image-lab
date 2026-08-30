@@ -11,6 +11,8 @@ using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
+using ImageLabPlugin.Features.FrequencyFilter;
+using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -25,14 +27,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十一个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -68,6 +70,8 @@ public sealed class CompositionAndPersistenceTests
         var secondConvolution = secondScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundDocument>();
         var wavelet = firstScope.ServiceProvider.GetRequiredService<WaveletLabDocument>();
         var secondWavelet = secondScope.ServiceProvider.GetRequiredService<WaveletLabDocument>();
+        var frequencyFilter = firstScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
+        var secondFrequencyFilter = secondScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -80,6 +84,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(lsb, secondLsb);
         Assert.NotSame(convolution, secondConvolution);
         Assert.NotSame(wavelet, secondWavelet);
+        Assert.NotSame(frequencyFilter, secondFrequencyFilter);
+        frequencyFilter.SourcePath = "scope-frequency-filter-one";
+        Assert.Empty(secondFrequencyFilter.SourcePath);
         wavelet.SourcePath = "scope-wavelet-one";
         Assert.Empty(secondWavelet.SourcePath);
         convolution.SourcePath = "scope-convolution-one";
@@ -103,8 +110,34 @@ public sealed class CompositionAndPersistenceTests
         Assert.Same(
             firstScope.ServiceProvider.GetRequiredService<Fft1DTransform>(),
             secondScope.ServiceProvider.GetRequiredService<Fft1DTransform>());
+        Assert.Same(
+            firstScope.ServiceProvider.GetRequiredService<RadialFilterResponse>(),
+            secondScope.ServiceProvider.GetRequiredService<RadialFilterResponse>());
         first.PayloadText = "scope-one";
         Assert.Empty(second.PayloadText);
+    }
+
+    [Fact]
+    public async Task 频域滤波快照只恢复轻量参数且不自动建立Session()
+    {
+        var registration = new RecordingRegistration();
+        registration.Services.AddSingleton<IPluginWindowInteraction, NullWindowInteraction>();
+        registration.Services.AddScoped<IDocumentLifetime, TestLifetime>();
+        new ImageLabPluginModule().Configure(registration);
+        using var provider = registration.Services.BuildServiceProvider(validateScopes: true);
+        using var firstScope = provider.CreateScope();
+        var document = firstScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
+        await document.InitializeAsync(new NewDocumentActivation("频域滤波"), default);
+        document.SourcePath = "missing.png"; document.SelectedKind = "带阻"; document.SelectedFamily = "Butterworth";
+        document.InnerCutoff = 0.22; document.OuterCutoff = 0.71; document.ButterworthOrder = 6; document.KernelSize = 15;
+        var snapshot = await document.CaptureSaveSnapshotAsync(default);
+
+        using var secondScope = provider.CreateScope();
+        var restored = secondScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
+        await restored.InitializeAsync(new RestoreDocumentActivation("频域滤波", snapshot.Content), default);
+        Assert.Equal("带阻", restored.SelectedKind); Assert.Equal("Butterworth", restored.SelectedFamily);
+        Assert.Equal(0.22, restored.InnerCutoff); Assert.Equal(0.71, restored.OuterCutoff); Assert.Equal(6, restored.ButterworthOrder);
+        Assert.Equal(15, restored.KernelSize); Assert.False(restored.HasSession); Assert.False(restored.HasResult); Assert.False(restored.IsDirty);
     }
 
     [Fact]

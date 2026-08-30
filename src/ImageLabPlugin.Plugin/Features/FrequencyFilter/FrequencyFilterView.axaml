@@ -1,0 +1,63 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.FrequencyFilter.FrequencyFilterView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.FrequencyFilter"
+    xmlns:spectrum="using:ImageLabPlugin.Features.SpectrumInspector"
+    x:DataType="vm:FrequencyFilterDocument">
+  <UserControl.Styles><StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" /></UserControl.Styles>
+  <Grid Margin="12" RowDefinitions="*,Auto" RowSpacing="8">
+    <Grid ColumnDefinitions="260,2*,300" ColumnSpacing="10">
+      <ScrollViewer><StackPanel Spacing="7">
+        <TextBlock FontSize="18" FontWeight="SemiBold" Text="输入与参数" />
+        <Button Command="{Binding SelectSourceCommand}" Content="选择 PNG/JPEG" />
+        <TextBox Text="{Binding SourcePath}" PlaceholderText="图片路径" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <ComboBox ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" />
+          <ComboBox Grid.Column="1" ItemsSource="{Binding AnalysisEdgeOptions}" SelectedItem="{Binding AnalysisMaximumEdge}" />
+        </Grid>
+        <Button Command="{Binding PrepareCommand}" Content="载入并缓存 FFT" />
+        <TextBlock Text="滤波方向 / 家族" FontWeight="SemiBold" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <ComboBox ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedKind}" />
+          <ComboBox Grid.Column="1" ItemsSource="{Binding FamilyOptions}" SelectedItem="{Binding SelectedFamily}" />
+        </Grid>
+        <TextBlock Text="内/单截止 r（0,1]" /><NumericUpDown Minimum="0.01" Maximum="1" Increment="0.01" Value="{Binding InnerCutoff}" />
+        <StackPanel IsVisible="{Binding UsesTwoCutoffs}" Spacing="4"><TextBlock Text="外截止 r（必须大于内截止）" /><NumericUpDown Minimum="0.01" Maximum="1" Increment="0.01" Value="{Binding OuterCutoff}" /></StackPanel>
+        <StackPanel IsVisible="{Binding IsButterworth}" Spacing="4"><TextBlock Text="Butterworth 阶数 1–12" /><NumericUpDown Minimum="1" Maximum="12" Increment="1" Value="{Binding ButterworthOrder}" /></StackPanel>
+        <TextBlock Text="输出语义 / 显示增益" FontWeight="SemiBold" />
+        <ComboBox ItemsSource="{Binding ProjectionOptions}" SelectedItem="{Binding SelectedProjection}" />
+        <NumericUpDown Minimum="0" Maximum="4" Increment="0.1" Value="{Binding ProjectionGain}" IsEnabled="{Binding UsesProjectionGain}" />
+        <Button Command="{Binding ApplyCommand}" Content="立即执行代理滤波" IsEnabled="{Binding HasSession}" />
+        <Button Command="{Binding RenderFullCommand}" Content="显式执行完整尺寸" IsEnabled="{Binding CanRenderFull}" />
+        <Button Command="{Binding ExportCommand}" Content="导出当前 PNG" IsEnabled="{Binding CanExport}" />
+        <Button Command="{Binding CancelCommand}" Content="取消当前工作" IsEnabled="{Binding IsOperationBusy}" />
+      </StackPanel></ScrollViewer>
+
+      <Grid Grid.Column="1" RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="8">
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid><Image Source="{Binding SourcePreview}" Stretch="Uniform" /><TextBlock Margin="5" Text="分析代理" Foreground="White" Background="#99000000" VerticalAlignment="Top" /></Grid></Border>
+        <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid><Image Source="{Binding SpectrumPreview}" Stretch="Uniform" /><TextBlock Margin="5" Text="对数幅度谱" Foreground="White" Background="#99000000" VerticalAlignment="Top" /></Grid></Border>
+        <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid><Image Source="{Binding MaskPreview}" Stretch="Uniform" /><TextBlock Margin="5" Text="实数增益遮罩" Foreground="White" Background="#99000000" VerticalAlignment="Top" /></Grid></Border>
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid><Image Source="{Binding ResultPreview}" Stretch="Uniform" /><Image Source="{Binding DifferencePreview}" Stretch="Uniform" Opacity="0.22" /><TextBlock Margin="5" Text="IFFT 结果 + 有符号差异叠层" Foreground="White" Background="#99000000" VerticalAlignment="Top" /></Grid></Border>
+      </Grid>
+
+      <ScrollViewer Grid.Column="2"><StackPanel Spacing="8">
+        <TextBlock FontSize="18" FontWeight="SemiBold" Text="解释与空间近似" />
+        <TextBlock Text="径向振幅响应（H=0.5 不是功率 -3 dB）" TextWrapping="Wrap" />
+        <spectrum:RadialEnergyControl Height="100" Values="{Binding ResponseValues}" />
+        <TextBlock Text="{Binding TransitionSummary}" TextWrapping="Wrap" />
+        <TextBlock Text="副作用与质量变化" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding ResultSummary}" TextWrapping="Wrap" />
+        <TextBlock Text="梯度能量变化不等同于主观清晰度提升；PSNR/SSIM 只表示相对源图的变化。" TextWrapping="Wrap" Opacity="0.75" />
+        <TextBlock Text="有限空间核比较" FontWeight="SemiBold" />
+        <ComboBox ItemsSource="{Binding KernelSizeOptions}" SelectedItem="{Binding KernelSize}" />
+        <Button Command="{Binding CompareSpatialCommand}" Content="执行 Wrap/raw 公平比较" IsEnabled="{Binding HasResult}" />
+        <TextBlock Text="{Binding SpatialSummary}" TextWrapping="Wrap" />
+        <TextBlock Text="7/15/31 核是完整周期冲激响应的截断近似，不宣称完全等价。" TextWrapping="Wrap" Opacity="0.75" />
+      </StackPanel></ScrollViewer>
+    </Grid>
+    <Border Grid.Row="1" Padding="8" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}">
+      <Grid ColumnDefinitions="2*,3*,Auto" ColumnSpacing="10"><TextBlock Text="{Binding SizeSummary}" TextWrapping="Wrap" /><TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" /><ProgressBar Grid.Column="2" Width="110" IsIndeterminate="True" IsVisible="{Binding IsOperationBusy}" /></Grid>
+    </Border>
+  </Grid>
+</UserControl>
