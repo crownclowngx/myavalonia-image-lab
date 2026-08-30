@@ -3,8 +3,10 @@ using Avalonia.Platform.Storage;
 using ImageLabPlugin.Constants;
 using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
+using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
+using ImageLabPlugin.Domain.Frequency;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 using MyAvaloniaManagement.PluginSdk.UI;
@@ -16,14 +18,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献两个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献三个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -43,9 +45,18 @@ public sealed class CompositionAndPersistenceTests
         var first = firstScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var second = secondScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var inspect = firstScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
+        var spectrum = firstScope.ServiceProvider.GetRequiredService<SpectrumInspectorDocument>();
+        var secondSpectrum = secondScope.ServiceProvider.GetRequiredService<SpectrumInspectorDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
+        Assert.NotSame(first, spectrum);
+        Assert.NotSame(spectrum, secondSpectrum);
+        spectrum.SourcePath = "scope-spectrum-one";
+        Assert.Empty(secondSpectrum.SourcePath);
+        Assert.Same(
+            firstScope.ServiceProvider.GetRequiredService<Fft1DTransform>(),
+            secondScope.ServiceProvider.GetRequiredService<Fft1DTransform>());
         first.PayloadText = "scope-one";
         Assert.Empty(second.PayloadText);
     }

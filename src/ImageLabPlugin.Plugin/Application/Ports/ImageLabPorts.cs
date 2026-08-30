@@ -21,11 +21,16 @@ internal interface IImageCodec
 }
 
 /// <summary>隔离 Host/Standalone 的文件选择交互，不让应用层依赖 Avalonia Storage 类型。</summary>
-internal interface IImageLabFileDialog
+internal interface IImageFileDialog
 {
     Task<string?> PickImageAsync(CancellationToken cancellationToken);
-    Task<string?> PickPayloadAsync(CancellationToken cancellationToken);
     Task<string?> PickOutputImageAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
+/// <summary>仅暴露水印 Payload 文件选择意图，避免图片分析用例依赖无关能力。</summary>
+internal interface IPayloadFileDialog
+{
+    Task<string?> PickPayloadAsync(CancellationToken cancellationToken);
     Task<string?> PickPayloadExportAsync(string suggestedName, CancellationToken cancellationToken);
 }
 

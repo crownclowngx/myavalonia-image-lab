@@ -1,0 +1,73 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.SpectrumInspector.SpectrumInspectorView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.SpectrumInspector"
+    x:DataType="vm:SpectrumInspectorDocument">
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+      <Button Command="{Binding SelectSourceCommand}" Content="选择图片" />
+      <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="PNG/JPEG 路径" />
+      <ComboBox Grid.Column="2" Width="72" ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" />
+      <ComboBox Grid.Column="3" Width="92" ItemsSource="{Binding MaximumEdgeOptions}" SelectedItem="{Binding SelectedMaximumEdge}" />
+      <Button Grid.Column="4" Command="{Binding AnalyzeCommand}" Content="分析" />
+      <Button Grid.Column="5" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsBusy}" />
+      <Button Grid.Column="6" Command="{Binding ExportCommand}" Content="导出代理 PNG" IsEnabled="{Binding HasReconstruction}" />
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="3*,3*,2*" RowDefinitions="*,*" ColumnSpacing="8" RowSpacing="8">
+      <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+        <Grid>
+          <Image x:Name="SourceImage" Source="{Binding SourcePreview}" Stretch="Uniform" PointerPressed="OnSourcePointerPressed" />
+          <TextBlock Margin="6" VerticalAlignment="Top" Text="原图（点击检查 8×8 块）" Background="#99000000" Foreground="White" />
+        </Grid>
+      </Border>
+      <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+        <Grid>
+          <Image x:Name="SpectrumImage" Source="{Binding SpectrumPreview}" Stretch="Uniform" PointerMoved="OnSpectrumPointerMoved" />
+          <ComboBox Margin="6" Width="130" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    ItemsSource="{Binding SpectrumViewOptions}" SelectedItem="{Binding SelectedSpectrumView}" />
+        </Grid>
+      </Border>
+      <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+        <Grid><Image Source="{Binding MaskPreview}" Stretch="Uniform" /><TextBlock Margin="6" VerticalAlignment="Top" Text="共轭对称遮罩" Background="#99000000" Foreground="White" /></Grid>
+      </Border>
+      <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+        <Grid><Image Source="{Binding ReconstructionPreview}" Stretch="Uniform" /><TextBlock Margin="6" VerticalAlignment="Top" Text="IFFT 重建（分析代理尺寸）" Background="#99000000" Foreground="White" /></Grid>
+      </Border>
+
+      <ScrollViewer Grid.Column="2" Grid.RowSpan="2">
+        <StackPanel Spacing="8">
+          <TextBlock FontSize="18" FontWeight="SemiBold" Text="频带与检查" />
+          <TextBlock Text="频带" FontWeight="SemiBold" />
+          <ComboBox ItemsSource="{Binding BandOptions}" SelectedItem="{Binding SelectedBand}" />
+          <TextBlock Text="低/中边界（0 &lt; low &lt; high &lt; 1）" />
+          <NumericUpDown Minimum="0.01" Maximum="0.98" Increment="0.01" Value="{Binding LowBoundary}" />
+          <NumericUpDown Minimum="0.02" Maximum="0.99" Increment="0.01" Value="{Binding HighBoundary}" />
+          <StackPanel IsVisible="{Binding IsCustomBand}" Spacing="6">
+            <TextBlock Text="自定义环带 inner / outer" />
+            <NumericUpDown Minimum="0" Maximum="0.99" Increment="0.01" Value="{Binding CustomInner}" />
+            <NumericUpDown Minimum="0.01" Maximum="1" Increment="0.01" Value="{Binding CustomOuter}" />
+          </StackPanel>
+          <Button Command="{Binding ReconstructCommand}" Content="立即重建" IsEnabled="{Binding HasSession}" />
+          <TextBlock FontWeight="SemiBold" Text="径向能量" />
+          <vm:RadialEnergyControl Height="90" Values="{Binding RadialBins}" />
+          <TextBlock Text="{Binding EnergySummary}" TextWrapping="Wrap" />
+          <TextBlock FontWeight="SemiBold" Text="频点" />
+          <TextBlock Text="{Binding FrequencyPointSummary}" TextWrapping="Wrap" />
+          <TextBlock FontWeight="SemiBold" Text="DCT 块系数" />
+          <TextBox Text="{Binding BlockSummary}" IsReadOnly="True" AcceptsReturn="True" FontFamily="Consolas" MinHeight="210" TextWrapping="NoWrap" />
+          <TextBlock Text="透明像素按未预乘 RGB 分析；Alpha 不进入 FFT，重建时保持。" TextWrapping="Wrap" Opacity="0.75" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="2*,3*,Auto" ColumnSpacing="12">
+        <TextBlock Text="{Binding SizeSummary}" TextWrapping="Wrap" />
+        <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+        <ProgressBar Grid.Column="2" Width="120" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

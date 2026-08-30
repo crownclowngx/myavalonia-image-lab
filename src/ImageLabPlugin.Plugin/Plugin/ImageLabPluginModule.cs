@@ -2,6 +2,7 @@ using MyAvaloniaManagement.PluginSdk.UI;
 using ImageLabPlugin.Constants;
 using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
+using ImageLabPlugin.Features.SpectrumInspector;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -24,5 +25,11 @@ public sealed class ImageLabPluginModule : IPluginModule
                 "提取与验证",
                 "检测、恢复并验证 ImageLab 频域隐式水印",
                 "图像安全"));
+        registration.AddPersistableDocument<SpectrumInspectorDocument, SpectrumInspectorView>(
+            new DocumentDescriptor(
+                PluginIds.SpectrumInspectorDocument,
+                "频域分析器",
+                "观察图像通道的全局 FFT、分块 DCT、频带能量与逆变换结果",
+                "图像分析"));
     }
 }

@@ -5,7 +5,7 @@ using MyAvaloniaManagement.PluginSdk.UI;
 namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
-internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) : IImageLabFileDialog
+internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) : IImageFileDialog, IPayloadFileDialog
 {
     private static readonly FilePickerFileType Images = new("图片")
     {

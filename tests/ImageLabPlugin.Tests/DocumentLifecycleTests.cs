@@ -103,6 +103,7 @@ public sealed class DocumentLifecycleTests
             new ImmediateInspectUseCase(),
             new SuccessfulExtractUseCase("RECOVERED-CANARY"u8.ToArray()),
             new NullDialog(),
+            new NullDialog(),
             new AtomicFileWriter(),
             lifetime);
         try
@@ -161,6 +162,7 @@ public sealed class DocumentLifecycleTests
         new(
             estimate,
             new NeverCalledEmbedUseCase(),
+            new NullDialog(),
             new NullDialog(),
             new AtomicFileWriter(),
             lifetime ?? new TestLifetime());
@@ -297,7 +299,7 @@ public sealed class DocumentLifecycleTests
         public ExtractionReport Extract(PixelImage image, string? password, CancellationToken cancellationToken) => _report;
     }
 
-    private sealed class NullDialog : IImageLabFileDialog
+    private sealed class NullDialog : IImageFileDialog, IPayloadFileDialog
     {
         public Task<string?> PickImageAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
         public Task<string?> PickPayloadAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);

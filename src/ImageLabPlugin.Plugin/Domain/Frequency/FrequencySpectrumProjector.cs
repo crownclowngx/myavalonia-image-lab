@@ -24,7 +24,8 @@ internal sealed class FrequencySpectrumProjector(Dct8x8Transform transform)
                 {
                     for (var x = 0; x < 8; x++)
                     {
-                        spatial[(y * 8) + x] = luma[(blockX * 8) + x, (blockY * 8) + y] - 128d;
+                        // Dct8x8Transform 自己负责中心化；这里必须传入原始 [0,255] 亮度，避免重复减 128。
+                        spatial[(y * 8) + x] = luma[(blockX * 8) + x, (blockY * 8) + y];
                     }
                 }
 

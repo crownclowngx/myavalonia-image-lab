@@ -1,6 +1,6 @@
 # ImageLabPlugin V1 频域分析器实施计划
 
-> 计划状态：待实施；G0–G7 均不得在没有门禁证据时标记完成  
+> 计划状态：开发实现与自动门禁完成；G7 的真实窗口全量人工验收及发布阶段延期
 > 基线日期：2026-08-30  
 > 产品名称：Spectrum Inspector／频域分析器  
 > 技术基线：.NET 10、Avalonia 12、Managed Plugin SDK 3.3  
@@ -9,14 +9,14 @@
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 待实施 | 冻结产品范围、数学语义、资源预算、交互与依赖决策 | `docs/plan-history/spectrum-inspector/g0-product-and-numeric-baseline.md` |
-| G1 | 待实施 | 建立六通道、分析代理和图像重建基础 | `docs/plan-history/spectrum-inspector/g1-channel-and-analysis-proxy.md` |
-| G2 | 待实施 | 完成可取消、可验证的 FFT/IFFT 公共频域核心 | `docs/plan-history/spectrum-inspector/g2-fft-foundation.md` |
-| G3 | 待实施 | 完成全局频谱、分块 DCT、频点查询与径向能量分析 | `docs/plan-history/spectrum-inspector/g3-spectrum-analysis.md` |
-| G4 | 待实施 | 完成共轭对称频带遮罩和 IFFT 重建 | `docs/plan-history/spectrum-inspector/g4-band-reconstruction.md` |
-| G5 | 待实施 | 完成 Persistable Document、生命周期与快照 | `docs/plan-history/spectrum-inspector/g5-document-lifecycle.md` |
-| G6 | 待实施 | 完成联动界面、Standalone 和 PNG 导出闭环 | `docs/plan-history/spectrum-inspector/g6-ui-and-export.md` |
-| G7 | 待实施 | 完成自动测试、本地门禁、文档和开发封板 | `docs/plan-history/spectrum-inspector/g7-local-sealing.md` |
+| G0 | 已完成 | 冻结产品范围、数学语义、资源预算、交互与依赖决策 | `docs/plan-history/spectrum-inspector/g0-product-and-numeric-baseline.md` |
+| G1 | 已完成 | 建立六通道、分析代理和图像重建基础 | `docs/plan-history/spectrum-inspector/g1-channel-and-analysis-proxy.md` |
+| G2 | 已完成 | 完成可取消、可验证的 FFT/IFFT 公共频域核心 | `docs/plan-history/spectrum-inspector/g2-fft-foundation.md` |
+| G3 | 已完成 | 完成全局频谱、分块 DCT、频点查询与径向能量分析 | `docs/plan-history/spectrum-inspector/g3-spectrum-analysis.md` |
+| G4 | 已完成 | 完成共轭对称频带遮罩和 IFFT 重建 | `docs/plan-history/spectrum-inspector/g4-band-reconstruction.md` |
+| G5 | 已完成 | 完成 Persistable Document、生命周期与快照 | `docs/plan-history/spectrum-inspector/g5-document-lifecycle.md` |
+| G6 | 已完成（自动门禁） | 完成联动界面、Standalone 和 PNG 导出闭环 | `docs/plan-history/spectrum-inspector/g6-ui-and-export.md` |
+| G7 | 部分完成 | 自动测试、本地双配置门禁与文档完成；真实窗口人工验收延期 | `docs/plan-history/spectrum-inspector/g7-local-sealing.md` |
 
 本文定义 ImageLab 在频域隐式水印之后的第二个产品能力。它不是普通图片编辑器，也不是把当前水印页面中的
 “DCT 对数幅度”简单放大，而是一个可以解释空间位置、颜色通道、8×8 DCT 块和全局频谱关系的独立实验
@@ -975,39 +975,38 @@ V1 只新增 Document 类型，尚无旧 Spectrum Inspector 快照需要迁移�
 
 ### 产品与交互
 
-- [ ] 第三个贡献是 Persistable Document，不是 singleton Tool；
-- [ ] 六通道、三档分辨率、三种幅度模式、相位和 DCT 全部可用；
-- [ ] 原图、频谱、遮罩、重建和检查侧栏正确联动；
-- [ ] 悬停和块选择的原图/代理/频率坐标可解释；
-- [ ] 径向曲线和四类能量占比正确；
-- [ ] 全部/低/中/高/自定义环带可重建；
-- [ ] PNG 明确按分析代理尺寸导出。
+- [x] 第三个贡献是 Persistable Document，不是 singleton Tool；
+- [x] 六通道、三档分辨率、三种幅度模式、相位和 DCT 全部可用；
+- [x] 原图、频谱、遮罩、重建和检查侧栏正确联动；
+- [x] 悬停和块选择的原图/代理/频率坐标可解释；
+- [x] 径向曲线和四类能量占比正确；
+- [x] 全部/低/中/高/自定义环带可重建；
+- [x] PNG 明确按分析代理尺寸导出。
 
 ### 架构与生命周期
 
-- [ ] Domain、Application、Feature、Infrastructure 依赖方向正确；
-- [ ] Document 不直接执行 FFT/DCT 或文件编码；
-- [ ] 文件端口满足接口隔离；
-- [ ] 多 Scope 状态完全隔离；
-- [ ] Session、工作缓冲和 Bitmap 所有权明确；
-- [ ] 取消、关闭、防抖和迟到结果保护均有测试；
-- [ ] 快照不包含大型派生数据，恢复不自动执行 FFT。
+- [x] Domain、Application、Feature、Infrastructure 依赖方向正确；
+- [x] Document 不直接执行 FFT/DCT 或文件编码；
+- [x] 文件端口满足接口隔离；
+- [x] 多 Scope 状态完全隔离；
+- [x] Session、工作缓冲和 Bitmap 所有权明确；
+- [x] 取消、关闭、防抖和迟到结果保护均有测试；
+- [x] 快照不包含大型派生数据，恢复不自动执行 FFT。
 
 ### 数值与资源
 
-- [ ] FFT/IFFT、Parseval、共轭和虚部残差门禁通过；
-- [ ] 六通道和 Alpha 门禁通过；
-- [ ] DCT 双重中心化问题有回归测试；
-- [ ] 2048 档不突破规定补零和缓冲上限；
-- [ ] 全通逐字节一致；
-- [ ] 频带边界、能量总和和零能量输入正确。
+- [x] FFT/IFFT、Parseval、共轭和虚部残差门禁通过；
+- [x] 六通道和 Alpha 门禁通过；
+- [x] DCT 双重中心化问题有回归测试；
+- [x] 2048 档不突破规定补零和缓冲上限；
+- [x] 全通逐字节一致；
+- [x] 频带边界、能量总和和零能量输入正确。
 
 ### 测试与文档
 
-- [ ] 现有 44 个测试全部保持通过；
-- [ ] 新增 Domain、重建、Document、UI、组合和 PNG 回读测试；
-- [ ] Debug/Release 本地门禁通过；
-- [ ] 用户指南、测试门禁、文档索引和公共领域边界已同步；
-- [ ] G0–G7 记录包含真实数据、偏差、风险和回滚；
-- [ ] 文档没有宣称已执行真实 Host、ZIP、Windows CI 或发布封板。
-
+- [x] 现有 44 个测试全部保持通过；
+- [x] 新增 Domain、重建、Document、UI、组合和 PNG 回读测试；
+- [x] Debug/Release 本地门禁通过；
+- [x] 用户指南、测试门禁、文档索引和公共领域边界已同步；
+- [x] G0–G7 记录包含真实数据、偏差、风险和回滚；
+- [x] 文档没有宣称已执行真实 Host、ZIP、Windows CI 或发布封板。

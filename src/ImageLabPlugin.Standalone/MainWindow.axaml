@@ -12,5 +12,8 @@
     <TabItem Header="提取与验证">
       <ContentControl x:Name="InspectPreview" />
     </TabItem>
+    <TabItem Header="频域分析器">
+      <ContentControl x:Name="SpectrumPreview" />
+    </TabItem>
   </TabControl>
 </Window>

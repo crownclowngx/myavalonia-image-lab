@@ -18,7 +18,8 @@ internal sealed partial class WatermarkInspectDocument : ObservableObject, IPers
     private const int PreviewCharacterLimit = 4096;
     private readonly IInspectWatermarkUseCase _inspectUseCase;
     private readonly IExtractWatermarkUseCase _extractUseCase;
-    private readonly IImageLabFileDialog _fileDialog;
+    private readonly IImageFileDialog _imageFileDialog;
+    private readonly IPayloadFileDialog _payloadFileDialog;
     private readonly IAtomicFileWriter _fileWriter;
     private readonly IDocumentLifetime _lifetime;
     private DocumentPresentationState _presentation = new("提取与验证");
@@ -32,13 +33,15 @@ internal sealed partial class WatermarkInspectDocument : ObservableObject, IPers
     public WatermarkInspectDocument(
         IInspectWatermarkUseCase inspectUseCase,
         IExtractWatermarkUseCase extractUseCase,
-        IImageLabFileDialog fileDialog,
+        IImageFileDialog imageFileDialog,
+        IPayloadFileDialog payloadFileDialog,
         IAtomicFileWriter fileWriter,
         IDocumentLifetime lifetime)
     {
         _inspectUseCase = inspectUseCase;
         _extractUseCase = extractUseCase;
-        _fileDialog = fileDialog;
+        _imageFileDialog = imageFileDialog;
+        _payloadFileDialog = payloadFileDialog;
         _fileWriter = fileWriter;
         _lifetime = lifetime;
     }
@@ -88,7 +91,7 @@ internal sealed partial class WatermarkInspectDocument : ObservableObject, IPers
     [RelayCommand]
     private async Task SelectSourceAsync()
     {
-        var path = await _fileDialog.PickImageAsync(_lifetime.ClosingToken).ConfigureAwait(true);
+        var path = await _imageFileDialog.PickImageAsync(_lifetime.ClosingToken).ConfigureAwait(true);
         if (!string.IsNullOrWhiteSpace(path))
         {
             SourcePath = path;
@@ -154,7 +157,7 @@ internal sealed partial class WatermarkInspectDocument : ObservableObject, IPers
             PayloadContentType.Json => "recovered.json",
             _ => "recovered.bin"
         };
-        var path = await _fileDialog.PickPayloadExportAsync(suggestedName, _lifetime.ClosingToken)
+        var path = await _payloadFileDialog.PickPayloadExportAsync(suggestedName, _lifetime.ClosingToken)
             .ConfigureAwait(true);
         if (string.IsNullOrWhiteSpace(path))
         {

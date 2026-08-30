@@ -21,7 +21,8 @@ internal sealed partial class WatermarkEmbedDocument : ObservableObject, IPersis
     private const int SnapshotSchema = 1;
     private readonly IEstimateWatermarkCapacityUseCase _estimateUseCase;
     private readonly IEmbedWatermarkUseCase _embedUseCase;
-    private readonly IImageLabFileDialog _fileDialog;
+    private readonly IImageFileDialog _imageFileDialog;
+    private readonly IPayloadFileDialog _payloadFileDialog;
     private readonly IAtomicFileWriter _fileWriter;
     private readonly IDocumentLifetime _lifetime;
     private DocumentPresentationState _presentation = new("水印写入");
@@ -34,13 +35,15 @@ internal sealed partial class WatermarkEmbedDocument : ObservableObject, IPersis
     public WatermarkEmbedDocument(
         IEstimateWatermarkCapacityUseCase estimateUseCase,
         IEmbedWatermarkUseCase embedUseCase,
-        IImageLabFileDialog fileDialog,
+        IImageFileDialog imageFileDialog,
+        IPayloadFileDialog payloadFileDialog,
         IAtomicFileWriter fileWriter,
         IDocumentLifetime lifetime)
     {
         _estimateUseCase = estimateUseCase;
         _embedUseCase = embedUseCase;
-        _fileDialog = fileDialog;
+        _imageFileDialog = imageFileDialog;
+        _payloadFileDialog = payloadFileDialog;
         _fileWriter = fileWriter;
         _lifetime = lifetime;
     }
@@ -100,7 +103,7 @@ internal sealed partial class WatermarkEmbedDocument : ObservableObject, IPersis
     [RelayCommand]
     private async Task SelectSourceAsync()
     {
-        var path = await _fileDialog.PickImageAsync(_lifetime.ClosingToken).ConfigureAwait(true);
+        var path = await _imageFileDialog.PickImageAsync(_lifetime.ClosingToken).ConfigureAwait(true);
         if (!string.IsNullOrWhiteSpace(path))
         {
             SourcePath = path;
@@ -112,7 +115,7 @@ internal sealed partial class WatermarkEmbedDocument : ObservableObject, IPersis
     [RelayCommand]
     private async Task SelectPayloadFileAsync()
     {
-        var path = await _fileDialog.PickPayloadAsync(_lifetime.ClosingToken).ConfigureAwait(true);
+        var path = await _payloadFileDialog.PickPayloadAsync(_lifetime.ClosingToken).ConfigureAwait(true);
         if (!string.IsNullOrWhiteSpace(path))
         {
             PayloadFilePath = path;
@@ -189,7 +192,7 @@ internal sealed partial class WatermarkEmbedDocument : ObservableObject, IPersis
             ? "watermarked"
             : Path.GetFileNameWithoutExtension(SourcePath) + ".watermarked";
         var extension = OutputJpeg ? ".jpg" : ".png";
-        var path = await _fileDialog.PickOutputImageAsync(baseName + extension, _lifetime.ClosingToken)
+        var path = await _imageFileDialog.PickOutputImageAsync(baseName + extension, _lifetime.ClosingToken)
             .ConfigureAwait(true);
         if (string.IsNullOrWhiteSpace(path))
         {

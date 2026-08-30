@@ -4,6 +4,7 @@ using Avalonia.Headless;
 using Avalonia.Skia;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
+using ImageLabPlugin.Application.SpectrumAnalysis;
 using ImageLabPlugin.Domain.Frequency;
 using ImageLabPlugin.Domain.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
@@ -11,8 +12,11 @@ using ImageLabPlugin.Infrastructure.Cryptography;
 using ImageLabPlugin.Infrastructure.ErrorCorrection;
 using ImageLabPlugin.Infrastructure.Imaging;
 using ImageLabPlugin.Infrastructure.Watermarking;
+using ImageLabPlugin.Infrastructure.Persistence;
+using MyAvaloniaManagement.PluginSdk;
 using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
+using ImageLabPlugin.Features.SpectrumInspector;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -54,14 +58,17 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 两个真实Document视图可在Headless环境独立加载()
+    public void 三个真实Document视图可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
+        var spectrumView = new SpectrumInspectorView();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
         Assert.NotSame(embedView.Content, inspectView.Content);
+        Assert.NotNull(spectrumView.Content);
+        Assert.NotSame(inspectView.Content, spectrumView.Content);
     }
 
     [Fact]
@@ -84,6 +91,47 @@ public sealed class ImageCodecAndUseCaseTests
             Assert.InRange(Math.Abs(expected[i + 2] - actual[i + 2]), 0, 3);
             Assert.Equal(expected[i + 3], actual[i + 3]);
         }
+    }
+
+    [Fact]
+    public async Task 频域Document使用正式编解码器完成分析重建与预览闭环()
+    {
+        var codec = new AvaloniaImageCodec();
+        var source = CreateTexturedImage(64, 48, includeAlpha: true);
+        var bytes = await codec.EncodeAsync(source, ImageOutputFormat.Png, 100, CancellationToken.None);
+        var path = Path.Combine(Path.GetTempPath(), $"image-lab-spectrum-{Guid.NewGuid():N}.png");
+        await File.WriteAllBytesAsync(path, bytes);
+        var channel = new ImageChannelConverter();
+        var fft = new Fft2DTransform(new Fft1DTransform());
+        var spectrumProjector = new SpectrumProjector();
+        var radial = new RadialEnergyAnalyzer();
+        var dct = new Dct8x8Transform();
+        using var document = new SpectrumInspectorDocument(
+            new AnalyzeSpectrumUseCase(codec, new ImageAnalysisProxyProjector(), channel, fft, spectrumProjector,
+                new DctSpectrumProjector(channel, dct), radial),
+            new InspectDctBlockUseCase(new DctBlockAnalyzer(channel, dct)),
+            new ReconstructSpectrumBandUseCase(fft, new FrequencyBandMaskFactory(), channel),
+            new ProjectSpectrumUseCase(spectrumProjector, radial),
+            new NullImageDialog(), codec, new AtomicFileWriter(), new TestDocumentLifetime());
+        try
+        {
+            await document.InitializeAsync(new NewDocumentActivation("频域闭环"), CancellationToken.None);
+            document.SourcePath = path;
+            await document.AnalyzeCommand.ExecuteAsync(null);
+
+            Assert.True(document.HasSession);
+            Assert.True(document.HasReconstruction);
+            Assert.NotNull(document.SourcePreview);
+            Assert.NotNull(document.SpectrumPreview);
+            Assert.NotNull(document.MaskPreview);
+            Assert.NotNull(document.ReconstructionPreview);
+            Assert.Equal(256, document.RadialBins.Count);
+
+            document.SelectedBand = "高频";
+            await document.ReconstructCommand.ExecuteAsync(null);
+            Assert.Contains("重建完成", document.StatusMessage, StringComparison.Ordinal);
+        }
+        finally { File.Delete(path); }
     }
 
     [Fact]
@@ -259,5 +307,17 @@ public sealed class ImageCodecAndUseCaseTests
         }
 
         return new PixelImage(new ImageSize(width, height), rgba);
+    }
+
+    private sealed class NullImageDialog : IImageFileDialog
+    {
+        public Task<string?> PickImageAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+        public Task<string?> PickOutputImageAsync(string suggestedName, CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+    }
+
+    private sealed class TestDocumentLifetime : IDocumentLifetime
+    {
+        public CancellationToken ClosingToken => CancellationToken.None;
+        public bool IsClosing => false;
     }
 }
