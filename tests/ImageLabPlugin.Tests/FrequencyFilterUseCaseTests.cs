@@ -75,7 +75,7 @@ public sealed class FrequencyFilterUseCaseTests
         using var session = await Prepare(codec).ExecuteAsync(new("source.png", ImageChannel.Red, 512), default);
         var fft = new Fft2DTransform(new Fft1DTransform());
         var useCase = new CompareFrequencySpatialUseCase(new FrequencyFilterMaskFactory(new RadialFilterResponse()), Builder(),
-            new FrequencySpatialComparator(new FrequencyFilterEngine(fft), new SpatialConvolver(), new FrequencyImpulseResponseFactory(fft)));
+            new FrequencySpatialComparator(new FrequencyFilterEngine(new FrequencyMaskApplier(fft)), new SpatialConvolver(), new FrequencyImpulseResponseFactory(fft)));
         var result = await useCase.ExecuteAsync(session, Recipe(), 7, default);
         Assert.Equal(1, codec.DecodeCount); Assert.Equal(7, result.ImpulseKernel.Kernel.Size); Assert.True(result.MeanAbsoluteError >= 0);
     }
@@ -91,7 +91,7 @@ public sealed class FrequencyFilterUseCaseTests
     {
         var converter = new ImageChannelConverter();
         return new ApplyFrequencyFilterUseCase(new FrequencyFilterMaskFactory(new RadialFilterResponse()),
-            new FrequencyFilterEngine(new Fft2DTransform(new Fft1DTransform())), new FrequencySignalProjector(converter),
+            new FrequencyFilterEngine(new FrequencyMaskApplier(new Fft2DTransform(new Fft1DTransform()))), new FrequencySignalProjector(converter),
             new FrequencyDifferenceProjector(), new FrequencySideEffectAnalyzer(),
             new FullReferenceQualityAnalyzer(new ImagePairValidator()));
     }

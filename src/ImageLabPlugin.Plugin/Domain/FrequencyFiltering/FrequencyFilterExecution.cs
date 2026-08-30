@@ -5,7 +5,7 @@ using ImageLabPlugin.Domain.Imaging;
 namespace ImageLabPlugin.Domain.FrequencyFiltering;
 
 /// <summary>只负责复制缓存频谱、逐频点乘增益并执行 IFFT。</summary>
-internal sealed class FrequencyFilterEngine(Fft2DTransform fft)
+internal sealed class FrequencyFilterEngine(FrequencyMaskApplier applier)
 {
     public FrequencyFilterPlaneResult Apply(FrequencySpectrum spectrum, FrequencyFilterMask mask,
         CancellationToken cancellationToken = default)
@@ -14,15 +14,10 @@ internal sealed class FrequencyFilterEngine(Fft2DTransform fft)
         if (mask.Width != spectrum.PaddedWidth || mask.Height != spectrum.PaddedHeight)
             throw new ArgumentException("遮罩与频谱尺寸不一致。", nameof(mask));
 
-        var padded = ApplyPadded(spectrum, mask, cancellationToken);
-        var raw = new double[checked((int)spectrum.SourceSize.PixelCount)];
-        for (var y = 0; y < spectrum.SourceSize.Height; y++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            padded.ValueSpan.Slice(y * spectrum.PaddedWidth, spectrum.SourceSize.Width)
-                .CopyTo(raw.AsSpan(y * spectrum.SourceSize.Width, spectrum.SourceSize.Width));
-        }
-        return new FrequencyFilterPlaneResult(spectrum.SourceSize, raw, padded.MaximumImaginaryResidual, mask.MathematicalFingerprint);
+        // 保留 Frequency Filter 的稳定返回类型，但把真正的乘法/IFFT 委托给共享核心，避免编辑器复制第二套循环。
+        var applied = applier.Apply(spectrum, mask.GainMask, cancellationToken);
+        return new FrequencyFilterPlaneResult(spectrum.SourceSize, applied.ValueSpan,
+            applied.MaximumImaginaryResidual, mask.MathematicalFingerprint);
     }
 
     /// <summary>保留完整补零网格，供相同 Wrap 边界的空间核路径进行 raw-double 比较。</summary>
@@ -32,30 +27,9 @@ internal sealed class FrequencyFilterEngine(Fft2DTransform fft)
         ArgumentNullException.ThrowIfNull(spectrum); ArgumentNullException.ThrowIfNull(mask);
         if (mask.Width != spectrum.PaddedWidth || mask.Height != spectrum.PaddedHeight)
             throw new ArgumentException("遮罩与频谱尺寸不一致。", nameof(mask));
-        // 工作副本拥有本次执行的唯一写权限。Session 的频谱是跨滑块请求复用的事实，绝不能原地乘遮罩。
-        var working = spectrum.CreateWorkingCopy();
-        var gains = mask.GainSpan;
-        for (var i = 0; i < working.Length; i++)
-        {
-            if ((i & 16383) == 0) cancellationToken.ThrowIfCancellationRequested();
-            working[i] *= gains[i];
-        }
-        fft.Inverse(working, spectrum.PaddedWidth, spectrum.PaddedHeight, cancellationToken);
-        var raw = new double[working.Length];
-        double maximumImaginary = 0d;
-        for (var i = 0; i < working.Length; i++)
-        {
-            if ((i & 16383) == 0) cancellationToken.ThrowIfCancellationRequested();
-            var value = working[i];
-            if (!double.IsFinite(value.Real) || !double.IsFinite(value.Imaginary))
-                throw new InvalidDataException("IFFT 产生了非有限结果，未提交半成品。");
-            maximumImaginary = Math.Max(maximumImaginary, Math.Abs(value.Imaginary));
-            raw[i] = value.Real;
-        }
-        // 径向实数遮罩应保持共轭对称；超限意味着坐标或遮罩实现有错，不能静默丢弃虚部。
-        if (maximumImaginary > 1e-8)
-            throw new InvalidDataException($"IFFT 虚部残差 {maximumImaginary:E3} 超出 1E-8 数值门禁。");
-        return new PaddedFrequencyPlane(spectrum.PaddedWidth, spectrum.PaddedHeight, raw, maximumImaginary);
+        var applied = applier.ApplyPadded(spectrum, mask.GainMask, cancellationToken);
+        return new PaddedFrequencyPlane(applied.Width, applied.Height, applied.ValueSpan,
+            applied.MaximumImaginaryResidual);
     }
 }
 

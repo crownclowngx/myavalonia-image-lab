@@ -10,6 +10,7 @@ using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
+using ImageLabPlugin.Features.FrequencyMaskEditor;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -28,6 +29,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _convolutionScope;
     private IServiceScope? _waveletScope;
     private IServiceScope? _frequencyFilterScope;
+    private IServiceScope? _frequencyMaskScope;
 
     public MainWindow()
     {
@@ -47,6 +49,7 @@ public sealed partial class MainWindow : Window
         _convolutionScope = services.CreateScope();
         _waveletScope = services.CreateScope();
         _frequencyFilterScope = services.CreateScope();
+        _frequencyMaskScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -69,6 +72,8 @@ public sealed partial class MainWindow : Window
         var waveletView = _waveletScope.ServiceProvider.GetRequiredService<WaveletLabView>();
         var frequencyFilterDocument = _frequencyFilterScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
         var frequencyFilterView = _frequencyFilterScope.ServiceProvider.GetRequiredService<FrequencyFilterView>();
+        var frequencyMaskDocument = _frequencyMaskScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorDocument>();
+        var frequencyMaskView = _frequencyMaskScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -90,6 +95,8 @@ public sealed partial class MainWindow : Window
         waveletDocument.InitializeAsync(new NewDocumentActivation("小波实验室"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         frequencyFilterDocument.InitializeAsync(new NewDocumentActivation("频域滤波"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        frequencyMaskDocument.InitializeAsync(new NewDocumentActivation("频谱遮罩编辑器"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -113,6 +120,8 @@ public sealed partial class MainWindow : Window
         WaveletPreview.Content = waveletView;
         frequencyFilterView.DataContext = frequencyFilterDocument;
         FrequencyFilterPreview.Content = frequencyFilterView;
+        frequencyMaskView.DataContext = frequencyMaskDocument;
+        FrequencyMaskPreview.Content = frequencyMaskView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -126,6 +135,7 @@ public sealed partial class MainWindow : Window
             convolutionDocument.Dispose();
             waveletDocument.Dispose();
             frequencyFilterDocument.Dispose();
+            frequencyMaskDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -137,6 +147,7 @@ public sealed partial class MainWindow : Window
             _convolutionScope?.Dispose();
             _waveletScope?.Dispose();
             _frequencyFilterScope?.Dispose();
+            _frequencyMaskScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -148,6 +159,7 @@ public sealed partial class MainWindow : Window
             _convolutionScope = null;
             _waveletScope = null;
             _frequencyFilterScope = null;
+            _frequencyMaskScope = null;
         };
     }
 }

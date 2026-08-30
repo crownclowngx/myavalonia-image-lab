@@ -31,6 +31,8 @@ using ImageLabPlugin.Domain.Wavelets;
 using ImageLabPlugin.Infrastructure.Wavelets;
 using ImageLabPlugin.Application.FrequencyFiltering;
 using ImageLabPlugin.Domain.FrequencyFiltering;
+using ImageLabPlugin.Application.FrequencyMaskEditing;
+using ImageLabPlugin.Domain.FrequencyMaskEditing;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -53,6 +55,7 @@ public static class ImageLabPluginServices
         AddConvolutionServices(services);
         AddWaveletServices(services);
         AddFrequencyFilterServices(services);
+        AddFrequencyMaskEditorServices(services);
         return services;
     }
 
@@ -65,6 +68,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<ImageAnalysisProxyProjector>();
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
+        services.AddSingleton<FrequencyMaskApplier>();
     }
 
     /// <summary>登记 Avalonia、文件系统和安全随机源等领域外端口。</summary>
@@ -81,7 +85,9 @@ public static class ImageLabPluginServices
         services.AddSingleton<IFingerprintReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ILsbReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IWaveletReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IFrequencyMaskRecipeFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
 
     /// <summary>登记频域隐式水印协议、载体和四个应用用例。</summary>
@@ -280,5 +286,22 @@ public static class ImageLabPluginServices
         services.AddSingleton<ICompareFrequencySpatialUseCase, CompareFrequencySpatialUseCase>();
         services.AddSingleton<IRenderFullFrequencyFilterUseCase, RenderFullFrequencyFilterUseCase>();
         services.AddSingleton<IExportFrequencyFilterImageUseCase, ExportFrequencyFilterImageUseCase>();
+    }
+
+    /// <summary>登记遮罩编辑、严格配方边界与七个窄用例；Document/Session 仍由各自 Scope 独占。</summary>
+    private static void AddFrequencyMaskEditorServices(IServiceCollection services)
+    {
+        services.AddSingleton<ConjugateMaskWriter>();
+        services.AddSingleton<FrequencyMaskRasterizer>();
+        services.AddSingleton<FrequencyMaskDiagnostics>();
+        services.AddSingleton<IFrequencyMaskRecipeSerializer, FrequencyMaskRecipeSerializer>();
+        services.AddSingleton<IPrepareFrequencyMaskEditorSessionUseCase, PrepareFrequencyMaskEditorSessionUseCase>();
+        services.AddSingleton<RenderFrequencyMaskUseCase>();
+        services.AddSingleton<IRenderFrequencyMaskUseCase>(static provider => provider.GetRequiredService<RenderFrequencyMaskUseCase>());
+        services.AddSingleton<IRenderFullFrequencyMaskUseCase, RenderFullFrequencyMaskUseCase>();
+        services.AddSingleton<IExportFrequencyMaskImageUseCase, ExportFrequencyMaskImageUseCase>();
+        services.AddSingleton<IInspectFrequencyMaskPointUseCase, InspectFrequencyMaskPointUseCase>();
+        services.AddSingleton<IImportFrequencyMaskRecipeUseCase, ImportFrequencyMaskRecipeUseCase>();
+        services.AddSingleton<IExportFrequencyMaskRecipeUseCase, ExportFrequencyMaskRecipeUseCase>();
     }
 }

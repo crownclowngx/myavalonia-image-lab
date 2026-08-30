@@ -35,6 +35,10 @@ using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
+using ImageLabPlugin.Features.FrequencyMaskEditor;
+using ImageLabPlugin.Application.FrequencyMaskEditing;
+using ImageLabPlugin.Domain.FrequencyFiltering;
+using ImageLabPlugin.Domain.FrequencyMaskEditing;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -76,7 +80,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十一个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十二个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -98,6 +102,8 @@ public sealed class ImageCodecAndUseCaseTests
         var waveletPyramid = new WaveletPyramidControl();
         var waveletChart = new WaveletScanChartControl();
         var frequencyFilterView = new FrequencyFilterView();
+        var frequencyMaskView = new FrequencyMaskEditorView();
+        var frequencyMaskCanvas = new FrequencyMaskCanvasControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -123,6 +129,8 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(waveletPyramid);
         Assert.NotNull(waveletChart);
         Assert.NotNull(frequencyFilterView.Content);
+        Assert.NotNull(frequencyMaskView.Content);
+        Assert.NotNull(frequencyMaskCanvas);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -138,7 +146,8 @@ public sealed class ImageCodecAndUseCaseTests
             new BitPlaneViewerView(),
             new LsbSteganographyLabView(),
             new ConvolutionPlaygroundView(),
-            new FrequencyFilterView()
+            new FrequencyFilterView(),
+            new FrequencyMaskEditorView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -156,7 +165,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(36, numericInputs.Count);
+        Assert.Equal(44, numericInputs.Count);
     }
 
     [Fact]
@@ -181,6 +190,39 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.Equal(source.Size, attacked.Image.Size);
         Assert.True(attacked.FrameBer.ComparedBits > 0);
         Assert.NotNull(attacked.PsnrRgbDb);
+    }
+
+    [Fact]
+    public async Task 频谱遮罩Document完成真实Png载入手势重建撤销和轻量快照()
+    {
+        var codec = new AvaloniaImageCodec();
+        var input = Path.Combine(Path.GetTempPath(), $"frequency-mask-document-{Guid.NewGuid():N}.png");
+        try
+        {
+            await File.WriteAllBytesAsync(input, await codec.EncodeAsync(CreateTexturedImage(16, 16, includeAlpha: true),
+                ImageOutputFormat.Png, 100, default));
+            using var document = CreateFrequencyMaskDocument(codec);
+            await document.InitializeAsync(new NewDocumentActivation("遮罩交互"), default);
+            document.SourcePath = input;
+            document.AnalysisMaximumEdge = 512;
+            await document.PrepareCommand.ExecuteAsync(null);
+            Assert.True(document.HasSession);
+            Assert.True(document.HasResult);
+
+            document.CommitGesture([new NormalizedFrequencyPoint(8d / 15d, 8d / 15d)]);
+            Assert.True(document.CanUndo);
+            await WaitUntilAsync(() => document.HasResult);
+            Assert.Contains("编辑", document.DiagnosticsSummary, StringComparison.Ordinal);
+            document.UndoCommand.Execute(null);
+            Assert.True(document.CanRedo);
+            await WaitUntilAsync(() => document.HasResult);
+
+            var snapshot = await document.CaptureSaveSnapshotAsync(default);
+            var json = snapshot.Content.Payload.GetRawText();
+            Assert.DoesNotContain("Complex", json, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+        }
+        finally { File.Delete(input); }
     }
 
     [Fact]
@@ -509,10 +551,47 @@ public sealed class ImageCodecAndUseCaseTests
         return new PixelImage(new ImageSize(width, height), rgba);
     }
 
+    private static FrequencyMaskEditorDocument CreateFrequencyMaskDocument(IImageCodec codec)
+    {
+        var fft = new Fft2DTransform(new Fft1DTransform());
+        var converter = new ImageChannelConverter();
+        var builder = new FrequencySpectrumBuilder(fft);
+        var rasterizer = new FrequencyMaskRasterizer(new ConjugateMaskWriter());
+        var render = new RenderFrequencyMaskUseCase(rasterizer, new FrequencyMaskApplier(fft), converter,
+            new FrequencyMaskDiagnostics(), new FrequencyDifferenceProjector(),
+            new FullReferenceQualityAnalyzer(new ImagePairValidator()));
+        var serializer = new FrequencyMaskRecipeSerializer();
+        return new FrequencyMaskEditorDocument(
+            new PrepareFrequencyMaskEditorSessionUseCase(codec, new ImageAnalysisProxyProjector(), converter, builder, new SpectrumProjector()),
+            render, new RenderFullFrequencyMaskUseCase(converter, builder, render),
+            new ExportFrequencyMaskImageUseCase(codec, new AtomicFileWriter()),
+            new ImportFrequencyMaskRecipeUseCase(new BoundedTextFileReader(), serializer),
+            new ExportFrequencyMaskRecipeUseCase(serializer, new AtomicFileWriter()), serializer,
+            new InspectFrequencyMaskPointUseCase(), new NullImageDialog(), new NullRecipeDialog(), codec,
+            new TestDocumentLifetime());
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> predicate)
+    {
+        var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (DateTime.UtcNow < timeout)
+        {
+            if (predicate()) return;
+            await Task.Delay(20);
+        }
+        throw new TimeoutException("等待频谱遮罩 Document 状态超时。");
+    }
+
     private sealed class NullImageDialog : IImageFileDialog
     {
         public Task<string?> PickImageAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
         public Task<string?> PickOutputImageAsync(string suggestedName, CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+    }
+
+    private sealed class NullRecipeDialog : IFrequencyMaskRecipeFileDialog
+    {
+        public Task<string?> PickRecipeInputAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+        public Task<string?> PickRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken) => Task.FromResult<string?>(null);
     }
 
     private sealed class SequencedBitPlanePrepareUseCase : IPrepareBitPlaneSessionUseCase

@@ -107,11 +107,14 @@ internal sealed class FrequencyFilterMask
         MathematicalFingerprint = mathematicalFingerprint;
         _gains = gains.ToArray();
         _radialSamples = radialSamples.ToArray();
+        GainMask = new FrequencyGainMask(width, height, gains, mathematicalFingerprint);
     }
 
     public int Width { get; }
     public int Height { get; }
     public string MathematicalFingerprint { get; }
+    /// <summary>与其他频域产品共享的实数增益事实源；滤波器特有的径向样本仍留在本类型。</summary>
+    public FrequencyGainMask GainMask { get; }
     public ReadOnlyMemory<double> Gains => new((double[])_gains.Clone());
     internal ReadOnlySpan<double> GainSpan => _gains;
     public IReadOnlyList<RadialResponseSample> RadialSamples => Array.AsReadOnly(_radialSamples);

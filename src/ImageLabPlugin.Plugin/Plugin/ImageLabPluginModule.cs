@@ -11,6 +11,7 @@ using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
+using ImageLabPlugin.Features.FrequencyMaskEditor;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -86,6 +87,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.FrequencyFilterDocument,
                 "频域滤波",
                 "使用 Ideal、Butterworth 或 Gaussian 径向响应实验低通、高通、带通、带阻及空间有限核近似",
+                "图像分析"));
+        registration.AddPersistableDocument<FrequencyMaskEditorDocument, FrequencyMaskEditorView>(
+            new DocumentDescriptor(
+                PluginIds.FrequencyMaskEditorDocument,
+                "频谱遮罩编辑器",
+                "在中心化频谱上绘制共轭安全的实数增益遮罩，并联动观察空间域重建与诊断",
                 "图像分析"));
     }
 }

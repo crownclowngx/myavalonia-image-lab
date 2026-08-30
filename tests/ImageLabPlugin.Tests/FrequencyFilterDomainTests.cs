@@ -89,7 +89,7 @@ public sealed class FrequencyFilterDomainTests
         var spectrum = Spectrum(8, 8, Enumerable.Repeat(42d, 64).ToArray());
         var before = spectrum.Values.ToArray();
         var factory = new FrequencyFilterMaskFactory(new RadialFilterResponse());
-        var engine = new FrequencyFilterEngine(new Fft2DTransform(new Fft1DTransform()));
+        var engine = new FrequencyFilterEngine(new FrequencyMaskApplier(new Fft2DTransform(new Fft1DTransform())));
         var low = Recipe(FrequencyFilterKind.LowPass, FrequencyFilterFamily.Gaussian, 0.3, 0.8, 1);
         var lowResult = engine.Apply(spectrum, factory.Create(spectrum, low));
         Assert.All(lowResult.Values.ToArray(), value => Assert.InRange(value, 42d - 1e-9, 42d + 1e-9));
@@ -157,7 +157,7 @@ public sealed class FrequencyFilterDomainTests
         var values = Enumerable.Range(0, 64).Select(i => (double)(i % 13)).ToArray(); var spectrum = Spectrum(8, 8, values);
         var recipe = Recipe(FrequencyFilterKind.LowPass, FrequencyFilterFamily.Gaussian, 0.4, 0.8, 1);
         var factory = new FrequencyFilterMaskFactory(new RadialFilterResponse()); var fft = new Fft2DTransform(new Fft1DTransform());
-        var comparison = new FrequencySpatialComparator(new FrequencyFilterEngine(fft), new SpatialConvolver(),
+        var comparison = new FrequencySpatialComparator(new FrequencyFilterEngine(new FrequencyMaskApplier(fft)), new SpatialConvolver(),
             new FrequencyImpulseResponseFactory(fft)).Compare(values, spectrum, factory.Create(spectrum, recipe), recipe.Kind, 7);
         Assert.True(comparison.MeanAbsoluteError >= 0); Assert.True(comparison.MaximumAbsoluteError >= 0);
         Assert.True(comparison.FrequencyElapsed >= TimeSpan.Zero); Assert.True(comparison.SpatialElapsed >= TimeSpan.Zero);

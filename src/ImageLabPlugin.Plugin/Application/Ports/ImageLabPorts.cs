@@ -67,6 +67,13 @@ internal interface IWaveletReportFileDialog
     Task<string?> PickWaveletCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>频谱遮罩配方只暴露 JSON 导入与导出意图，不扩大图片文件对话框。</summary>
+internal interface IFrequencyMaskRecipeFileDialog
+{
+    Task<string?> PickRecipeInputAsync(CancellationToken cancellationToken);
+    Task<string?> PickRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {
@@ -87,4 +94,10 @@ internal interface IRandomSource
 internal interface IAtomicFileWriter
 {
     Task WriteAsync(string targetPath, ReadOnlyMemory<byte> content, CancellationToken cancellationToken);
+}
+
+/// <summary>有界文本读取端口；配方用例不直接依赖文件系统静态 API。</summary>
+internal interface ITextFileReader
+{
+    Task<byte[]> ReadAsync(string path, int maximumBytes, CancellationToken cancellationToken);
 }

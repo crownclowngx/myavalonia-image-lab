@@ -1,0 +1,82 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.FrequencyMaskEditor.FrequencyMaskEditorView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.FrequencyMaskEditor"
+    x:DataType="vm:FrequencyMaskEditorDocument">
+  <UserControl.Styles><StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" /></UserControl.Styles>
+  <Grid Margin="12" RowDefinitions="*,Auto" RowSpacing="8">
+    <Grid ColumnDefinitions="270,2*,310" ColumnSpacing="10">
+      <ScrollViewer><StackPanel Spacing="7">
+        <TextBlock FontSize="18" FontWeight="SemiBold" Text="输入与编辑" />
+        <Button Command="{Binding SelectSourceCommand}" Content="选择 PNG/JPEG" />
+        <TextBox Text="{Binding SourcePath}" PlaceholderText="图片路径" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <ComboBox ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" />
+          <ComboBox Grid.Column="1" ItemsSource="{Binding AnalysisEdgeOptions}" SelectedItem="{Binding AnalysisMaximumEdge}" />
+        </Grid>
+        <Button Command="{Binding PrepareCommand}" Content="载入并缓存 FFT" />
+        <TextBlock Text="工具" FontWeight="SemiBold" />
+        <ComboBox ItemsSource="{Binding ToolOptions}" SelectedItem="{Binding SelectedTool}" />
+        <TextBlock Text="画笔半径（相对短边）" /><NumericUpDown Minimum="0.002" Maximum="1" Increment="0.005" Value="{Binding BrushRadius}" />
+        <TextBlock Text="目标增益 / opacity" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <NumericUpDown Minimum="0" Maximum="1" Increment="0.05" Value="{Binding TargetGain}" />
+          <NumericUpDown Grid.Column="1" Minimum="0.01" Maximum="1" Increment="0.05" Value="{Binding Opacity}" />
+        </Grid>
+        <TextBlock Text="圆环内半径比例" /><NumericUpDown Minimum="0" Maximum="0.99" Increment="0.05" Value="{Binding RingInnerRatio}" />
+        <CheckBox IsChecked="{Binding IsBandLockEnabled}" Content="启用 DC 径向频带锁定" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <NumericUpDown Minimum="0" Maximum="0.99" Increment="0.01" Value="{Binding BandInnerRadius}" />
+          <NumericUpDown Grid.Column="1" Minimum="0.01" Maximum="1" Increment="0.01" Value="{Binding BandOuterRadius}" />
+        </Grid>
+        <TextBlock Text="全局遮罩强度 s" /><NumericUpDown Minimum="0" Maximum="1" Increment="0.05" Value="{Binding Strength}" />
+        <TextBlock Text="遮罩显示透明度（不进入数学指纹）" /><NumericUpDown Minimum="0" Maximum="1" Increment="0.05" Value="{Binding MaskOpacity}" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <Button Command="{Binding UndoCommand}" Content="撤销" IsEnabled="{Binding CanUndo}" />
+          <Button Grid.Column="1" Command="{Binding RedoCommand}" Content="重做" IsEnabled="{Binding CanRedo}" />
+        </Grid>
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <Button Command="{Binding InvertAllCommand}" Content="反转全部" />
+          <Button Grid.Column="1" Command="{Binding ResetAllPassCommand}" Content="重置为全通" />
+        </Grid>
+        <Button Command="{Binding ApplyCommand}" Content="立即重建代理" IsEnabled="{Binding HasSession}" />
+        <Button Command="{Binding RenderFullCommand}" Content="显式执行完整尺寸" IsEnabled="{Binding CanRenderFull}" />
+        <Button Command="{Binding CancelCommand}" Content="取消当前工作" IsEnabled="{Binding IsOperationBusy}" />
+      </StackPanel></ScrollViewer>
+
+      <Grid Grid.Column="1" RowDefinitions="2*,*" RowSpacing="8">
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid>
+            <vm:FrequencyMaskCanvasControl x:Name="MaskCanvas" Spectrum="{Binding SpectrumPreview}" Mask="{Binding MaskPreview}" MaskOpacity="{Binding MaskOpacity}" ProbeX="{Binding ProbeX}" ProbeY="{Binding ProbeY}" MirrorX="{Binding MirrorX}" MirrorY="{Binding MirrorY}" />
+            <TextBlock Margin="5" Text="中心化频谱 + 有效遮罩（拖动编辑）" Foreground="White" Background="#99000000" VerticalAlignment="Top" HorizontalAlignment="Left" />
+          </Grid>
+        </Border>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="8">
+          <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid><Image Source="{Binding SourcePreview}" Stretch="Uniform" /><TextBlock Margin="5" Text="分析代理" Foreground="White" Background="#99000000" VerticalAlignment="Top" HorizontalAlignment="Left" /></Grid></Border>
+          <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid><Image Source="{Binding ResultPreview}" Stretch="Uniform" /><Image Source="{Binding DifferencePreview}" Stretch="Uniform" Opacity="0.2" /><TextBlock Margin="5" Text="重建 + 有符号差异" Foreground="White" Background="#99000000" VerticalAlignment="Top" HorizontalAlignment="Left" /></Grid></Border>
+        </Grid>
+      </Grid>
+
+      <ScrollViewer Grid.Column="2"><StackPanel Spacing="8">
+        <TextBlock FontSize="18" FontWeight="SemiBold" Text="诊断与导出" />
+        <TextBlock Text="频点探针" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" />
+        <TextBlock Text="遮罩、能量与重建" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding DiagnosticsSummary}" TextWrapping="Wrap" />
+        <TextBlock Text="能量保留只描述频谱幅值变化；PSNR/SSIM 只描述相对源图差异，不代表自动修复或质量提升。" TextWrapping="Wrap" Opacity="0.75" />
+        <Separator />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <Button Command="{Binding ImportRecipeCommand}" Content="导入配方" />
+          <Button Grid.Column="1" Command="{Binding ExportRecipeCommand}" Content="导出配方" />
+        </Grid>
+        <Button Command="{Binding ExportReconstructionCommand}" Content="导出当前重建 PNG" IsEnabled="{Binding CanExport}" />
+        <Button Command="{Binding ExportMaskPreviewCommand}" Content="导出遮罩显示 PNG" IsEnabled="{Binding CanExport}" />
+        <TextBlock Text="遮罩 PNG 是显示图；可重放的精确 double 增益来自版本化 JSON 配方。" TextWrapping="Wrap" Opacity="0.75" />
+      </StackPanel></ScrollViewer>
+    </Grid>
+    <Border Grid.Row="1" Padding="8" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}">
+      <Grid ColumnDefinitions="2*,3*,Auto" ColumnSpacing="10"><TextBlock Text="{Binding SizeSummary}" TextWrapping="Wrap" /><TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" /><ProgressBar Grid.Column="2" Width="110" IsIndeterminate="True" IsVisible="{Binding IsOperationBusy}" /></Grid>
+    </Border>
+  </Grid>
+</UserControl>

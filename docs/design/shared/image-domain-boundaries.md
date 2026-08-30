@@ -23,6 +23,8 @@ Domain/Frequency
   SpectrumProjector      幅度、相位与频点 DTO
   RadialEnergyAnalyzer   256-bin 与频带占比
   FrequencyBandMaskFactory 共轭对称径向遮罩
+  FrequencyGainMask      不可变 `[0,1]` 共轭对称实数增益
+  FrequencyMaskApplier   共享频谱复制、增益乘法、IFFT 与 `1E-8` 门禁
   DctBlockAnalyzer       完整 8×8 单块报告
 
 Domain/Watermarking
@@ -55,6 +57,12 @@ Domain/Frequency
   OrthogonalDctBasis             不决定中心化语义的正交 DCT 数值基元
   LowFrequencyDctTransform       32×32 输入的左上 8×8 低频 DCT
 
+Domain/FrequencyMaskEditing
+  FrequencyMaskRecipe/Operation  归一化有界操作和规范指纹
+  FrequencyMaskRasterizer        画笔、橡皮、矩形、圆环和强度重放
+  ConjugateMaskWriter            自共轭安全的原子配对写入
+  MaskEditHistory                不保存完整遮罩的 undo/redo 游标
+
 Domain/Checksums
   Crc32                          协议中立 IEEE CRC-32 数值原语；不承担认证
 
@@ -76,7 +84,7 @@ Domain/Convolution
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。九个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。十二个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -88,6 +96,7 @@ Domain/Convolution
 - 宽高不能整除 8 时，只处理完整块；右边和下边余量逐字节不改。
 - 所有输出保持原始尺寸和 Alpha；源 `PixelImage` 不被原地修改。
 - 频谱 Session 只缓存一份只读复数频谱；重建使用一份短生命周期工作副本，不建立滤镜注册中心、万能图像服务或全局可变缓存。
+- 频谱遮罩历史保存最多 128 条操作描述而非完整 `double[]`；导入只接受严格 Recipe 并重新光栅化，不信任外部增益数组。
 - 比较 Session 由单个 scoped Document 独占，两张全图长期保留；两张显示代理、基础差异场和当前投影最大边均为 1024。
 - 质量统计按行确定性扫描，仅保留常量个累加器，不再为两张图创建全尺寸 `double[]` 亮度平面。
 - Alpha 不进入颜色指标；透明 RGB 仍参与统计。尺寸不同时只返回结构化原因，不静默缩放、裁切或对齐。
