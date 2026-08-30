@@ -3,6 +3,7 @@ using ImageLabPlugin.Domain.Imaging;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Watermarking;
+using ImageLabPlugin.Domain.Fingerprinting;
 
 namespace ImageLabPlugin.Application.Robustness;
 
@@ -70,6 +71,19 @@ internal interface IPlanRobustnessExperimentUseCase
 internal interface IRunRobustnessExperimentUseCase
 {
     Task<RobustnessExperimentSession> ExecuteAsync(RobustnessBaselineSession baseline, RobustnessExecutionPlan plan, IProgress<RobustnessProgress>? progress, CancellationToken cancellationToken);
+
+    Task<RobustnessExperimentSession> ExecuteAsync(
+        RobustnessBaselineSession baseline,
+        RobustnessExecutionPlan plan,
+        IReadOnlyList<FingerprintAlgorithmId> fingerprintAlgorithms,
+        IProgress<RobustnessProgress>? progress,
+        CancellationToken cancellationToken) => ExecuteAsync(baseline, plan, progress, cancellationToken);
+}
+
+/// <summary>鲁棒性应用层的窄观测入口；只返回指纹事实，不修改实验结论。</summary>
+internal interface IFingerprintObservationProbe
+{
+    IReadOnlyList<FingerprintObservation> Observe(PixelImage reference, PixelImage candidate, IReadOnlyList<FingerprintAlgorithmId> algorithms, CancellationToken cancellationToken);
 }
 internal interface IWatermarkDiagnosticReader
 {

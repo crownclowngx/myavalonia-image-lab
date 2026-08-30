@@ -2,8 +2,8 @@
 
 ## 当前证据
 
-频域分析器封板时基线为 68 项；仓库在图像比较实验室完成后的当前测试总数为 **97**，Debug 与 Release 配置均为
-97/97 通过，零跳过；
+频域分析器封板时基线为 68 项，图像比较实验室封板时为 97 项；仓库在感知指纹完成后的最新总数为 **149**，Debug 与 Release 配置均为
+149/149 通过，零跳过；
 `--locked-mode` restore 和两种配置的 `-warnaserror` build 均通过。Release 在这里仅表示本地编译配置回归，
 没有执行 ZIP、Windows CI、真实 Host 或任何发布门禁。
 
@@ -18,7 +18,7 @@
 - 全通逐字节短路、DC-only 重建、虚部残差和 Alpha 保持。
 - schema 1 快照、非法参数回退、恢复不自动分析、Revision、Scope 隔离和迟到结果拒绝。
 - 五个真实 View 的 Headless 加载，以及正式 Avalonia PNG 编解码器驱动的分析—预览—重建闭环。
-- Module 当前按固定顺序贡献五个 Persistable Document，零 Tool；算法 singleton、Document scoped。
+- Module 当前按固定顺序贡献六个 Persistable Document，零 Tool；算法 singleton、Document scoped。
 
 ## 本地命令
 

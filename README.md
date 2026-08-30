@@ -1,12 +1,12 @@
 # ImageLabPlugin
 
-这是 ImageLab 的 Managed Plugin 解决方案。当前提供“频域隐式水印”“频域分析器”“图像比较实验室”和“鲁棒性实验室”：
+这是 ImageLab 的 Managed Plugin 解决方案。当前提供“频域隐式水印”“频域分析器”“图像比较实验室”“鲁棒性实验室”和“感知指纹”：
 前者在图片 Y 通道的 8×8 DCT 中频系数写入受容量限制的 Payload；频域分析器提供六通道 FFT/DCT 与频带重建；
 比较实验室对两张同尺寸图片提供同步视图与客观指标；鲁棒性实验室用确定性扰动链、单参数扫描、分步水印诊断、
-成功率曲线和 Profile 矩阵测量恢复边界。
+成功率曲线和 Profile 矩阵测量恢复边界；感知指纹使用 aHash、dHash、pHash、汉明距离和受控稳定性试验比较两张显式图片。
 
 真实插件只位于 `src/ImageLabPlugin.Plugin`；`Standalone` 通过同一个 Module 和 DI 入口预览“水印写入”、
-“提取与验证”“频域分析器”“图像比较实验室”和“鲁棒性实验室”五个真实 Document，不复制业务实现。
+“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”和“感知指纹”六个真实 Document，不复制业务实现。
 
 > 第一次开始开发前，请先阅读 [项目文档与快速开始](docs/README.md)。其中说明了三个子项目和
 > Standalone 窗口的职责、接入真实 Host 的边界，以及临时部署和正式 ZIP 发布流程。
@@ -27,5 +27,6 @@ dotnet run --project src/ImageLabPlugin.Standalone
 - [频域分析器](docs/design/spectrum-inspector/README.md)
 - [图像比较实验室](docs/design/image-compare-lab/README.md)
 - [鲁棒性实验室](docs/design/robustness-lab/README.md)
+- [感知指纹](docs/design/image-fingerprint/README.md)
 
 每个目录都包含现有实施计划、测试门禁、详细指南、新手使用说明、数学原理和实施历史。当前实现完成本地开发自动门禁；真实 Host、ZIP、Windows CI 与发布封板仍未执行。

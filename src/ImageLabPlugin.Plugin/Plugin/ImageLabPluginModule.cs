@@ -5,6 +5,7 @@ using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
+using ImageLabPlugin.Features.ImageFingerprint;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -45,5 +46,11 @@ public sealed class ImageLabPluginModule : IPluginModule
                 "鲁棒性实验室",
                 "以可复现扰动链、参数扫描和分步诊断测量 ImageLab 水印的恢复边界",
                 "图像安全"));
+        registration.AddPersistableDocument<ImageFingerprintDocument, ImageFingerprintView>(
+            new DocumentDescriptor(
+                PluginIds.ImageFingerprintDocument,
+                "感知指纹",
+                "使用 aHash、dHash 和 pHash 比较两张显式图片的感知相似性与稳定性",
+                "图像分析"));
     }
 }

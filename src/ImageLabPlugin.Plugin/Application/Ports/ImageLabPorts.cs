@@ -47,6 +47,12 @@ internal interface IRobustnessReportFileDialog
     Task<string?> PickCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>只表达“选择感知指纹 JSON 报告位置”的文件意图。</summary>
+internal interface IFingerprintReportFileDialog
+{
+    Task<string?> PickFingerprintJsonOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>文本剪贴板窄端口；失败以 false 返回，Document 可以保留有效比较结果并提示重试。</summary>
 internal interface ITextClipboard
 {

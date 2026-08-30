@@ -8,7 +8,7 @@
 | [频域分析器](spectrum-inspector/README.md) | 观察频谱并按频带重建 | FFT/DCT、通道、遮罩和资源边界 |
 | [图像比较实验室](image-compare-lab/README.md) | 比较两张同尺寸图片 | 指标、直方图、差异投影和报告 |
 | [鲁棒性实验室](robustness-lab/README.md) | 测试水印经历扰动后的恢复能力 | 扰动链、扫描、BER、复现和报告 |
-| [感知指纹（待实施）](image-fingerprint/implementation.md) | 判断两张显式图片的感知指纹是否接近 | aHash、dHash、pHash、汉明距离、稳定性与门禁计划 |
+| [感知指纹](image-fingerprint/README.md) | 判断两张显式图片的感知指纹是否接近 | aHash、dHash、pHash、汉明距离、稳定性与报告 |
 
 跨能力的架构、领域边界、工作台命令、工作流和发布资料见 [公共设计资料](shared/README.md)。
 
@@ -22,4 +22,4 @@
 - `testing.md`：自动测试、本地命令、已证明与未证明的结论。
 - `history/`：各阶段实际实施记录，不作为当前入口文档。
 
-“感知指纹”当前只有实施计划，尚未提供可用 Document；完成各实施包后再按上述约定补齐实际使用、数学、测试与历史文档。
+五项能力均已完成开发实现与本地自动门禁；这不等于已通过真实 Host、ZIP、Windows CI 或发布验收。

@@ -8,7 +8,7 @@ namespace ImageLabPlugin.Domain.Frequency;
 internal sealed class Dct8x8Transform
 {
     public const int BlockSize = 8;
-    private static readonly double[,] Cosines = CreateCosines();
+    private static readonly OrthogonalDctBasis Basis = new(BlockSize);
 
     public void Forward(ReadOnlySpan<double> spatial, Span<double> frequency)
     {
@@ -22,7 +22,7 @@ internal sealed class Dct8x8Transform
                 {
                     for (var x = 0; x < BlockSize; x++)
                     {
-                        sum += (spatial[(y * BlockSize) + x] - 128d) * Cosines[x, u] * Cosines[y, v];
+                        sum += (spatial[(y * BlockSize) + x] - 128d) * Basis.Cosine(x, u) * Basis.Cosine(y, v);
                     }
                 }
 
@@ -44,7 +44,7 @@ internal sealed class Dct8x8Transform
                     for (var u = 0; u < BlockSize; u++)
                     {
                         sum += Scale(u) * Scale(v) * frequency[(v * BlockSize) + u] *
-                            Cosines[x, u] * Cosines[y, v];
+                            Basis.Cosine(x, u) * Basis.Cosine(y, v);
                     }
                 }
 
@@ -63,17 +63,4 @@ internal sealed class Dct8x8Transform
 
     private static double Scale(int frequency) => frequency == 0 ? 1d / Math.Sqrt(2d) : 1d;
 
-    private static double[,] CreateCosines()
-    {
-        var values = new double[BlockSize, BlockSize];
-        for (var position = 0; position < BlockSize; position++)
-        {
-            for (var frequency = 0; frequency < BlockSize; frequency++)
-            {
-                values[position, frequency] = Math.Cos(((2d * position + 1d) * frequency * Math.PI) / 16d);
-            }
-        }
-
-        return values;
-    }
 }

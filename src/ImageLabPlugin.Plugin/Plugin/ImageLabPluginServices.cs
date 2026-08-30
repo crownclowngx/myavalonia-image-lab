@@ -16,6 +16,9 @@ using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Robustness.Operators;
 using ImageLabPlugin.Infrastructure.Robustness;
+using ImageLabPlugin.Application.Fingerprinting;
+using ImageLabPlugin.Domain.Fingerprinting;
+using ImageLabPlugin.Infrastructure.Fingerprinting;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -26,6 +29,13 @@ public static class ImageLabPluginServices
     {
         ArgumentNullException.ThrowIfNull(services);
         services.AddSingleton<Dct8x8Transform>();
+        services.AddSingleton<LowFrequencyDctTransform>();
+        services.AddSingleton<FingerprintLumaNormalizer>();
+        services.AddSingleton<FingerprintDistanceCalculator>();
+        services.AddSingleton<FingerprintDecisionPolicy>();
+        services.AddSingleton<IImageFingerprintAlgorithm, AverageHashAlgorithm>();
+        services.AddSingleton<IImageFingerprintAlgorithm, DifferenceHashAlgorithm>();
+        services.AddSingleton<IImageFingerprintAlgorithm, PerceptualHashAlgorithm>();
         services.AddSingleton<FrequencySpectrumProjector>();
         services.AddSingleton<ImageChannelConverter>();
         services.AddSingleton<ImageAnalysisProxyProjector>();
@@ -52,6 +62,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IPayloadFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IComparisonReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IRobustnessReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IFingerprintReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ImageComparisonSummarySerializer>();
         services.AddSingleton<WatermarkFrameProtocol>();
@@ -95,6 +106,12 @@ public static class ImageLabPluginServices
         services.AddSingleton<IPlanRobustnessExperimentUseCase, PlanRobustnessExperimentUseCase>();
         services.AddSingleton<IRunRobustnessExperimentUseCase, RunRobustnessExperimentUseCase>();
         services.AddSingleton<IExportRobustnessReportUseCase, RobustnessReportExportUseCase>();
+        services.AddSingleton<FingerprintReportSerializer>();
+        services.AddSingleton<IPrepareFingerprintComparisonUseCase, PrepareFingerprintComparisonUseCase>();
+        services.AddSingleton<IFingerprintStabilityChannel, FingerprintStabilityChannel>();
+        services.AddSingleton<IRunFingerprintStabilityUseCase, RunFingerprintStabilityUseCase>();
+        services.AddSingleton<IExportFingerprintReportUseCase, FingerprintReportExportUseCase>();
+        services.AddSingleton<IFingerprintObservationProbe, FingerprintObservationProbe>();
         return services;
     }
 }

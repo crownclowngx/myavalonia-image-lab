@@ -21,5 +21,8 @@
     <TabItem Header="鲁棒性实验室">
       <ContentControl x:Name="RobustnessPreview" />
     </TabItem>
+    <TabItem Header="感知指纹">
+      <ContentControl x:Name="FingerprintPreview" />
+    </TabItem>
   </TabControl>
 </Window>

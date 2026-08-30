@@ -24,4 +24,8 @@ public static class PluginIds
     /// <summary>“鲁棒性实验室”多实例受控实验工作上下文的持久身份。</summary>
     public static readonly DocumentTypeId RobustnessLabDocument =
         new("myavalonia.plugin.image.lab.document.robustness-lab");
+
+    /// <summary>“感知指纹”双图比较与稳定性试验的多实例持久身份。</summary>
+    public static readonly DocumentTypeId ImageFingerprintDocument =
+        new("myavalonia.plugin.image.lab.document.image-fingerprint");
 }

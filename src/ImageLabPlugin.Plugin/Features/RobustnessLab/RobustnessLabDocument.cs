@@ -7,6 +7,7 @@ using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Watermarking;
+using ImageLabPlugin.Domain.Fingerprinting;
 using MyAvaloniaManagement.PluginSdk;
 
 namespace ImageLabPlugin.Features.RobustnessLab;
@@ -98,6 +99,9 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     [ObservableProperty] private int _trialCount = 1;
     [ObservableProperty] private long _experimentSeed = 20260830;
     [ObservableProperty] private bool _probeEachStep = true;
+    [ObservableProperty] private bool _observeAverageHash;
+    [ObservableProperty] private bool _observeDifferenceHash;
+    [ObservableProperty] private bool _observePerceptualHash;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private int _completedCases;
     [ObservableProperty] private int _totalCases;
@@ -194,7 +198,7 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
                     : $"正在后台执行案例 {Math.Min(value.CompletedCases + 1, value.TotalCases)}/{value.TotalCases}：{value.CurrentCase}";
             });
             var session = await Task.Run(
-                () => _run.ExecuteAsync(baseline, plan, progress, token),
+                () => _run.ExecuteAsync(baseline, plan, SelectedFingerprintAlgorithms(), progress, token),
                 token).ConfigureAwait(true);
             if (!CanCommit(generation)) { session.Dispose(); return; }
             _session = session; CurvePoints = session.Report.Curves; OnPropertyChanged(nameof(HasResult));
@@ -237,13 +241,14 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     public ValueTask<DocumentSaveSnapshot> CaptureSaveSnapshotAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested(); var steps = Steps.Select(value => new StepSnapshot(value.StepId, value.KindId, value.Enabled, value.ParameterId, value.Value)).ToArray();
-        var payload = JsonSerializer.SerializeToElement(new Snapshot(SourcePath, UseStealth, UseBalanced, UseRobust, ScanStart, ScanEnd, ScanStep, TrialCount, ExperimentSeed, ProbeEachStep, steps));
+        var payload = JsonSerializer.SerializeToElement(new Snapshot(SourcePath, UseStealth, UseBalanced, UseRobust, ScanStart, ScanEnd, ScanStep, TrialCount, ExperimentSeed, ProbeEachStep, ObserveAverageHash, ObserveDifferenceHash, ObservePerceptualHash, steps));
         return ValueTask.FromResult(new DocumentSaveSnapshot(new(_revision), new(SnapshotSchema, payload)));
     }
     public void AcceptChanges(DocumentRevision savedRevision) { var was = IsDirty; if (savedRevision.Value == _revision) _acceptedRevision = _revision; if (was != IsDirty) IsDirtyChanged?.Invoke(this, EventArgs.Empty); }
     public void Dispose() { if (_disposed) return; _disposed = true; ++_generation; CancelAndDispose(); InvalidateResult(disposeBaseline: true); Password = string.Empty; PayloadText = string.Empty; }
 
     partial void OnSourcePathChanged(string value) => RecipeChanged(); partial void OnPayloadTextChanged(string value) => RecipeChanged(); partial void OnPasswordChanged(string value) => RecipeChanged();
+    partial void OnObserveAverageHashChanged(bool value) => RecipeChanged(); partial void OnObserveDifferenceHashChanged(bool value) => RecipeChanged(); partial void OnObservePerceptualHashChanged(bool value) => RecipeChanged();
     partial void OnUseStealthChanged(bool value) => RecipeChanged(); partial void OnUseBalancedChanged(bool value) => RecipeChanged(); partial void OnUseRobustChanged(bool value) => RecipeChanged();
     partial void OnScanStartChanged(decimal value) => RecipeChanged(); partial void OnScanEndChanged(decimal value) => RecipeChanged(); partial void OnScanStepChanged(decimal value) => RecipeChanged(); partial void OnTrialCountChanged(int value) => RecipeChanged(); partial void OnExperimentSeedChanged(long value) => RecipeChanged(); partial void OnProbeEachStepChanged(bool value) => RecipeChanged();
     partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(IsRecipeEditable));
@@ -284,9 +289,18 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
         if (content.SchemaVersion != SnapshotSchema) { StatusMessage = $"不支持 schema {content.SchemaVersion}；已保留安全空配方。"; return; }
         var value = content.Payload.Deserialize<Snapshot>(); if (value is null) return; SourcePath = value.SourcePath ?? string.Empty; UseStealth = value.UseStealth; UseBalanced = value.UseBalanced; UseRobust = value.UseRobust;
         ScanStart = value.ScanStart; ScanEnd = value.ScanEnd; ScanStep = value.ScanStep; TrialCount = Math.Clamp(value.TrialCount, 1, RobustnessLimits.MaximumTrials); ExperimentSeed = value.ExperimentSeed; ProbeEachStep = value.ProbeEachStep;
+        ObserveAverageHash = value.ObserveAverageHash; ObserveDifferenceHash = value.ObserveDifferenceHash; ObservePerceptualHash = value.ObservePerceptualHash;
         Steps.Clear(); foreach (var step in value.Steps ?? []) Steps.Add(new(step.StepId ?? Guid.NewGuid().ToString("N"), step.KindId ?? "unsupported", step.Enabled, step.ParameterId ?? string.Empty, step.Value));
         Password = PayloadText = string.Empty; StatusMessage = "已恢复非敏感配方；请重新输入 Payload 和密码后显式运行。";
     }
-    private sealed record Snapshot(string? SourcePath, bool UseStealth, bool UseBalanced, bool UseRobust, decimal ScanStart, decimal ScanEnd, decimal ScanStep, int TrialCount, long ExperimentSeed, bool ProbeEachStep, StepSnapshot[]? Steps);
+    private IReadOnlyList<FingerprintAlgorithmId> SelectedFingerprintAlgorithms()
+    {
+        var result = new List<FingerprintAlgorithmId>(3);
+        if (ObserveAverageHash) result.Add(FingerprintAlgorithmId.AverageHash);
+        if (ObserveDifferenceHash) result.Add(FingerprintAlgorithmId.DifferenceHash);
+        if (ObservePerceptualHash) result.Add(FingerprintAlgorithmId.PerceptualHash);
+        return result;
+    }
+    private sealed record Snapshot(string? SourcePath, bool UseStealth, bool UseBalanced, bool UseRobust, decimal ScanStart, decimal ScanEnd, decimal ScanStep, int TrialCount, long ExperimentSeed, bool ProbeEachStep, bool ObserveAverageHash, bool ObserveDifferenceHash, bool ObservePerceptualHash, StepSnapshot[]? Steps);
     private sealed record StepSnapshot(string? StepId, string? KindId, bool Enabled, string? ParameterId, decimal Value);
 }

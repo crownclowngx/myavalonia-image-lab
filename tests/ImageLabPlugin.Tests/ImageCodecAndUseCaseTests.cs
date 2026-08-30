@@ -21,6 +21,7 @@ using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Infrastructure.Robustness;
+using ImageLabPlugin.Features.ImageFingerprint;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -62,7 +63,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 五个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 六个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -73,6 +74,9 @@ public sealed class ImageCodecAndUseCaseTests
         var robustnessView = new RobustnessLabView();
         var curve = new RobustnessCurveControl();
         var matrix = new RobustnessMatrixControl();
+        var fingerprintView = new ImageFingerprintView();
+        var fingerprintBitmap = new FingerprintBitmapControl();
+        var fingerprintCurve = new FingerprintStabilityControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -86,6 +90,9 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(robustnessView.Content);
         Assert.NotNull(curve);
         Assert.NotNull(matrix);
+        Assert.NotNull(fingerprintView.Content);
+        Assert.NotNull(fingerprintBitmap);
+        Assert.NotNull(fingerprintCurve);
     }
 
     [Fact]

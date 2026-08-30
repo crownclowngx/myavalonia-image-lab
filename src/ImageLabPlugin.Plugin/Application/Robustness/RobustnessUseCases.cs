@@ -7,6 +7,7 @@ using ImageLabPlugin.Domain.Imaging;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Watermarking;
+using ImageLabPlugin.Domain.Fingerprinting;
 
 namespace ImageLabPlugin.Application.Robustness;
 
@@ -60,9 +61,18 @@ internal sealed class PlanRobustnessExperimentUseCase(RobustnessExperimentPlanne
 internal sealed class RunRobustnessExperimentUseCase(
     PerturbationChainExecutor chain,
     IWatermarkDiagnosticReader diagnostics,
-    FullReferenceQualityAnalyzer quality) : IRunRobustnessExperimentUseCase
+    FullReferenceQualityAnalyzer quality,
+    IFingerprintObservationProbe? fingerprintProbe = null) : IRunRobustnessExperimentUseCase
 {
     public async Task<RobustnessExperimentSession> ExecuteAsync(RobustnessBaselineSession baseline, RobustnessExecutionPlan plan, IProgress<RobustnessProgress>? progress, CancellationToken token)
+        => await ExecuteAsync(baseline, plan, [], progress, token).ConfigureAwait(false);
+
+    public async Task<RobustnessExperimentSession> ExecuteAsync(
+        RobustnessBaselineSession baseline,
+        RobustnessExecutionPlan plan,
+        IReadOnlyList<FingerprintAlgorithmId> fingerprintAlgorithms,
+        IProgress<RobustnessProgress>? progress,
+        CancellationToken token)
     {
         baseline.ThrowIfDisposed(); var results = new List<RobustnessCaseResult>(plan.Cases.Count); var password = baseline.GetPassword();
         try
@@ -79,7 +89,10 @@ internal sealed class RunRobustnessExperimentUseCase(
                             (image, _, _) => diagnostics.Read(image, controlled, baseline.Payload, password, token), token).ConfigureAwait(false);
                         var final = executed.Observations.LastOrDefault()?.Diagnostic ?? diagnostics.Read(executed.Image, controlled, baseline.Payload, password, token);
                         results.Add(new(planned.Key, true, final, executed.Observations, executed.FirstFailureStep, executed.RecoveredAfterFailure,
-                            Measure(controlled.Image, executed.Image, token), Measure(baseline.Original, executed.Image, token), LocalQualityGridAnalyzer.Analyze(controlled.Image, executed.Image, token)));
+                            Measure(controlled.Image, executed.Image, token), Measure(baseline.Original, executed.Image, token), LocalQualityGridAnalyzer.Analyze(controlled.Image, executed.Image, token),
+                            FingerprintObservations: fingerprintAlgorithms.Count == 0 || fingerprintProbe is null
+                                ? null
+                                : fingerprintProbe.Observe(controlled.Image, executed.Image, fingerprintAlgorithms, token)));
                     }
                     catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
                     catch (Exception exception)
@@ -111,4 +124,26 @@ internal sealed class RunRobustnessExperimentUseCase(
     private QualityMeasurement Measure(PixelImage reference, PixelImage candidate, CancellationToken token) => reference.Size == candidate.Size
         ? new(quality.Analyze(reference, candidate, token), null)
         : new(null, QualityUnavailableReason.SizeMismatch);
+}
+
+/// <summary>复用已登记的三种无状态算法，为鲁棒性案例追加只读观测。</summary>
+internal sealed class FingerprintObservationProbe(
+    IEnumerable<IImageFingerprintAlgorithm> algorithms,
+    FingerprintDistanceCalculator distanceCalculator) : IFingerprintObservationProbe
+{
+    private readonly IReadOnlyDictionary<FingerprintAlgorithmId, IImageFingerprintAlgorithm> _algorithms = algorithms.ToDictionary(value => value.Id);
+
+    public IReadOnlyList<FingerprintObservation> Observe(PixelImage reference, PixelImage candidate, IReadOnlyList<FingerprintAlgorithmId> algorithms, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(reference); ArgumentNullException.ThrowIfNull(candidate); ArgumentNullException.ThrowIfNull(algorithms);
+        var result = new List<FingerprintObservation>(algorithms.Count);
+        foreach (var id in algorithms.Distinct())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!_algorithms.TryGetValue(id, out var algorithm)) throw new ArgumentException($"未登记指纹算法 {id}。", nameof(algorithms));
+            var left = algorithm.Compute(reference, cancellationToken); var right = algorithm.Compute(candidate, cancellationToken);
+            result.Add(new(id, left, right, distanceCalculator.Calculate(left, right)));
+        }
+        return result;
+    }
 }

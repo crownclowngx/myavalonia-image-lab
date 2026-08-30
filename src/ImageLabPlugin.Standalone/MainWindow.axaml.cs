@@ -4,6 +4,7 @@ using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
+using ImageLabPlugin.Features.ImageFingerprint;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -16,6 +17,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _spectrumScope;
     private IServiceScope? _compareScope;
     private IServiceScope? _robustnessScope;
+    private IServiceScope? _fingerprintScope;
 
     public MainWindow()
     {
@@ -29,6 +31,7 @@ public sealed partial class MainWindow : Window
         _spectrumScope = services.CreateScope();
         _compareScope = services.CreateScope();
         _robustnessScope = services.CreateScope();
+        _fingerprintScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -39,6 +42,8 @@ public sealed partial class MainWindow : Window
         var compareView = _compareScope.ServiceProvider.GetRequiredService<ImageCompareLabView>();
         var robustnessDocument = _robustnessScope.ServiceProvider.GetRequiredService<RobustnessLabDocument>();
         var robustnessView = _robustnessScope.ServiceProvider.GetRequiredService<RobustnessLabView>();
+        var fingerprintDocument = _fingerprintScope.ServiceProvider.GetRequiredService<ImageFingerprintDocument>();
+        var fingerprintView = _fingerprintScope.ServiceProvider.GetRequiredService<ImageFingerprintView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -48,6 +53,8 @@ public sealed partial class MainWindow : Window
         compareDocument.InitializeAsync(new NewDocumentActivation("图像比较实验室"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         robustnessDocument.InitializeAsync(new NewDocumentActivation("鲁棒性实验室"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        fingerprintDocument.InitializeAsync(new NewDocumentActivation("感知指纹"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -59,6 +66,8 @@ public sealed partial class MainWindow : Window
         ComparePreview.Content = compareView;
         robustnessView.DataContext = robustnessDocument;
         RobustnessPreview.Content = robustnessView;
+        fingerprintView.DataContext = fingerprintDocument;
+        FingerprintPreview.Content = fingerprintView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -66,16 +75,19 @@ public sealed partial class MainWindow : Window
             spectrumDocument.Dispose();
             compareDocument.Dispose();
             robustnessDocument.Dispose();
+            fingerprintDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
             _compareScope?.Dispose();
             _robustnessScope?.Dispose();
+            _fingerprintScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
             _compareScope = null;
             _robustnessScope = null;
+            _fingerprintScope = null;
         };
     }
 }

@@ -1,6 +1,6 @@
 # ImageLabPlugin V1 感知指纹实施计划
 
-> 计划状态：待实施；本文只完成设计与本地基线确认，不表示功能已经进入产品<br>
+> 计划状态：开发实现与本地自动门禁完成；不表示已经发布<br>
 > 基线日期：2026-08-30<br>
 > 产品名称：Image Fingerprint／感知指纹<br>
 > 技术基线：.NET 10、C# 14、Avalonia 12、Managed Plugin SDK 3.3<br>
@@ -10,21 +10,21 @@
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 待实施 | 冻结产品范围、算法版本、位序、阈值校准、资源和隐私语义 | `history/g0-product-and-numeric-baseline.md` |
-| G1 | 待实施 | 建立视觉归一化、64 位指纹值对象和汉明距离基础 | `history/g1-normalization-and-fingerprint-core.md` |
-| G2 | 待实施 | 完成 aHash 与 dHash，并建立独立 Golden Vector | `history/g2-ahash-and-dhash.md` |
-| G3 | 待实施 | 完成标准化 pHash 低频 DCT，并证明既有 DCT/水印零回归 | `history/g3-phash-and-dct-reuse.md` |
-| G4 | 待实施 | 完成双图比较、版本化结论策略、Session 和报告 | `history/g4-pair-comparison-and-report.md` |
-| G5 | 待实施 | 完成 Persistable Document、取消、快照和资源生命周期 | `history/g5-document-lifecycle.md` |
-| G6 | 待实施 | 完成位图、并排结果、限制说明和无障碍交互 | `history/g6-ui-and-explanation.md` |
-| G7 | 待实施 | 完成四类受控稳定性试验与 Robustness Lab 指纹观测入口 | `history/g7-stability-and-robustness-observer.md` |
-| G8 | 待实施 | 完成本地双配置门禁、专用文档与开发阶段封板 | `history/g8-local-sealing.md` |
+| G0 | 已完成 | 冻结产品范围、算法版本、位序、阈值校准、资源和隐私语义 | `history/g0-product-and-numeric-baseline.md` |
+| G1 | 已完成 | 建立视觉归一化、64 位指纹值对象和汉明距离基础 | `history/g1-normalization-and-fingerprint-core.md` |
+| G2 | 已完成 | 完成 aHash 与 dHash，并建立独立 Golden Vector | `history/g2-ahash-and-dhash.md` |
+| G3 | 已完成 | 完成标准化 pHash 低频 DCT，并证明既有 DCT/水印零回归 | `history/g3-phash-and-dct-reuse.md` |
+| G4 | 已完成 | 完成双图比较、版本化结论策略、Session 和报告 | `history/g4-pair-comparison-and-report.md` |
+| G5 | 已完成 | 完成 Persistable Document、取消、快照和资源生命周期 | `history/g5-document-lifecycle.md` |
+| G6 | 已完成 | 完成位图、并排结果、限制说明和无障碍交互 | `history/g6-ui-and-explanation.md` |
+| G7 | 已完成 | 完成四类受控稳定性试验与 Robustness Lab 指纹观测入口 | `history/g7-stability-and-robustness-observer.md` |
+| G8 | 已完成 | 完成本地双配置门禁、专用文档与开发阶段封板 | `history/g8-local-sealing.md` |
 
 本文定义 ImageLab 的第六个 Persistable Document。它判断两张图片在经历缩放、重编码或轻微颜色变化后，是否仍表现出相近的视觉指纹；它比较的是经过明确算法归一化后的图像内容，不比较文件字节、文件名、EXIF、编码器标记或目录关系。
 
 感知指纹只能提供启发式相似线索，不能证明版权归属、原始来源、编辑历史或法律意义上的同一性。V1 不扫描目录、不自动寻找重复文件、不建立图库索引，也不把相似度百分比描述为概率。
 
-本文是实施阶段的唯一总计划。每个 G 包完成后，必须新增对应历史记录并填写实际代码、自动测试、数值证据、偏差、风险和回滚方式。计划中的测试数不能提前写成已通过；当前阶段只执行本地开发门禁，不新增 Windows CI，不执行 ZIP、真实 Host、安装/卸载或发布封板。
+本文是实施阶段的总计划；当前行为与证据由同目录专用文档和 G0–G8 历史记录承接。当前阶段只执行本地开发门禁，不新增 Windows CI，不执行 ZIP、真实 Host、安装/卸载或发布封板。
 
 ## 1. V1 目标与固定用户闭环
 
@@ -1154,41 +1154,41 @@ V1 首次实现没有旧指纹快照或报告需要迁移。开发期 schema 改
 
 ### 产品与语义
 
-- [ ] 只处理两张用户显式选择的图片，不扫描目录；
-- [ ] aHash、dHash、pHash 的输入、位序、摘要和算法 ID 已冻结；
-- [ ] 汉明距离与位相似度准确，且没有概率措辞；
-- [ ] 三算法独立结论、分歧和限制可见；
-- [ ] 阈值有校准证据，或安全降级为只显示距离；
-- [ ] wHash 明确等待 DWT 基础，不以占位代码进入 V1。
+- [x] 只处理两张用户显式选择的图片，不扫描目录；
+- [x] aHash、dHash、pHash 的输入、位序、摘要和算法 ID 已冻结；
+- [x] 汉明距离与位相似度准确，且没有概率措辞；
+- [x] 三算法独立结论、分歧和限制可见；
+- [x] 阈值有离线可重复参考清单校准证据，并明确不外推为概率；
+- [x] wHash 明确等待 DWT 基础，不以占位代码进入 V1。
 
 ### SOLID 与生命周期
 
-- [ ] Domain/Application/Infrastructure/Feature 依赖方向正确；
-- [ ] 只有一个朴素算法 Strategy，没有反射、工厂堆叠或通用 DAG；
-- [ ] Document 不执行算法、解码、JSON、JPEG 或逐像素循环；
-- [ ] 两个 Scope、取消、generation、关闭和迟到结果安全；
-- [ ] Session、完整图片、预览和 Bitmap 的所有权清楚；
-- [ ] 第六个 Persistable Document 身份和快照稳定。
+- [x] Domain/Application/Infrastructure/Feature 依赖方向正确；
+- [x] 只有一个朴素算法 Strategy，没有反射、工厂堆叠或通用 DAG；
+- [x] Document 不执行算法、解码、JSON、JPEG 或逐像素循环；
+- [x] 两个 Scope、取消、generation、关闭和迟到结果安全；
+- [x] Session、完整图片、预览和 Bitmap 的所有权清楚；
+- [x] 第六个 Persistable Document 身份和快照稳定。
 
 ### 数值与资源
 
-- [ ] Alpha、BT.601、插值、DCT、中位数和位序有 Golden Vector；
-- [ ] 现有 DCT、频域和水印协议行为零回归；
-- [ ] 算法摘要与独立参考实现交叉验证；
-- [ ] 两张 16M 像素图片和 1024 代理的资源边界受控；
-- [ ] 稳定性最多 21 点、串行执行且不缓存所有完整图片；
-- [ ] Robustness 观测不改变原成功、BER 和质量语义。
+- [x] Alpha、BT.601、插值、DCT、中位数和位序有 Golden Vector；
+- [x] 现有 DCT、频域和水印协议行为零回归；
+- [x] 算法摘要与独立参考实现交叉验证；
+- [x] 两张 16M 像素图片和 1024 代理的资源边界受控；
+- [x] 稳定性最多 21 点、串行执行且不缓存所有完整图片；
+- [x] Robustness 观测不改变原成功、BER 和质量语义。
 
 ### 测试与文档
 
-- [ ] 现有 122 项起始回归未放宽，最终实际测试总数已记录；
-- [ ] Domain、用例、Document、报告、Headless UI 和组合根门禁齐全；
-- [ ] locked restore 与 Debug/Release warn-as-error build/test 全部通过；
-- [ ] JSON、快照、隐私、取消、迟到结果和 Scope 隔离测试齐全；
-- [ ] 根 README、docs 索引、未来能力和公共领域边界已同步；
-- [ ] README、指南、新手说明、数学原理、测试、报告 schema 和 G0–G8 记录齐全；
-- [ ] 无 AIFLOW、Workflow Action、Workbench Command；
-- [ ] 无 Windows CI、ZIP、真实 Host 或发布完成声明。
+- [x] 现有 122 项起始回归未放宽，最终实际测试总数 149 已记录；
+- [x] Domain、用例、Document、报告、Headless UI 和组合根门禁齐全；
+- [x] locked restore 与 Debug/Release warn-as-error build/test 全部通过；
+- [x] JSON、快照、隐私、取消、迟到结果和 Scope 隔离测试齐全；
+- [x] 根 README、docs 索引、未来能力和公共领域边界已同步；
+- [x] README、指南、新手说明、数学原理、测试、报告 schema 和 G0–G8 记录齐全；
+- [x] 无 AIFLOW、Workflow Action、Workbench Command；
+- [x] 无 Windows CI、ZIP、真实 Host 或发布完成声明。
 
 只有所有开发项都有实际证据后，计划状态才可改为“开发实现与本地自动门禁完成”。这仍不等于已经发布；发布阶段必须另行执行真实 Host、正式包、目标设备和发布验收。
 

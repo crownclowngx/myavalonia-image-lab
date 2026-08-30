@@ -6,6 +6,7 @@ using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
+using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -20,14 +21,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献五个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献六个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -53,6 +54,8 @@ public sealed class CompositionAndPersistenceTests
         var secondCompare = secondScope.ServiceProvider.GetRequiredService<ImageCompareLabDocument>();
         var robustness = firstScope.ServiceProvider.GetRequiredService<RobustnessLabDocument>();
         var secondRobustness = secondScope.ServiceProvider.GetRequiredService<RobustnessLabDocument>();
+        var fingerprint = firstScope.ServiceProvider.GetRequiredService<ImageFingerprintDocument>();
+        var secondFingerprint = secondScope.ServiceProvider.GetRequiredService<ImageFingerprintDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -60,6 +63,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(spectrum, secondSpectrum);
         Assert.NotSame(compare, secondCompare);
         Assert.NotSame(robustness, secondRobustness);
+        Assert.NotSame(fingerprint, secondFingerprint);
+        fingerprint.ReferencePath = "scope-fingerprint-one";
+        Assert.Empty(secondFingerprint.ReferencePath);
         robustness.SourcePath = "scope-robustness-one";
         Assert.Empty(secondRobustness.SourcePath);
         compare.ReferencePath = "scope-compare-one";

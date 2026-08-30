@@ -83,6 +83,12 @@
                 </Grid>
                 <TextBlock Text="trial 是同一强度的重复实验次数；随机种子用于复现噪声。确定性攻击通常设 1 次，随机噪声建议 3–5 次。" TextWrapping="Wrap" Opacity="0.78" />
                 <CheckBox Content="逐步探针（定位第一次不可恢复观察位置）" IsChecked="{Binding ProbeEachStep}" />
+                <TextBlock Text="可选感知指纹观测（只追加距离，不改变水印成功、BER 或质量语义）" FontWeight="SemiBold" />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <CheckBox Content="aHash" IsChecked="{Binding ObserveAverageHash}" />
+                  <CheckBox Content="dHash" IsChecked="{Binding ObserveDifferenceHash}" />
+                  <CheckBox Content="pHash" IsChecked="{Binding ObservePerceptualHash}" />
+                </StackPanel>
                 <TextBlock Text="随机噪声使用 SHA-256/SplitMix64-v1 派生；不会复用水印密码学随机源。" TextWrapping="Wrap" Opacity="0.75" />
               </StackPanel>
               <StackPanel Orientation="Horizontal" Spacing="8">

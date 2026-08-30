@@ -2,6 +2,7 @@ using ImageLabPlugin.Domain.Comparison;
 using ImageLabPlugin.Domain.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
 using System.Numerics;
+using ImageLabPlugin.Domain.Fingerprinting;
 
 namespace ImageLabPlugin.Domain.Robustness;
 
@@ -77,7 +78,8 @@ internal sealed record RobustnessCaseResult(
     QualityMeasurement EndToEndQuality,
     IReadOnlyList<LocalQualityCell> LocalQuality,
     long? JpegEncodedBytes = null,
-    string? OperatorError = null);
+    string? OperatorError = null,
+    IReadOnlyList<FingerprintObservation>? FingerprintObservations = null);
 
 internal sealed record RobustnessCurvePoint(
     EmbeddingProfileId Profile,
