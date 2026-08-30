@@ -33,5 +33,8 @@
     <TabItem Header="卷积核实验台">
       <ContentControl x:Name="ConvolutionPreview" />
     </TabItem>
+    <TabItem Header="小波实验室">
+      <ContentControl x:Name="WaveletPreview" />
+    </TabItem>
   </TabControl>
 </Window>

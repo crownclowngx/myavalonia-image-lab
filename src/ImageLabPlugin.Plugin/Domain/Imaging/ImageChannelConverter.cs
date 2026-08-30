@@ -33,7 +33,10 @@ internal sealed class ImageChannelConverter
         return new ImageChannelPlane(image.Size, channel, values);
     }
 
-    public ChannelReconstructionResult Apply(PixelImage source, ImageChannelPlane modified)
+    public ChannelReconstructionResult Apply(
+        PixelImage source,
+        ImageChannelPlane modified,
+        MidpointRounding midpointRounding = MidpointRounding.ToEven)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(modified);
@@ -52,7 +55,7 @@ internal sealed class ImageChannelConverter
                 var value = modified[x, y];
                 if (modified.Channel is ImageChannel.Red or ImageChannel.Green or ImageChannel.Blue)
                 {
-                    var channelByte = Clamp(value, out var clipped);
+                    var channelByte = Clamp(value, midpointRounding, out var clipped);
                     clippedPixels += clipped ? 1 : 0;
                     result.SetRgb(
                         x,
@@ -68,9 +71,9 @@ internal sealed class ImageChannelConverter
                 var targetCb = modified.Channel == ImageChannel.ChromaBlue ? value : original.ChromaBlue;
                 var targetCr = modified.Channel == ImageChannel.ChromaRed ? value : original.ChromaRed;
                 var restored = YCbCrColorSpace.ToRgb(targetY, targetCb, targetCr);
-                var r = Clamp(restored.Red, out var redClipped);
-                var g = Clamp(restored.Green, out var greenClipped);
-                var b = Clamp(restored.Blue, out var blueClipped);
+                var r = Clamp(restored.Red, midpointRounding, out var redClipped);
+                var g = Clamp(restored.Green, midpointRounding, out var greenClipped);
+                var b = Clamp(restored.Blue, midpointRounding, out var blueClipped);
                 clippedPixels += redClipped || greenClipped || blueClipped ? 1 : 0;
                 result.SetRgb(x, y, r, g, b);
             }
@@ -82,9 +85,9 @@ internal sealed class ImageChannelConverter
     public static double NeutralValue(ImageChannel channel) =>
         channel is ImageChannel.ChromaBlue or ImageChannel.ChromaRed ? 128d : 0d;
 
-    private static byte Clamp(double value, out bool clipped)
+    private static byte Clamp(double value, MidpointRounding midpointRounding, out bool clipped)
     {
         clipped = value < 0d || value > 255d;
-        return (byte)Math.Clamp((int)Math.Round(value), 0, 255);
+        return (byte)Math.Clamp((int)Math.Round(value, midpointRounding), 0, 255);
     }
 }

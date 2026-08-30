@@ -1194,6 +1194,10 @@ V1 首次实现没有旧指纹快照或报告需要迁移。开发期 schema 改
 
 ## 24. V1.1：wHash 的进入条件
 
+> 2026-08-31 状态更新：Wavelet Lab 已提供通过独立 Golden、奇数尺寸、方向、重建与双配置门禁的共享
+> `Domain/Wavelets` Haar 基础，因此“不能临时复制 DWT”的前置条件已经满足。wHash 仍未实现；其输入尺寸、
+> 层数、位序和阈值协议必须另开 V1.1 设计与测试，不能把 Wavelet Lab 的 Document/UI 作为哈希依赖。
+
 wHash 不作为 G0–G8 的完成条件。只有以下条件全部满足后，才新建设计阶段并增加 AlgorithmId：
 
 - ImageLab 已有经独立设计与测试的二维 DWT 公共基础，而不是为 wHash 临时复制一份 Haar 代码；

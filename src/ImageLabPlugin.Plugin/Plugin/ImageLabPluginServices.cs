@@ -26,6 +26,9 @@ using ImageLabPlugin.Domain.Steganography;
 using ImageLabPlugin.Infrastructure.Steganography;
 using ImageLabPlugin.Application.Convolution;
 using ImageLabPlugin.Domain.Convolution;
+using ImageLabPlugin.Application.Wavelets;
+using ImageLabPlugin.Domain.Wavelets;
+using ImageLabPlugin.Infrastructure.Wavelets;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -46,6 +49,7 @@ public static class ImageLabPluginServices
         AddBitPlaneServices(services);
         AddLsbSteganographyServices(services);
         AddConvolutionServices(services);
+        AddWaveletServices(services);
         return services;
     }
 
@@ -73,6 +77,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRobustnessReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IFingerprintReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ILsbReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IWaveletReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
     }
 
@@ -226,5 +231,31 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRenderKernelResponseUseCase, RenderKernelResponseUseCase>();
         services.AddSingleton<IRenderFullConvolutionUseCase, RenderFullConvolutionUseCase>();
         services.AddSingleton<IExportConvolutionImageUseCase, ExportConvolutionImageUseCase>();
+    }
+
+    /// <summary>登记两种小波 Strategy、不可变处理服务、窄用例与 DCT/DWT benchmark Adapter。</summary>
+    private static void AddWaveletServices(IServiceCollection services)
+    {
+        services.AddSingleton<HaarWaveletTransform>();
+        services.AddSingleton<Cdf53WaveletTransform>();
+        services.AddSingleton<IWaveletTransform>(static provider => provider.GetRequiredService<HaarWaveletTransform>());
+        services.AddSingleton<IWaveletTransform>(static provider => provider.GetRequiredService<Cdf53WaveletTransform>());
+        services.AddSingleton<WaveletTransformCatalog>();
+        services.AddSingleton<WaveletNoiseEstimator>();
+        services.AddSingleton<WaveletThresholdProcessor>();
+        services.AddSingleton<WaveletSubbandProjector>();
+        services.AddSingleton<WaveletImageReconstructor>();
+        services.AddSingleton<DwtWatermarkCarrier>();
+        services.AddSingleton<IWatermarkBenchmarkCarrier, DctWatermarkBenchmarkAdapter>();
+        services.AddSingleton<IWatermarkBenchmarkCarrier, DwtWatermarkBenchmarkAdapter>();
+        services.AddSingleton<IWaveletReportSerializer, WaveletExperimentReportSerializer>();
+        services.AddSingleton<IPrepareWaveletSessionUseCase, PrepareWaveletSessionUseCase>();
+        services.AddSingleton<IDecomposeWaveletUseCase, DecomposeWaveletUseCase>();
+        services.AddSingleton<IDenoiseWaveletUseCase, DenoiseWaveletUseCase>();
+        services.AddSingleton<IReconstructWaveletLevelUseCase, ReconstructWaveletLevelUseCase>();
+        services.AddSingleton<IRunWaveletQualityScanUseCase, RunWaveletQualityScanUseCase>();
+        services.AddSingleton<IRunWatermarkCarrierBenchmarkUseCase, RunWatermarkCarrierBenchmarkUseCase>();
+        services.AddSingleton<IExportWaveletImageUseCase, ExportWaveletImageUseCase>();
+        services.AddSingleton<IExportWaveletReportUseCase, ExportWaveletReportUseCase>();
     }
 }

@@ -8,6 +8,7 @@ using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
+using ImageLabPlugin.Features.WaveletLab;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -24,6 +25,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _bitPlaneScope;
     private IServiceScope? _lsbScope;
     private IServiceScope? _convolutionScope;
+    private IServiceScope? _waveletScope;
 
     public MainWindow()
     {
@@ -41,6 +43,7 @@ public sealed partial class MainWindow : Window
         _bitPlaneScope = services.CreateScope();
         _lsbScope = services.CreateScope();
         _convolutionScope = services.CreateScope();
+        _waveletScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -59,6 +62,8 @@ public sealed partial class MainWindow : Window
         var lsbView = _lsbScope.ServiceProvider.GetRequiredService<LsbSteganographyLabView>();
         var convolutionDocument = _convolutionScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundDocument>();
         var convolutionView = _convolutionScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundView>();
+        var waveletDocument = _waveletScope.ServiceProvider.GetRequiredService<WaveletLabDocument>();
+        var waveletView = _waveletScope.ServiceProvider.GetRequiredService<WaveletLabView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -76,6 +81,8 @@ public sealed partial class MainWindow : Window
         lsbDocument.InitializeAsync(new NewDocumentActivation("LSB 隐写与统计实验"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         convolutionDocument.InitializeAsync(new NewDocumentActivation("卷积核实验台"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        waveletDocument.InitializeAsync(new NewDocumentActivation("小波实验室"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -95,6 +102,8 @@ public sealed partial class MainWindow : Window
         LsbPreview.Content = lsbView;
         convolutionView.DataContext = convolutionDocument;
         ConvolutionPreview.Content = convolutionView;
+        waveletView.DataContext = waveletDocument;
+        WaveletPreview.Content = waveletView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -106,6 +115,7 @@ public sealed partial class MainWindow : Window
             bitPlaneDocument.Dispose();
             lsbDocument.Dispose();
             convolutionDocument.Dispose();
+            waveletDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -115,6 +125,7 @@ public sealed partial class MainWindow : Window
             _bitPlaneScope?.Dispose();
             _lsbScope?.Dispose();
             _convolutionScope?.Dispose();
+            _waveletScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -124,6 +135,7 @@ public sealed partial class MainWindow : Window
             _bitPlaneScope = null;
             _lsbScope = null;
             _convolutionScope = null;
+            _waveletScope = null;
         };
     }
 }

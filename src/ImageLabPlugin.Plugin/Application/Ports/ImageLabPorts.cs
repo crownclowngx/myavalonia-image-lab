@@ -60,6 +60,13 @@ internal interface ILsbReportFileDialog
     Task<string?> PickLsbCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>小波实验只暴露 JSON/CSV 报告保存意图，避免继续扩大图片文件端口。</summary>
+internal interface IWaveletReportFileDialog
+{
+    Task<string?> PickWaveletJsonOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickWaveletCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

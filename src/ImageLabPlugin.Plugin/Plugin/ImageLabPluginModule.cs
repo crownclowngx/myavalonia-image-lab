@@ -9,6 +9,7 @@ using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
+using ImageLabPlugin.Features.WaveletLab;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -72,6 +73,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.ConvolutionPlaygroundDocument,
                 "卷积核实验台",
                 "编辑空间卷积核，并联动观察边界、差异、像素贡献和频率响应",
+                "图像分析"));
+        registration.AddPersistableDocument<WaveletLabDocument, WaveletLabView>(
+            new DocumentDescriptor(
+                PluginIds.WaveletLabDocument,
+                "小波实验室",
+                "分解、观察并重建多尺度小波子带，实验阈值去噪及 DCT/DWT 水印差异",
                 "图像分析"));
     }
 }

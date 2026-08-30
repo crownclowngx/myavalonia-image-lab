@@ -10,6 +10,7 @@ using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
+using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -24,14 +25,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献九个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -65,6 +66,8 @@ public sealed class CompositionAndPersistenceTests
         var secondLsb = secondScope.ServiceProvider.GetRequiredService<LsbSteganographyLabDocument>();
         var convolution = firstScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundDocument>();
         var secondConvolution = secondScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundDocument>();
+        var wavelet = firstScope.ServiceProvider.GetRequiredService<WaveletLabDocument>();
+        var secondWavelet = secondScope.ServiceProvider.GetRequiredService<WaveletLabDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -76,6 +79,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(bitPlane, secondBitPlane);
         Assert.NotSame(lsb, secondLsb);
         Assert.NotSame(convolution, secondConvolution);
+        Assert.NotSame(wavelet, secondWavelet);
+        wavelet.SourcePath = "scope-wavelet-one";
+        Assert.Empty(secondWavelet.SourcePath);
         convolution.SourcePath = "scope-convolution-one";
         convolution.KernelText = "0 0 0\n0 1 0\n0 0 0";
         Assert.Empty(secondConvolution.SourcePath);

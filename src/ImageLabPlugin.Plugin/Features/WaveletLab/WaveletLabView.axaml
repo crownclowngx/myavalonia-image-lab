@@ -1,0 +1,101 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.WaveletLab.WaveletLabView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.WaveletLab"
+    x:DataType="vm:WaveletLabDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
+    <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10">
+      <StackPanel Spacing="4">
+        <TextBlock Text="小波实验室 · Wavelet Lab" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Haar / CDF 5/3 多层分解、子带投影、可逆重建、阈值去噪与 DCT/DWT 有限比较" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding HelpSummary}" TextWrapping="Wrap" Opacity="0.8" />
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="330,*,360" ColumnSpacing="10">
+      <ScrollViewer>
+        <StackPanel Spacing="8">
+          <TextBlock Text="输入与参数" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Text="源图路径" />
+          <TextBox Text="{Binding SourcePath}" PlaceholderText="PNG / JPEG" />
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Content="选择源图" Command="{Binding SelectSourceCommand}" />
+            <Button Content="载入/建立代理" Command="{Binding LoadCommand}" />
+          </StackPanel>
+          <TextBlock Text="可选干净参考图" />
+          <TextBox Text="{Binding ReferencePath}" PlaceholderText="仅同尺寸时可用" />
+          <Button Content="选择参考图" Command="{Binding SelectReferenceCommand}" HorizontalAlignment="Left" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <StackPanel><TextBlock Text="小波" /><ComboBox ItemsSource="{Binding TransformOptions}" SelectedItem="{Binding SelectedTransform}" /></StackPanel>
+            <StackPanel Grid.Column="1"><TextBlock Text="分析通道" /><ComboBox ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" /></StackPanel>
+          </Grid>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <StackPanel><TextBlock Text="分解层数 1–6" /><NumericUpDown Minimum="1" Maximum="6" Value="{Binding Levels}" /></StackPanel>
+            <StackPanel Grid.Column="1"><TextBlock Text="代理最大边" /><ComboBox ItemsSource="{Binding AnalysisEdgeOptions}" SelectedItem="{Binding AnalysisMaximumEdge}" /></StackPanel>
+          </Grid>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <StackPanel><TextBlock Text="阈值模式" /><ComboBox ItemsSource="{Binding ThresholdModeOptions}" SelectedItem="{Binding SelectedThresholdMode}" /></StackPanel>
+            <StackPanel Grid.Column="1"><TextBlock Text="阈值来源" /><ComboBox ItemsSource="{Binding ThresholdSourceOptions}" SelectedItem="{Binding SelectedThresholdSource}" /></StackPanel>
+          </Grid>
+          <TextBlock Text="实际阈值 T（Universal 只给建议，不静默覆盖）" TextWrapping="Wrap" />
+          <NumericUpDown Minimum="0" Maximum="100000" Increment="0.5" Value="{Binding Threshold}" />
+          <TextBlock Text="目标细节子带（LL 始终不修改）" />
+          <StackPanel Orientation="Horizontal" Spacing="10"><CheckBox Content="LH" IsChecked="{Binding TargetLh}" /><CheckBox Content="HL" IsChecked="{Binding TargetHl}" /><CheckBox Content="HH" IsChecked="{Binding TargetHh}" /></StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Content="分析代理" Command="{Binding AnalyzeProxyCommand}" />
+            <Button Content="显式完整尺寸" Command="{Binding AnalyzeFullCommand}" />
+            <Button Content="取消" Command="{Binding CancelCommand}" />
+          </StackPanel>
+          <Button Content="从最深层逐级重建到当前层" Command="{Binding ReconstructCurrentLevelCommand}" />
+          <Separator />
+          <Button Content="运行有限阈值×层数扫描" Command="{Binding RunScanCommand}" />
+          <TextBlock Text="共同有限 Payload" />
+          <TextBox Text="{Binding PayloadText}" MaxLength="256" />
+          <Button Content="运行 DCT / DWT 公平比较" Command="{Binding RunBenchmarkCommand}" />
+          <StackPanel Orientation="Horizontal" Spacing="6"><Button Content="导出完整 PNG" Command="{Binding ExportImageCommand}" /><Button Content="JSON" Command="{Binding ExportJsonCommand}" /><Button Content="CSV" Command="{Binding ExportCsvCommand}" /></StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+
+      <Grid Grid.Column="1" RowDefinitions="Auto,*,*" RowSpacing="8">
+        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+          <StackPanel><TextBlock Text="当前层" /><NumericUpDown Minimum="1" Maximum="6" Value="{Binding CurrentLevel}" /></StackPanel>
+          <StackPanel Grid.Column="1"><TextBlock Text="子带" /><ComboBox ItemsSource="{Binding SubbandOptions}" SelectedItem="{Binding SelectedSubband}" /></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Text="显示归一化" /><ComboBox ItemsSource="{Binding ProjectionOptions}" SelectedItem="{Binding SelectedProjection}" /></StackPanel>
+        </Grid>
+        <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="当前子带投影（显示方式不修改真实系数）" FontWeight="SemiBold" /><vm:WaveletPyramidControl Grid.Row="1" MinHeight="220" Source="{Binding SubbandPreview}" /></Grid>
+        </Border>
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="8">
+          <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="分析代理源图" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding SourcePreview}" Stretch="Uniform" /></Grid></Border>
+          <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="重建 / 去噪结果" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding ResultPreview}" Stretch="Uniform" /></Grid></Border>
+        </Grid>
+      </Grid>
+
+      <ScrollViewer Grid.Column="2">
+        <StackPanel Spacing="10">
+          <TextBlock Text="结果与解释" FontSize="16" FontWeight="SemiBold" />
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8"><StackPanel><TextBlock Text="分解 / 噪声建议" FontWeight="SemiBold" /><TextBlock Text="{Binding AnalysisSummary}" TextWrapping="Wrap" /></StackPanel></Border>
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8"><StackPanel><TextBlock Text="重建 / 去噪统计" FontWeight="SemiBold" /><TextBlock Text="{Binding DenoiseSummary}" TextWrapping="Wrap" /></StackPanel></Border>
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+            <StackPanel Spacing="4"><TextBlock Text="有限扫描（曲线 + 表格等价信息）" FontWeight="SemiBold" /><TextBlock Text="{Binding ScanSummary}" TextWrapping="Wrap" />
+              <vm:WaveletScanChartControl Height="120" Values="{Binding ScanPlotValues}" />
+              <ItemsControl ItemsSource="{Binding ScanCaseRows}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" FontFamily="Consolas" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            </StackPanel>
+          </Border>
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+            <StackPanel Spacing="4"><TextBlock Text="DCT / DWT 比较矩阵摘要" FontWeight="SemiBold" /><TextBlock Text="{Binding BenchmarkSummary}" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding BenchmarkCaseRows}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" FontFamily="Consolas" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            </StackPanel>
+          </Border>
+          <TextBlock Text="教学边界" FontWeight="SemiBold" />
+          <TextBlock Text="• LH = X低通/Y高通；HL = X高通/Y低通。&#10;• 系数变小不等于语义对象被正确识别。&#10;• 无干净参考图时只报告残差、MAD 与稀疏度。&#10;• 载体比较只对当前图片、Payload、强度和扰动成立。" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" /><ProgressBar Grid.Column="1" Width="140" IsIndeterminate="True" IsVisible="{Binding IsOperationBusy}" /></Grid>
+    </Border>
+  </Grid>
+</UserControl>

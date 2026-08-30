@@ -40,4 +40,8 @@ public static class PluginIds
     /// <summary>“卷积核实验台”多实例空间卷积教学工作上下文的持久身份。</summary>
     public static readonly DocumentTypeId ConvolutionPlaygroundDocument =
         new("myavalonia.plugin.image.lab.document.convolution-playground");
+
+    /// <summary>“小波实验室”多尺度分解、去噪与载体比较的多实例持久身份。</summary>
+    public static readonly DocumentTypeId WaveletLabDocument =
+        new("myavalonia.plugin.image.lab.document.wavelet-lab");
 }

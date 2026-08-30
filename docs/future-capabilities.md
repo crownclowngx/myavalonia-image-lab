@@ -34,7 +34,7 @@ ImageLab 的长期边界是：
 
 ## 当前能力基线
 
-当前 V1 已经提供九个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”和“卷积核实验台”。底层已经具备：
+当前 V1 已经提供十个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”“卷积核实验台”和“小波实验室”。底层已经具备：
 
 - 自有 RGBA8888 `PixelImage` 与受限图像尺寸模型。
 - RGB 与 YCbCr 亮度投影和重建。
@@ -192,7 +192,7 @@ V1 已按[专用实施与证据入口](design/convolution-playground/README.md)�
 3×3 至 31×31 奇数方核、真二维离散卷积、四种边界与归一化、六单通道/RGB、双核梯度、分析代理联动、
 256² 核频响、像素贡献和显式完整尺寸 PNG 导出；没有引入 AIFLOW、通用滤镜链、Windows CI 或发布门禁。
 
-### 8. Wavelet Lab／小波实验室
+### 8. Wavelet Lab／小波实验室（V1 已实现）
 
 建立二维离散小波变换和多层金字塔，用于观察局部空间信息与多尺度频率信息：
 
@@ -202,6 +202,10 @@ V1 已按[专用实施与证据入口](design/convolution-playground/README.md)�
 - 不同阈值和分解层数的质量比较。
 - DCT 水印与 DWT 水印的容量、隐蔽性和鲁棒性对比。
 - 为 wHash 和后续多尺度分析提供共同基础。
+
+V1 已按[专用实现与证据入口](design/wavelet-lab/README.md)完成为第十个多实例 Persistable Document，
+采用 Haar/CDF 5/3、六单通道、多级 packed 金字塔、硬/软阈值、有限质量扫描及同条件 DCT/DWT 水印对比。
+自动门禁为 Debug/Release 333/333、零跳过，构建零警告/零错误；不使用 AIFLOW，也未增加 Windows CI 或执行发布门禁。
 
 ### 9. Frequency Filter／频域滤波
 
