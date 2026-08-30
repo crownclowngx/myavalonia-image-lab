@@ -23,11 +23,15 @@
                 <CheckBox Content="均衡" IsChecked="{Binding UseBalanced}" />
                 <CheckBox Content="鲁棒" IsChecked="{Binding UseRobust}" />
               </StackPanel>
+              <TextBlock Text="Profile（写入强度方案）：隐蔽＝改动较小、优先观感；均衡＝强度与观感折中；鲁棒＝改动较强、优先抗处理。比较 Profile 时请保持图片、Payload 和攻击配方一致。" TextWrapping="Wrap" Opacity="0.78" />
               <TextBlock Text="扰动链（列表顺序就是执行顺序）" FontWeight="SemiBold" />
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <ComboBox Width="190" ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedKindId}" />
+                <ComboBox Width="250" ItemsSource="{Binding AttackOptions}" SelectedItem="{Binding SelectedAttack}">
+                  <ComboBox.ItemTemplate><DataTemplate x:DataType="local:RobustnessAttackHelp"><TextBlock Text="{Binding DisplayLabel}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
                 <Button Content="添加" Command="{Binding AddStepCommand}" />
               </StackPanel>
+              <TextBlock Text="{Binding SelectedAttack.Description}" TextWrapping="Wrap" Opacity="0.78" />
               <ListBox MinHeight="170" ItemsSource="{Binding Steps}" SelectedItem="{Binding SelectedStep}">
                 <ListBox.ItemTemplate><DataTemplate x:DataType="local:RobustnessStepItem"><StackPanel Orientation="Horizontal" Spacing="8"><CheckBox IsChecked="{Binding Enabled}" /><TextBlock Text="{Binding Summary}" TextWrapping="Wrap" /></StackPanel></DataTemplate></ListBox.ItemTemplate>
               </ListBox>
@@ -38,20 +42,46 @@
                 <Button Content="下移" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedStep}" />
               </StackPanel>
               <TextBlock Text="选中步骤与扫描参数" FontWeight="SemiBold" />
-              <ComboBox ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedStep.KindId}" />
-              <Grid ColumnDefinitions="*,*" ColumnSpacing="6"><TextBox PlaceholderText="稳定参数 ID" Text="{Binding SelectedStep.ParameterId}" /><NumericUpDown Grid.Column="1" Value="{Binding SelectedStep.Value}" Increment="0.01" /></Grid>
+              <ComboBox ItemsSource="{Binding SelectedStep.AttackOptions}" SelectedItem="{Binding SelectedStep.SelectedAttack}">
+                <ComboBox.ItemTemplate><DataTemplate x:DataType="local:RobustnessAttackHelp"><TextBlock Text="{Binding DisplayLabel}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+              <Grid ColumnDefinitions="2*,*" ColumnSpacing="6">
+                <ComboBox ItemsSource="{Binding SelectedStep.ParameterOptions}" SelectedItem="{Binding SelectedStep.SelectedParameter}">
+                  <ComboBox.ItemTemplate><DataTemplate x:DataType="local:RobustnessParameterHelp"><TextBlock Text="{Binding DisplayLabel}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
+                <NumericUpDown Grid.Column="1" Value="{Binding SelectedStep.Value}" Increment="{Binding SelectedStep.ParameterHelp.Increment}" />
+              </Grid>
+              <Border Padding="10" CornerRadius="5" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}">
+                <StackPanel Spacing="5">
+                  <TextBlock Text="{Binding SelectedStep.AttackHelp.DisplayLabel}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SelectedStep.AttackHelp.Description}" TextWrapping="Wrap" />
+                  <TextBlock Text="实验目的" FontWeight="SemiBold" Margin="0,4,0,0" />
+                  <TextBlock Text="{Binding SelectedStep.AttackHelp.Purpose}" TextWrapping="Wrap" />
+                  <TextBlock Text="当前参数" FontWeight="SemiBold" Margin="0,4,0,0" />
+                  <TextBlock Text="{Binding SelectedStep.ParameterHelp.DisplayLabel}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SelectedStep.ParameterHelp.UnitAndRange}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SelectedStep.ParameterHelp.Direction}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SelectedStep.ParameterHelp.SuggestedScan, StringFormat='建议：{0}'}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding SelectedStep.AttackHelp.Caution, StringFormat='注意：{0}'}" TextWrapping="Wrap" Opacity="0.78" />
+                </StackPanel>
+              </Border>
             </StackPanel>
           </ScrollViewer>
           <ScrollViewer Grid.Column="1">
             <StackPanel Spacing="8">
               <StackPanel Spacing="8" IsEnabled="{Binding IsRecipeEditable}">
                 <TextBlock Text="单参数扫描与资源预检" FontWeight="SemiBold" />
+                <TextBlock Text="扫描会在每个点只改变上方选中步骤的当前参数；其他步骤保持固定，因此曲线才有明确因果含义。" TextWrapping="Wrap" Opacity="0.78" />
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
-                  <NumericUpDown Value="{Binding ScanStart}" Increment="0.01" PlaceholderText="起点" />
-                  <NumericUpDown Grid.Column="1" Value="{Binding ScanEnd}" Increment="0.01" PlaceholderText="终点" />
-                  <NumericUpDown Grid.Column="2" Value="{Binding ScanStep}" Minimum="0.0001" Increment="0.01" PlaceholderText="步长" />
+                  <StackPanel Spacing="3"><TextBlock Text="扫描起点" /><NumericUpDown Value="{Binding ScanStart}" Increment="0.01" /></StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="3"><TextBlock Text="扫描终点" /><NumericUpDown Value="{Binding ScanEnd}" Increment="0.01" /></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="3"><TextBlock Text="每次增减量" /><NumericUpDown Value="{Binding ScanStep}" Minimum="0.0001" Increment="0.01" /></StackPanel>
                 </Grid>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="6"><NumericUpDown Minimum="1" Maximum="20" Value="{Binding TrialCount}" /><NumericUpDown Grid.Column="1" Value="{Binding ExperimentSeed}" /></Grid>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                  <StackPanel Spacing="3"><TextBlock Text="trial 重复次数" /><NumericUpDown Minimum="1" Maximum="20" Value="{Binding TrialCount}" /></StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="3"><TextBlock Text="实验随机种子" /><NumericUpDown Value="{Binding ExperimentSeed}" /></StackPanel>
+                </Grid>
+                <TextBlock Text="trial 是同一强度的重复实验次数；随机种子用于复现噪声。确定性攻击通常设 1 次，随机噪声建议 3–5 次。" TextWrapping="Wrap" Opacity="0.78" />
                 <CheckBox Content="逐步探针（定位第一次不可恢复观察位置）" IsChecked="{Binding ProbeEachStep}" />
                 <TextBlock Text="随机噪声使用 SHA-256/SplitMix64-v1 派生；不会复用水印密码学随机源。" TextWrapping="Wrap" Opacity="0.75" />
               </StackPanel>
@@ -69,7 +99,18 @@
                 </StackPanel>
               </Border>
               <TextBlock Text="指标语义" FontWeight="SemiBold" />
-              <TextBlock Text="成功要求正式提取、Payload 相等且完整性有效。Physical BER 位于副本投票前；Voted BER 位于 RS 前。尺寸变化时 PSNR/SSIM 为 N/A，不自动缩放或配准。" TextWrapping="Wrap" />
+              <TextBlock Text="成功要求正式提取、Payload 相等且完整性有效。尺寸变化时质量指标为 N/A，不自动缩放或配准。" TextWrapping="Wrap" />
+              <Border Padding="10" CornerRadius="5" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="常用简称中文解释" FontWeight="SemiBold" />
+                  <TextBlock Text="Payload：写入水印的实际文本内容。" TextWrapping="Wrap" />
+                  <TextBlock Text="BER（比特错误率）：读错的 0/1 数量占总比特数的比例，越低越好。Physical BER 是副本投票前；Voted BER 是投票后、纠错前。" TextWrapping="Wrap" />
+                  <TextBlock Text="RS（Reed–Solomon 纠错）：修复部分受损数据；修复符号数上升表示水印已受损，即使最终仍成功。" TextWrapping="Wrap" />
+                  <TextBlock Text="PSNR（峰值信噪比）：衡量像素误差，通常越高越接近参考图。" TextWrapping="Wrap" />
+                  <TextBlock Text="SSIM（结构相似度）：衡量亮度、对比度和结构相似程度，越接近 1 越相似。" TextWrapping="Wrap" />
+                  <TextBlock Text="N/A：当前条件下不可计算，不代表 0 分或攻击失败。" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
             </StackPanel>
           </ScrollViewer>
         </Grid>

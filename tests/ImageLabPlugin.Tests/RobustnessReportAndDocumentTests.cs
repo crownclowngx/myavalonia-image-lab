@@ -105,6 +105,41 @@ public sealed class RobustnessReportAndDocumentTests
         Assert.Contains("取消", document.OperationStage, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task 中文攻击帮助覆盖全部算子且选择后同步参数解释()
+    {
+        var expectedIds = Enum.GetValues<PerturbationKind>().Select(value => value.ToStableId()).Order().ToArray();
+        var attacks = RobustnessLabHelpCatalog.Attacks;
+        Assert.Equal(expectedIds, attacks.Select(value => value.KindId).Order());
+        Assert.Equal(attacks.Count, attacks.Select(value => value.KindId).Distinct(StringComparer.Ordinal).Count());
+        Assert.All(attacks, attack =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(attack.DisplayName));
+            Assert.False(string.IsNullOrWhiteSpace(attack.Description));
+            Assert.False(string.IsNullOrWhiteSpace(attack.Purpose));
+            Assert.False(string.IsNullOrWhiteSpace(attack.Caution));
+            Assert.NotEmpty(attack.Parameters);
+            Assert.Equal(attack.Parameters.Count, attack.Parameters.Select(value => value.ParameterId).Distinct(StringComparer.Ordinal).Count());
+            var defaults = RobustnessLabDocument.DefaultFor(attack.KindId);
+            Assert.Contains(attack.Parameters, value => value.ParameterId == defaults.ParameterId && value.DefaultValue == defaults.Value);
+            var domainStep = new PerturbationStep("help", attack.Kind, true, RobustnessLabDocument.CreateParameters(attack.Kind));
+            Assert.All(attack.Parameters, parameter =>
+                PerturbationParameterEditor.WithScannedValue(domainStep, parameter.ParameterId, parameter.DefaultValue));
+        });
+
+        using var document = CreateDocument(new NeverPrepare());
+        await document.InitializeAsync(new NewDocumentActivation("help"), default);
+        var step = Assert.IsType<RobustnessStepItem>(document.SelectedStep);
+        Assert.Contains("JPEG", step.Summary, StringComparison.Ordinal);
+
+        step.SelectedAttack = Assert.Single(attacks, value => value.Kind == PerturbationKind.Crop);
+        step.SelectedParameter = Assert.Single(step.ParameterOptions, value => value.ParameterId == "bottom");
+        Assert.Equal("crop", step.KindId); Assert.Equal("bottom", step.ParameterId); Assert.Equal(0m, step.Value);
+        Assert.Contains("底部裁剪", step.Summary, StringComparison.Ordinal);
+        Assert.Contains("像素", step.ParameterHelp.UnitAndRange, StringComparison.Ordinal);
+        Assert.Contains("尺寸", step.AttackHelp.Caution, StringComparison.Ordinal);
+    }
+
     private static WatermarkDiagnosticResult Diagnostic(bool success) => new(success, success ? WatermarkDetectionStatus.RecoveredIntegrityValid : WatermarkDetectionStatus.UnrecoverableDamage,
         success ? IntegrityStatus.Valid : IntegrityStatus.Invalid, success, null, null, success ? RobustnessFailureReason.None : RobustnessFailureReason.DataUnrecoverable, "test");
 

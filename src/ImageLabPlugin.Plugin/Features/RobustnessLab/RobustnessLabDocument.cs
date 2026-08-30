@@ -20,9 +20,36 @@ internal sealed partial class RobustnessStepItem : ObservableObject
     [ObservableProperty] private bool _enabled;
     [ObservableProperty] private string _parameterId;
     [ObservableProperty] private decimal _value;
-    public string Summary => $"{KindId} / {ParameterId}={Value}";
-    partial void OnKindIdChanged(string value) { var defaults = RobustnessLabDocument.DefaultFor(value); ParameterId = defaults.ParameterId; Value = defaults.Value; OnPropertyChanged(nameof(Summary)); }
-    partial void OnParameterIdChanged(string value) => OnPropertyChanged(nameof(Summary));
+    public IReadOnlyList<RobustnessAttackHelp> AttackOptions => RobustnessLabHelpCatalog.Attacks;
+    public RobustnessAttackHelp AttackHelp => RobustnessLabHelpCatalog.FindOrUnknown(KindId);
+    public IReadOnlyList<RobustnessParameterHelp> ParameterOptions => AttackHelp.Parameters;
+    public RobustnessParameterHelp ParameterHelp => ParameterOptions.FirstOrDefault(value => value.ParameterId == ParameterId) ?? RobustnessParameterHelp.Unknown(ParameterId);
+    public RobustnessAttackHelp? SelectedAttack
+    {
+        get => RobustnessLabHelpCatalog.Find(KindId);
+        set { if (value is not null && value.KindId != KindId) KindId = value.KindId; }
+    }
+    public RobustnessParameterHelp? SelectedParameter
+    {
+        get => ParameterOptions.FirstOrDefault(value => value.ParameterId == ParameterId);
+        set
+        {
+            if (value is null || value.ParameterId == ParameterId) return;
+            ParameterId = value.ParameterId;
+            Value = value.DefaultValue;
+        }
+    }
+    public string Summary => $"{AttackHelp.DisplayName} · {ParameterHelp.DisplayName} = {Value}";
+    partial void OnKindIdChanged(string value)
+    {
+        var defaults = RobustnessLabDocument.DefaultFor(value); ParameterId = defaults.ParameterId; Value = defaults.Value;
+        OnPropertyChanged(nameof(SelectedAttack)); OnPropertyChanged(nameof(AttackHelp)); OnPropertyChanged(nameof(ParameterOptions));
+        OnPropertyChanged(nameof(SelectedParameter)); OnPropertyChanged(nameof(ParameterHelp)); OnPropertyChanged(nameof(Summary));
+    }
+    partial void OnParameterIdChanged(string value)
+    {
+        OnPropertyChanged(nameof(SelectedParameter)); OnPropertyChanged(nameof(ParameterHelp)); OnPropertyChanged(nameof(Summary));
+    }
     partial void OnValueChanged(decimal value) => OnPropertyChanged(nameof(Summary));
 }
 
@@ -63,7 +90,7 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     [ObservableProperty] private bool _useStealth;
     [ObservableProperty] private bool _useBalanced = true;
     [ObservableProperty] private bool _useRobust;
-    [ObservableProperty] private string _selectedKindId = "jpeg-reencode";
+    [ObservableProperty] private RobustnessAttackHelp _selectedAttack = RobustnessLabHelpCatalog.Attacks[0];
     [ObservableProperty] private RobustnessStepItem? _selectedStep;
     [ObservableProperty] private decimal _scanStart = 95m;
     [ObservableProperty] private decimal _scanEnd = 75m;
@@ -82,7 +109,7 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     [ObservableProperty] private IReadOnlyList<RobustnessCurvePoint> _curvePoints = [];
 
     public ObservableCollection<RobustnessStepItem> Steps { get; } = [];
-    public IReadOnlyList<string> KindOptions { get; } = Enum.GetValues<PerturbationKind>().Select(value => value.ToStableId()).ToArray();
+    public IReadOnlyList<RobustnessAttackHelp> AttackOptions { get; } = RobustnessLabHelpCatalog.Attacks;
     public DocumentPresentationState Presentation => _presentation;
     public bool IsDirty => _revision != _acceptedRevision;
     public bool HasResult => _session is not null;
@@ -98,6 +125,7 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
         {
             if (activation is RestoreDocumentActivation restore) Restore(restore.RestoredContent);
             if (Steps.Count == 0) AddDefaultStep("jpeg-reencode");
+            SelectedStep ??= Steps[0];
             _presentation = new(string.IsNullOrWhiteSpace(activation.Title) ? "鲁棒性实验室" : activation.Title); PresentationChanged?.Invoke(this, EventArgs.Empty); _revision = _acceptedRevision = 0;
         }
         finally { _restoring = false; }
@@ -105,7 +133,7 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     }
 
     [RelayCommand] private async Task SelectSourceAsync() { var path = await _images.PickImageAsync(_lifetime.ClosingToken).ConfigureAwait(true); if (!string.IsNullOrWhiteSpace(path)) SourcePath = path; }
-    [RelayCommand] private void AddStep() { AddDefaultStep(SelectedKindId); SelectedStep = Steps[^1]; }
+    [RelayCommand] private void AddStep() { AddDefaultStep(SelectedAttack.KindId); SelectedStep = Steps[^1]; }
     [RelayCommand] private void RemoveStep(RobustnessStepItem? item) { if (item is not null) Steps.Remove(item); }
     [RelayCommand] private void CopyStep(RobustnessStepItem? item) { if (item is null || Steps.Count >= RobustnessLimits.MaximumSteps) return; var index = Steps.IndexOf(item); Steps.Insert(index + 1, new(Guid.NewGuid().ToString("N"), item.KindId, item.Enabled, item.ParameterId, item.Value)); }
     [RelayCommand] private void MoveUp(RobustnessStepItem? item) { if (item is null) return; var index = Steps.IndexOf(item); if (index > 0) Steps.Move(index, index - 1); }
@@ -238,7 +266,8 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
         PerturbationKind.Crop => ("left", 0), PerturbationKind.Pad => ("left", 0), PerturbationKind.Translate => ("dx", 0), PerturbationKind.Rotate => ("degrees", 0), PerturbationKind.Perspective => ("top-left-x", 0),
         PerturbationKind.Brightness => ("offset", 0), PerturbationKind.Contrast => ("factor", 1), PerturbationKind.Gamma => ("gamma", 1), PerturbationKind.Saturation => ("factor", 1), PerturbationKind.ColorBias => ("red", 0), _ => throw new ArgumentOutOfRangeException()
     };
-    private static PerturbationParameters CreateParameters(PerturbationKind kind) => kind switch
+    /// <summary>为展示层编辑和契约测试建立领域算子的恒等/默认参数对象。</summary>
+    internal static PerturbationParameters CreateParameters(PerturbationKind kind) => kind switch
     {
         PerturbationKind.JpegReencode => new JpegParameters(), PerturbationKind.Scale => new ScaleParameters(), PerturbationKind.GaussianNoise => new GaussianNoiseParameters(), PerturbationKind.SaltPepperNoise => new SaltPepperParameters(),
         PerturbationKind.DeterministicPixel => new DeterministicPixelParameters(), PerturbationKind.GaussianBlur => new GaussianBlurParameters(), PerturbationKind.MedianBlur => new MedianBlurParameters(), PerturbationKind.UnsharpMask => new UnsharpMaskParameters(),
