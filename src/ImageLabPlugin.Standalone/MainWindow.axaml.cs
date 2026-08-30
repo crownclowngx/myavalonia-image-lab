@@ -11,6 +11,7 @@ using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
+using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -30,6 +31,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _waveletScope;
     private IServiceScope? _frequencyFilterScope;
     private IServiceScope? _frequencyMaskScope;
+    private IServiceScope? _periodicNoiseScope;
 
     public MainWindow()
     {
@@ -50,6 +52,7 @@ public sealed partial class MainWindow : Window
         _waveletScope = services.CreateScope();
         _frequencyFilterScope = services.CreateScope();
         _frequencyMaskScope = services.CreateScope();
+        _periodicNoiseScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -74,6 +77,8 @@ public sealed partial class MainWindow : Window
         var frequencyFilterView = _frequencyFilterScope.ServiceProvider.GetRequiredService<FrequencyFilterView>();
         var frequencyMaskDocument = _frequencyMaskScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorDocument>();
         var frequencyMaskView = _frequencyMaskScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorView>();
+        var periodicNoiseDocument = _periodicNoiseScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalDocument>();
+        var periodicNoiseView = _periodicNoiseScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -97,6 +102,8 @@ public sealed partial class MainWindow : Window
         frequencyFilterDocument.InitializeAsync(new NewDocumentActivation("频域滤波"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         frequencyMaskDocument.InitializeAsync(new NewDocumentActivation("频谱遮罩编辑器"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        periodicNoiseDocument.InitializeAsync(new NewDocumentActivation("周期噪声与陷波器"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -122,6 +129,8 @@ public sealed partial class MainWindow : Window
         FrequencyFilterPreview.Content = frequencyFilterView;
         frequencyMaskView.DataContext = frequencyMaskDocument;
         FrequencyMaskPreview.Content = frequencyMaskView;
+        periodicNoiseView.DataContext = periodicNoiseDocument;
+        PeriodicNoisePreview.Content = periodicNoiseView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -136,6 +145,7 @@ public sealed partial class MainWindow : Window
             waveletDocument.Dispose();
             frequencyFilterDocument.Dispose();
             frequencyMaskDocument.Dispose();
+            periodicNoiseDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -148,6 +158,7 @@ public sealed partial class MainWindow : Window
             _waveletScope?.Dispose();
             _frequencyFilterScope?.Dispose();
             _frequencyMaskScope?.Dispose();
+            _periodicNoiseScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -160,6 +171,7 @@ public sealed partial class MainWindow : Window
             _waveletScope = null;
             _frequencyFilterScope = null;
             _frequencyMaskScope = null;
+            _periodicNoiseScope = null;
         };
     }
 }

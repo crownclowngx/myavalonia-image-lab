@@ -74,6 +74,14 @@ internal interface IFrequencyMaskRecipeFileDialog
     Task<string?> PickRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>周期噪声产品只暴露配方与候选摘要的 JSON 路径意图。</summary>
+internal interface IPeriodicNoiseFileDialog
+{
+    Task<string?> PickRecipeInputAsync(CancellationToken cancellationToken);
+    Task<string?> PickRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickCandidateSummaryOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

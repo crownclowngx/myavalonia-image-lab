@@ -52,4 +52,8 @@ public static class PluginIds
     /// <summary>“频谱遮罩编辑器”多实例绘制、重建与配方实验的持久身份。</summary>
     public static readonly DocumentTypeId FrequencyMaskEditorDocument =
         new("myavalonia.plugin.image.lab.document.frequency-mask-editor");
+
+    /// <summary>“周期噪声与陷波器”多实例候选复核与共轭安全重建的持久身份。</summary>
+    public static readonly DocumentTypeId PeriodicNoiseRemovalDocument =
+        new("myavalonia.plugin.image.lab.document.periodic-noise-removal");
 }

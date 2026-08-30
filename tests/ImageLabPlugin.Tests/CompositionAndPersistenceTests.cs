@@ -13,6 +13,7 @@ using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
+using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
@@ -28,14 +29,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十二个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十三个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -75,6 +76,8 @@ public sealed class CompositionAndPersistenceTests
         var secondFrequencyFilter = secondScope.ServiceProvider.GetRequiredService<FrequencyFilterDocument>();
         var frequencyMask = firstScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorDocument>();
         var secondFrequencyMask = secondScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorDocument>();
+        var periodicNoise = firstScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalDocument>();
+        var secondPeriodicNoise = secondScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -89,6 +92,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(wavelet, secondWavelet);
         Assert.NotSame(frequencyFilter, secondFrequencyFilter);
         Assert.NotSame(frequencyMask, secondFrequencyMask);
+        Assert.NotSame(periodicNoise, secondPeriodicNoise);
+        periodicNoise.SourcePath = "scope-periodic-one";
+        Assert.Empty(secondPeriodicNoise.SourcePath);
         frequencyMask.SourcePath = "scope-frequency-mask-one";
         Assert.Empty(secondFrequencyMask.SourcePath);
         frequencyFilter.SourcePath = "scope-frequency-filter-one";

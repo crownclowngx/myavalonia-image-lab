@@ -6,7 +6,7 @@ namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
 internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
-    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, IFrequencyMaskRecipeFileDialog, ITextClipboard
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -103,6 +103,38 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
                 Title = "导出频谱遮罩配方",
                 SuggestedFileName = suggestedName,
                 FileTypeChoices = [new FilePickerFileType("JSON 配方") { Patterns = ["*.json"] }]
+            }, cancellationToken);
+
+    async Task<string?> IPeriodicNoiseFileDialog.PickRecipeInputAsync(CancellationToken cancellationToken)
+    {
+        var paths = await interaction.PickOpenFilesAsync(
+            new FilePickerOpenOptions
+            {
+                Title = "导入周期陷波配方",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("JSON 配方") { Patterns = ["*.json"] }]
+            }, cancellationToken).ConfigureAwait(false);
+        return paths.Count == 0 ? null : paths[0];
+    }
+
+    Task<string?> IPeriodicNoiseFileDialog.PickRecipeOutputAsync(string suggestedName,
+        CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "导出周期陷波配方",
+                SuggestedFileName = suggestedName,
+                FileTypeChoices = [new FilePickerFileType("JSON 配方") { Patterns = ["*.json"] }]
+            }, cancellationToken);
+
+    public Task<string?> PickCandidateSummaryOutputAsync(string suggestedName,
+        CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "导出周期频率候选摘要",
+                SuggestedFileName = suggestedName,
+                FileTypeChoices = [new FilePickerFileType("JSON 摘要") { Patterns = ["*.json"] }]
             }, cancellationToken);
 
     public Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken) =>

@@ -33,6 +33,8 @@ using ImageLabPlugin.Application.FrequencyFiltering;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Application.FrequencyMaskEditing;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
+using ImageLabPlugin.Application.PeriodicNoiseRemoval;
+using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -56,6 +58,7 @@ public static class ImageLabPluginServices
         AddWaveletServices(services);
         AddFrequencyFilterServices(services);
         AddFrequencyMaskEditorServices(services);
+        AddPeriodicNoiseRemovalServices(services);
         return services;
     }
 
@@ -69,6 +72,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
         services.AddSingleton<FrequencyMaskApplier>();
+        services.AddSingleton<FrequencyGainSpectrumProjector>();
     }
 
     /// <summary>登记 Avalonia、文件系统和安全随机源等领域外端口。</summary>
@@ -86,6 +90,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<ILsbReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IWaveletReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IFrequencyMaskRecipeFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IPeriodicNoiseFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -303,5 +308,29 @@ public static class ImageLabPluginServices
         services.AddSingleton<IInspectFrequencyMaskPointUseCase, InspectFrequencyMaskPointUseCase>();
         services.AddSingleton<IImportFrequencyMaskRecipeUseCase, ImportFrequencyMaskRecipeUseCase>();
         services.AddSingleton<IExportFrequencyMaskRecipeUseCase, ExportFrequencyMaskRecipeUseCase>();
+    }
+
+    /// <summary>登记周期峰检测、共轭陷波、损失诊断和独立导入导出窄用例。</summary>
+    private static void AddPeriodicNoiseRemovalServices(IServiceCollection services)
+    {
+        services.AddSingleton<RadialSpectrumBaseline>();
+        services.AddSingleton<PeriodicPeakRiskAssessor>();
+        services.AddSingleton<PeriodicPeakDetector>();
+        services.AddSingleton<NotchResponse>();
+        services.AddSingleton<NotchMaskFactory>();
+        services.AddSingleton<PeriodicNoiseLossAnalyzer>();
+        services.AddSingleton<IPeriodicNoiseRecipeSerializer, PeriodicNoiseRecipeSerializer>();
+        services.AddSingleton<IPeriodicNoiseCandidateSummarySerializer, PeriodicNoiseCandidateSummarySerializer>();
+        services.AddSingleton<IPreparePeriodicNoiseSessionUseCase, PreparePeriodicNoiseSessionUseCase>();
+        services.AddSingleton<IDetectPeriodicNoiseCandidatesUseCase, DetectPeriodicNoiseCandidatesUseCase>();
+        services.AddSingleton<IMapPeriodicSpectrumSelectionUseCase, MapPeriodicSpectrumSelectionUseCase>();
+        services.AddSingleton<RenderPeriodicNoisePreviewUseCase>();
+        services.AddSingleton<IRenderPeriodicNoisePreviewUseCase>(static provider =>
+            provider.GetRequiredService<RenderPeriodicNoisePreviewUseCase>());
+        services.AddSingleton<IRenderFullPeriodicNoiseResultUseCase, RenderFullPeriodicNoiseResultUseCase>();
+        services.AddSingleton<IImportPeriodicNoiseRecipeUseCase, ImportPeriodicNoiseRecipeUseCase>();
+        services.AddSingleton<IExportPeriodicNoiseRecipeUseCase, ExportPeriodicNoiseRecipeUseCase>();
+        services.AddSingleton<IExportPeriodicNoiseCandidateSummaryUseCase, ExportPeriodicNoiseCandidateSummaryUseCase>();
+        services.AddSingleton<IExportPeriodicNoiseArtifactUseCase, ExportPeriodicNoiseArtifactUseCase>();
     }
 }

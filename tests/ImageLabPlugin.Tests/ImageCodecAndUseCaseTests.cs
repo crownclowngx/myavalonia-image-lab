@@ -39,6 +39,9 @@ using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Application.FrequencyMaskEditing;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
+using ImageLabPlugin.Features.PeriodicNoiseRemoval;
+using ImageLabPlugin.Application.PeriodicNoiseRemoval;
+using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -80,7 +83,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十二个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十三个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -104,6 +107,8 @@ public sealed class ImageCodecAndUseCaseTests
         var frequencyFilterView = new FrequencyFilterView();
         var frequencyMaskView = new FrequencyMaskEditorView();
         var frequencyMaskCanvas = new FrequencyMaskCanvasControl();
+        var periodicNoiseView = new PeriodicNoiseRemovalView();
+        var periodicSpectrum = new PeriodicSpectrumControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -131,6 +136,8 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(frequencyFilterView.Content);
         Assert.NotNull(frequencyMaskView.Content);
         Assert.NotNull(frequencyMaskCanvas);
+        Assert.NotNull(periodicNoiseView.Content);
+        Assert.NotNull(periodicSpectrum);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -147,7 +154,8 @@ public sealed class ImageCodecAndUseCaseTests
             new LsbSteganographyLabView(),
             new ConvolutionPlaygroundView(),
             new FrequencyFilterView(),
-            new FrequencyMaskEditorView()
+            new FrequencyMaskEditorView(),
+            new PeriodicNoiseRemovalView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -165,7 +173,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(44, numericInputs.Count);
+        Assert.Equal(51, numericInputs.Count);
     }
 
     [Fact]
@@ -246,6 +254,52 @@ public sealed class ImageCodecAndUseCaseTests
             var json = snapshot.Content.Payload.GetRawText();
             Assert.DoesNotContain("Complex", json, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+        }
+        finally { File.Delete(input); }
+    }
+
+    [Fact]
+    public async Task 周期噪声Document严格执行草案采用重建与导出状态机()
+    {
+        var codec = new AvaloniaImageCodec();
+        var input = Path.Combine(Path.GetTempPath(), $"periodic-noise-document-{Guid.NewGuid():N}.png");
+        try
+        {
+            await File.WriteAllBytesAsync(input, await codec.EncodeAsync(CreateTexturedImage(32, 32,
+                includeAlpha: true), ImageOutputFormat.Png, 100, default));
+            using var document = CreatePeriodicNoiseDocument(codec);
+            await document.InitializeAsync(new NewDocumentActivation("周期噪声状态机"), default);
+            document.SourcePath = input;
+            document.AnalysisMaximumEdge = 512;
+            await document.PrepareCommand.ExecuteAsync(null);
+            Assert.True(document.HasSession);
+
+            document.ToggleSpectrumPoint(0.65, 0.5);
+            Assert.True(document.HasDraft);
+            await document.PreviewCommand.ExecuteAsync(null);
+            Assert.False(document.CanExport);
+            Assert.Contains("未确认草案", document.DiagnosticsSummary, StringComparison.Ordinal);
+
+            document.AcceptDraftCommand.Execute(null);
+            Assert.True(document.HasAcceptedRecipe);
+            Assert.False(document.CanExport);
+            await document.PreviewCommand.ExecuteAsync(null);
+            Assert.True(document.CanExport);
+            Assert.Contains("已采用", document.DiagnosticsSummary, StringComparison.Ordinal);
+
+            var snapshot = await document.CaptureSaveSnapshotAsync(default);
+            var json = snapshot.Content.Payload.GetRawText();
+            Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("spectrum", json, StringComparison.OrdinalIgnoreCase);
+
+            using var restored = CreatePeriodicNoiseDocument(codec);
+            await restored.InitializeAsync(new RestoreDocumentActivation("恢复周期噪声", snapshot.Content), default);
+            Assert.True(restored.HasAcceptedRecipe);
+            Assert.False(restored.HasSession);
+            await restored.PrepareCommand.ExecuteAsync(null);
+            Assert.True(restored.HasSession);
+            Assert.True(restored.HasAcceptedRecipe);
+            Assert.False(restored.CanExport);
         }
         finally { File.Delete(input); }
     }
@@ -596,6 +650,29 @@ public sealed class ImageCodecAndUseCaseTests
             new TestDocumentLifetime());
     }
 
+    private static PeriodicNoiseRemovalDocument CreatePeriodicNoiseDocument(IImageCodec codec)
+    {
+        var fft = new Fft2DTransform(new Fft1DTransform());
+        var converter = new ImageChannelConverter();
+        var builder = new FrequencySpectrumBuilder(fft);
+        var render = new RenderPeriodicNoisePreviewUseCase(new NotchMaskFactory(new NotchResponse()),
+            new FrequencyMaskApplier(fft), new FrequencyGainSpectrumProjector(new SpectrumProjector()), converter,
+            new FrequencyDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()),
+            new PeriodicNoiseLossAnalyzer());
+        var serializer = new PeriodicNoiseRecipeSerializer();
+        return new PeriodicNoiseRemovalDocument(
+            new PreparePeriodicNoiseSessionUseCase(codec, new ImageAnalysisProxyProjector(), converter, builder,
+                new SpectrumProjector()),
+            new DetectPeriodicNoiseCandidatesUseCase(new PeriodicPeakDetector(new RadialSpectrumBaseline(),
+                new PeriodicPeakRiskAssessor())), new MapPeriodicSpectrumSelectionUseCase(), render,
+            new RenderFullPeriodicNoiseResultUseCase(converter, builder, render),
+            new ImportPeriodicNoiseRecipeUseCase(new BoundedTextFileReader(), serializer),
+            new ExportPeriodicNoiseRecipeUseCase(serializer, new AtomicFileWriter()),
+            new ExportPeriodicNoiseCandidateSummaryUseCase(new PeriodicNoiseCandidateSummarySerializer(),
+                new AtomicFileWriter()), new ExportPeriodicNoiseArtifactUseCase(codec, new AtomicFileWriter()),
+            new NullImageDialog(), new NullPeriodicNoiseDialog(), codec, new TestDocumentLifetime());
+    }
+
     private static async Task WaitUntilAsync(Func<bool> predicate)
     {
         var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(5);
@@ -617,6 +694,15 @@ public sealed class ImageCodecAndUseCaseTests
     {
         public Task<string?> PickRecipeInputAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
         public Task<string?> PickRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+    }
+
+    private sealed class NullPeriodicNoiseDialog : IPeriodicNoiseFileDialog
+    {
+        public Task<string?> PickRecipeInputAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+        public Task<string?> PickRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+            Task.FromResult<string?>(null);
+        public Task<string?> PickCandidateSummaryOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+            Task.FromResult<string?>(null);
     }
 
     private sealed class SequencedBitPlanePrepareUseCase : IPrepareBitPlaneSessionUseCase

@@ -12,6 +12,7 @@ using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
+using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -93,6 +94,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.FrequencyMaskEditorDocument,
                 "频谱遮罩编辑器",
                 "在中心化频谱上绘制共轭安全的实数增益遮罩，并联动观察空间域重建与诊断",
+                "图像分析"));
+        registration.AddPersistableDocument<PeriodicNoiseRemovalDocument, PeriodicNoiseRemovalView>(
+            new DocumentDescriptor(
+                PluginIds.PeriodicNoiseRemovalDocument,
+                "周期噪声与陷波器",
+                "复核周期频率候选，以必须人工采用的共轭安全陷波草案观察频谱、重建、差异与不可逆损失",
                 "图像分析"));
     }
 }

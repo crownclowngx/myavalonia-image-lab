@@ -42,5 +42,8 @@
     <TabItem Header="频谱遮罩编辑器">
       <ContentControl x:Name="FrequencyMaskPreview" />
     </TabItem>
+    <TabItem Header="周期噪声与陷波器">
+      <ContentControl x:Name="PeriodicNoisePreview" />
+    </TabItem>
   </TabControl>
 </Window>

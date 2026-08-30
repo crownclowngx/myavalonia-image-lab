@@ -1,0 +1,107 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.PeriodicNoiseRemoval.PeriodicNoiseRemovalView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.PeriodicNoiseRemoval"
+    x:DataType="vm:PeriodicNoiseRemovalDocument">
+  <UserControl.Styles><StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" /></UserControl.Styles>
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+    <Grid ColumnDefinitions="Auto,2*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="7">
+      <Button Command="{Binding SelectSourceCommand}" Content="选择 PNG/JPEG" />
+      <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="图片路径" />
+      <ComboBox Grid.Column="2" Width="72" ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" />
+      <ComboBox Grid.Column="3" Width="90" ItemsSource="{Binding AnalysisEdgeOptions}" SelectedItem="{Binding AnalysisMaximumEdge}" />
+      <Button Grid.Column="4" Command="{Binding PrepareCommand}" Content="载入并缓存 FFT" />
+      <Button Grid.Column="5" Command="{Binding DetectCommand}" Content="运行候选检测" IsEnabled="{Binding HasSession}" />
+      <Button Grid.Column="6" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsBusy}" />
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="310,2*,320" ColumnSpacing="10">
+      <ScrollViewer><StackPanel Spacing="6">
+        <TextBlock FontSize="18" FontWeight="SemiBold" Text="检测与候选" />
+        <TextBlock Text="候选是需要复核的频率峰，不等于已确认噪声。" TextWrapping="Wrap" />
+        <TextBlock Text="DC 排除半径（cycles/pixel）" />
+        <NumericUpDown Minimum="0.001" Maximum="0.25" Increment="0.001" Value="{Binding DcExclusionRadius}" />
+        <TextBlock Text="稳健分数阈值" />
+        <NumericUpDown Minimum="0.1" Maximum="100" Increment="0.5" Value="{Binding RobustScoreThreshold}" />
+        <TextBlock Text="局部突出度阈值" />
+        <NumericUpDown Minimum="0.01" Maximum="100" Increment="0.05" Value="{Binding ProminenceThreshold}" />
+        <TextBlock Text="非极大值抑制距离" />
+        <NumericUpDown Minimum="0.001" Maximum="0.25" Increment="0.001" Value="{Binding SuppressionRadius}" />
+        <Button Command="{Binding GenerateSuggestionsCommand}" Content="生成保守建议草案" IsEnabled="{Binding HasDetection}" />
+        <Button Command="{Binding ExportCandidatesCommand}" Content="导出候选摘要 JSON" IsEnabled="{Binding HasDetection}" />
+        <TextBlock Text="{Binding CandidateSummary}" TextWrapping="Wrap" />
+        <ListBox Height="330" ItemsSource="{Binding CandidateRows}" SelectedItem="{Binding SelectedCandidate}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:PeriodicCandidateRow">
+              <StackPanel Margin="2" Spacing="2">
+                <TextBlock FontWeight="SemiBold" Text="{Binding FrequencyText}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding ScoreText}" />
+                <TextBlock Text="{Binding RiskText}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding SourceText}" Opacity="0.7" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Command="{Binding ToggleCandidateCommand}" Content="加入/移除所选候选整对中心" IsEnabled="{Binding HasDetection}" />
+      </StackPanel></ScrollViewer>
+
+      <Grid Grid.Column="1" RowDefinitions="*,*,*" ColumnDefinitions="*,*" RowSpacing="7" ColumnSpacing="7">
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid><vm:PeriodicSpectrumControl x:Name="OriginalSpectrum" Spectrum="{Binding OriginalSpectrumPreview}" Markers="{Binding SpectrumMarkers}" />
+            <TextBlock Margin="5" Padding="3" VerticalAlignment="Top" Text="原始频谱（单击手动选点）" Foreground="White" Background="#99000000" /></Grid>
+        </Border>
+        <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid><vm:PeriodicSpectrumControl x:Name="FilteredSpectrum" Spectrum="{Binding FilteredSpectrumPreview}" Markers="{Binding SpectrumMarkers}" />
+            <TextBlock Margin="5" Padding="3" VerticalAlignment="Top" Text="处理后精确频谱 F×H" Foreground="White" Background="#99000000" /></Grid>
+        </Border>
+        <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid><Image Source="{Binding SourcePreview}" Stretch="Uniform" /><TextBlock Margin="5" Padding="3" VerticalAlignment="Top" Text="分析代理原图" Foreground="White" Background="#99000000" /></Grid>
+        </Border>
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid><Image Source="{Binding ResultPreview}" Stretch="Uniform" /><TextBlock Margin="5" Padding="3" VerticalAlignment="Top" Text="IFFT 重建结果" Foreground="White" Background="#99000000" /></Grid>
+        </Border>
+        <Border Grid.Row="2" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid><Image Source="{Binding SignedDifferencePreview}" Stretch="Uniform" /><TextBlock Margin="5" Padding="3" VerticalAlignment="Top" Text="符号差异（红增蓝减）" Foreground="White" Background="#99000000" /></Grid>
+        </Border>
+        <Border Grid.Row="2" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid><Image Source="{Binding AbsoluteDifferencePreview}" Stretch="Uniform" /><TextBlock Margin="5" Padding="3" VerticalAlignment="Top" Text="绝对差异" Foreground="White" Background="#99000000" /></Grid>
+        </Border>
+      </Grid>
+
+      <ScrollViewer Grid.Column="2"><StackPanel Spacing="7">
+        <TextBlock FontSize="18" FontWeight="SemiBold" Text="陷波草案与损失" />
+        <TextBlock Text="过渡方式" /><ComboBox ItemsSource="{Binding TransitionOptions}" SelectedItem="{Binding SelectedTransition}" />
+        <TextBlock Text="半径 r（cycles/pixel）" /><NumericUpDown Minimum="0.0001" Maximum="0.25" Increment="0.001" Value="{Binding NotchRadius}" />
+        <TextBlock Text="衰减强度 a（0 全通，1 中心全抑制）" /><NumericUpDown Minimum="0" Maximum="1" Increment="0.05" Value="{Binding NotchStrength}" />
+        <StackPanel IsVisible="{Binding IsButterworth}" Spacing="4"><TextBlock Text="Butterworth 阶数 1–12" /><NumericUpDown Minimum="1" Maximum="12" Increment="1" Value="{Binding ButterworthOrder}" /></StackPanel>
+        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+          <Button Command="{Binding PreviewCommand}" Content="立即预览/重建" IsEnabled="{Binding HasSession}" />
+          <Button Grid.Column="1" Command="{Binding AcceptDraftCommand}" Content="采用草案" IsEnabled="{Binding HasDraft}" />
+          <Button Grid.Column="2" Command="{Binding DiscardDraftCommand}" Content="放弃草案" IsEnabled="{Binding HasDraft}" />
+        </Grid>
+        <Button Command="{Binding RenderFullCommand}" Content="执行预算内原尺寸" IsEnabled="{Binding CanRenderFull}" />
+        <TextBlock Text="{Binding RecipeStateSummary}" TextWrapping="Wrap" />
+        <Border Padding="7" Background="#22FF9800"><TextBlock Text="{Binding DiagnosticsSummary}" TextWrapping="Wrap" /></Border>
+        <TextBlock Text="遮罩预览" FontWeight="SemiBold" /><Image Height="120" Source="{Binding MaskPreview}" Stretch="Uniform" />
+        <TextBlock Text="导出只接受当前 Session、已采用配方和非草案结果的匹配指纹；不会覆盖源文件。" TextWrapping="Wrap" Opacity="0.75" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <Button Command="{Binding ExportResultCommand}" Content="导出结果 PNG" IsEnabled="{Binding CanExport}" />
+          <Button Grid.Column="1" Command="{Binding ExportMaskCommand}" Content="导出遮罩 PNG" IsEnabled="{Binding CanExport}" />
+        </Grid>
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+          <Button Command="{Binding ImportRecipeCommand}" Content="导入配方" />
+          <Button Grid.Column="1" Command="{Binding ExportRecipeCommand}" Content="导出配方" />
+        </Grid>
+      </StackPanel></ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Padding="8" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}">
+      <Grid ColumnDefinitions="2*,3*,Auto" ColumnSpacing="10">
+        <TextBlock Text="{Binding SessionSummary}" TextWrapping="Wrap" />
+        <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+        <ProgressBar Grid.Column="2" Width="110" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>
