@@ -1,0 +1,296 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "ImageLabPlugin.Plugin/1.0.0": {
+        "dependencies": {
+          "CommunityToolkit.Mvvm": "8.4.2",
+          "MyAvaloniaManagement.PluginSdk": "3.3.0",
+          "MyAvaloniaManagement.PluginSdk.UI": "3.3.0"
+        },
+        "runtime": {
+          "ImageLabPlugin.Plugin.dll": {}
+        }
+      },
+      "Avalonia/12.1.0": {
+        "dependencies": {
+          "Avalonia.Remote.Protocol": "12.1.0",
+          "MicroCom.Runtime": "0.11.6"
+        },
+        "runtime": {
+          "lib/net10.0/Avalonia.Base.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.Controls.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.DesignerSupport.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          },
+          "lib/net10.0/Avalonia.Dialogs.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.Markup.Xaml.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.Markup.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.Metal.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.MicroCom.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.OpenGL.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.Vulkan.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          },
+          "lib/net10.0/Avalonia.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          }
+        }
+      },
+      "Avalonia.Remote.Protocol/12.1.0": {
+        "runtime": {
+          "lib/net10.0/Avalonia.Remote.Protocol.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          }
+        }
+      },
+      "Avalonia.Themes.Fluent/12.1.0": {
+        "dependencies": {
+          "Avalonia": "12.1.0"
+        },
+        "runtime": {
+          "lib/net10.0/Avalonia.Themes.Fluent.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          }
+        }
+      },
+      "CommunityToolkit.Mvvm/8.4.2": {
+        "runtime": {
+          "lib/net8.0/CommunityToolkit.Mvvm.dll": {
+            "assemblyVersion": "8.4.0.0",
+            "fileVersion": "8.4.2.1"
+          }
+        }
+      },
+      "Irihi.Avalonia.Shared/0.4.0": {
+        "dependencies": {
+          "Avalonia": "12.1.0"
+        },
+        "runtime": {
+          "lib/net10.0/Irihi.Avalonia.Shared.dll": {
+            "assemblyVersion": "0.4.0.0",
+            "fileVersion": "0.4.0.0"
+          }
+        }
+      },
+      "Irihi.Avalonia.Shared.Contracts/0.4.0": {
+        "runtime": {
+          "lib/net10.0/Irihi.Avalonia.Shared.Contracts.dll": {
+            "assemblyVersion": "0.4.0.0",
+            "fileVersion": "0.4.0.0"
+          }
+        }
+      },
+      "Irihi.Ursa/2.1.0": {
+        "dependencies": {
+          "Avalonia": "12.1.0",
+          "Irihi.Avalonia.Shared": "0.4.0",
+          "Irihi.Avalonia.Shared.Contracts": "0.4.0"
+        },
+        "runtime": {
+          "lib/net10.0/Ursa.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "Irihi.Ursa.Themes.Semi/2.1.0": {
+        "dependencies": {
+          "Avalonia": "12.1.0",
+          "Irihi.Ursa": "2.1.0",
+          "Semi.Avalonia": "12.1.0"
+        },
+        "runtime": {
+          "lib/net10.0/Ursa.Themes.Semi.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "MicroCom.Runtime/0.11.6": {
+        "runtime": {
+          "lib/net8.0/MicroCom.Runtime.dll": {
+            "assemblyVersion": "0.11.6.0",
+            "fileVersion": "0.11.6.0"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.10": {
+        "runtime": {
+          "lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.1026.32716"
+          }
+        }
+      },
+      "MyAvaloniaManagement.PluginSdk/3.3.0": {
+        "runtime": {
+          "lib/net10.0/MyAvaloniaManagement.PluginSdk.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.3.0.0"
+          }
+        }
+      },
+      "MyAvaloniaManagement.PluginSdk.UI/3.3.0": {
+        "dependencies": {
+          "Avalonia": "12.1.0",
+          "Avalonia.Themes.Fluent": "12.1.0",
+          "Irihi.Ursa": "2.1.0",
+          "Irihi.Ursa.Themes.Semi": "2.1.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.10",
+          "MyAvaloniaManagement.PluginSdk": "3.3.0",
+          "Semi.Avalonia": "12.1.0"
+        },
+        "runtime": {
+          "lib/net10.0/MyAvaloniaManagement.PluginSdk.UI.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.3.0.0"
+          }
+        }
+      },
+      "Semi.Avalonia/12.1.0": {
+        "dependencies": {
+          "Avalonia": "12.1.0",
+          "Irihi.Avalonia.Shared": "0.4.0"
+        },
+        "runtime": {
+          "lib/net10.0/Semi.Avalonia.dll": {
+            "assemblyVersion": "12.1.0.0",
+            "fileVersion": "12.1.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ImageLabPlugin.Plugin/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Avalonia/12.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-an4ugAy2q6GTdaFl635V8W/LKrWNL+mnSFUprbgyf8m1Zzf9WgoGaF5ajGv5i4gXefMZrzsUPV1QU+kKrgwCWg==",
+      "path": "avalonia/12.1.0",
+      "hashPath": "avalonia.12.1.0.nupkg.sha512"
+    },
+    "Avalonia.Remote.Protocol/12.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-p6OKt6O7vOub4TS2pAjaeW0Y13oxrPs4uixeVZpJByiSQKKk+LyApN5yRy2JerpfTMtI86Y5pNwugyKTHZJnAw==",
+      "path": "avalonia.remote.protocol/12.1.0",
+      "hashPath": "avalonia.remote.protocol.12.1.0.nupkg.sha512"
+    },
+    "Avalonia.Themes.Fluent/12.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MVi5L9HymnNm+gP2aNXNcyrP2iKGJWFubQ5Bv8/Przflxca1aIT9QBpTUV6c3olA9rLYFY7MJRR/C/BZaUhemQ==",
+      "path": "avalonia.themes.fluent/12.1.0",
+      "hashPath": "avalonia.themes.fluent.12.1.0.nupkg.sha512"
+    },
+    "CommunityToolkit.Mvvm/8.4.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WadCzGEc2U+3e20avRLng4qNtt4zoOGWrdUISqJWrHe3/FSnrYjuM5Sb4yQb09LhkBXrrI4Zt3dLKgRMbItsrg==",
+      "path": "communitytoolkit.mvvm/8.4.2",
+      "hashPath": "communitytoolkit.mvvm.8.4.2.nupkg.sha512"
+    },
+    "Irihi.Avalonia.Shared/0.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-T6+jezCUjisJNz6zkNcNLVNI2ttWznbyQnW6MS9L45EXhePqRCIxB3xV/5L8gFAJ83JrhiCIokMOxRWdq9/1Zg==",
+      "path": "irihi.avalonia.shared/0.4.0",
+      "hashPath": "irihi.avalonia.shared.0.4.0.nupkg.sha512"
+    },
+    "Irihi.Avalonia.Shared.Contracts/0.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Du8DY2YqlSmCmywqZtuOhgwLkgklMeE1ajZ4Dd/iqVz6HmAKptjVTqA1oloZX5ihqsdKRiNuUGCdYPe1rekf2Q==",
+      "path": "irihi.avalonia.shared.contracts/0.4.0",
+      "hashPath": "irihi.avalonia.shared.contracts.0.4.0.nupkg.sha512"
+    },
+    "Irihi.Ursa/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-G2wAmenCgMZkBOqs5MYRtlurhU2tAKKmcNJzjjaA9Mj5v3YIivuv7wyNpIpgYZ602sOZhFtQwYrCaLVUhn9Htw==",
+      "path": "irihi.ursa/2.1.0",
+      "hashPath": "irihi.ursa.2.1.0.nupkg.sha512"
+    },
+    "Irihi.Ursa.Themes.Semi/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vz7iA6YcAqJ9Z34CXGtapsROERLjZ7vD1CqblO7V5NWQyrJ5igbAYSuFFWnZnPVFKkyKM/c43oGmcWjiDBLoHA==",
+      "path": "irihi.ursa.themes.semi/2.1.0",
+      "hashPath": "irihi.ursa.themes.semi.2.1.0.nupkg.sha512"
+    },
+    "MicroCom.Runtime/0.11.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NdNWGDiZ6eS/Mf/9+QHR91cj1K7Hy+PX9yrHI/zM7xFYuj9IWT2uxtB6sCHjrnxAeLV9fut1R6zHDUGKX6f9lQ==",
+      "path": "microcom.runtime/0.11.6",
+      "hashPath": "microcom.runtime.0.11.6.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.10": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-z/2xXlFw2aLGjHyEm6E0tQ+In6VfzQzTrtArbQ2c0TQE16ZbyDCMGPvaUT9I0s8rgy9sRWlU2P9waW37qV04qA==",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/10.0.10",
+      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512"
+    },
+    "MyAvaloniaManagement.PluginSdk/3.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-O8xzVypKP+ClPbn374SrHjT/5R5Xc1wPGGjY7HfKOegGwlQ++24fRy18C/UmwBzecBcMsAZHZzepZWHFm05i/Q==",
+      "path": "myavaloniamanagement.pluginsdk/3.3.0",
+      "hashPath": "myavaloniamanagement.pluginsdk.3.3.0.nupkg.sha512"
+    },
+    "MyAvaloniaManagement.PluginSdk.UI/3.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QnkATmnoYcftRsc24wd/wJzUltqW8ENpYZunLAPZnmwdfETeisZS5XCwxfbnFU/sbgp30kC8Jkdo/m0hUCaWAA==",
+      "path": "myavaloniamanagement.pluginsdk.ui/3.3.0",
+      "hashPath": "myavaloniamanagement.pluginsdk.ui.3.3.0.nupkg.sha512"
+    },
+    "Semi.Avalonia/12.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-me56M9qqcCTdYrsnf2vmd1xNF9gBN33PE3CXc9Gq1NPHO8fieZgFkmeqvaJnLMHg927UQyb7xmRSRf/ORAbv/w==",
+      "path": "semi.avalonia/12.1.0",
+      "hashPath": "semi.avalonia.12.1.0.nupkg.sha512"
+    }
+  }
+}

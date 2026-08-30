@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ManagedPlugin>true</ManagedPlugin>
+    <ManagedPluginId>myavalonia.plugin.image.lab</ManagedPluginId>
+    <ManagedPluginDirectoryName>ImageLabPlugin</ManagedPluginDirectoryName>
+    <PluginVersion>1.0.0</PluginVersion>
+    <ManagedPluginRuntimeIdentifier>win-x64</ManagedPluginRuntimeIdentifier>
+    <ManagedPluginEntryType>ImageLabPlugin.Plugin.ImageLabPluginModule</ManagedPluginEntryType>
+    <ManagedPluginSdkMinInclusive>3.3.0</ManagedPluginSdkMinInclusive>
+    <ManagedPluginSdkMaxExclusive>4.0.0</ManagedPluginSdkMaxExclusive>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="MyAvaloniaManagement.Plugin.Build" PrivateAssets="all" />
+    <PackageReference Include="MyAvaloniaManagement.PluginSdk" />
+    <PackageReference Include="MyAvaloniaManagement.PluginSdk.UI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ImageLabPlugin.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ImageLabPlugin.Standalone</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

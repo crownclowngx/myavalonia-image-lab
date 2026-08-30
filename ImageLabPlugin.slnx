@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ImageLabPlugin.Plugin/ImageLabPlugin.Plugin.csproj" />
+    <Project Path="src/ImageLabPlugin.Standalone/ImageLabPlugin.Standalone.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ImageLabPlugin.Tests/ImageLabPlugin.Tests.csproj" />
+  </Folder>
+</Solution>
