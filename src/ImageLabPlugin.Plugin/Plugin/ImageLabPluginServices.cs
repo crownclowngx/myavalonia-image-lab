@@ -12,6 +12,10 @@ using ImageLabPlugin.Infrastructure.Imaging;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Infrastructure.Ui;
 using ImageLabPlugin.Infrastructure.Watermarking;
+using ImageLabPlugin.Application.Robustness;
+using ImageLabPlugin.Domain.Robustness;
+using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Infrastructure.Robustness;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -47,6 +51,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IImageFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPayloadFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IComparisonReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IRobustnessReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ImageComparisonSummarySerializer>();
         services.AddSingleton<WatermarkFrameProtocol>();
@@ -63,6 +68,33 @@ public static class ImageLabPluginServices
         services.AddSingleton<IProjectImageDifferenceUseCase, ProjectImageDifferenceUseCase>();
         services.AddSingleton<IInspectImagePairUseCase, InspectImagePairUseCase>();
         services.AddSingleton<IExportComparisonSummaryUseCase, ExportComparisonSummaryUseCase>();
+        services.AddSingleton<RobustnessRecipeValidator>();
+        services.AddSingleton<RobustnessExperimentPlanner>();
+        services.AddSingleton<IImagePerturbationOperator, DeterministicPixelOperator>();
+        services.AddSingleton<IImagePerturbationOperator, GaussianNoiseOperator>();
+        services.AddSingleton<IImagePerturbationOperator, SaltPepperNoiseOperator>();
+        services.AddSingleton<IImagePerturbationOperator, BrightnessOperator>();
+        services.AddSingleton<IImagePerturbationOperator, ContrastOperator>();
+        services.AddSingleton<IImagePerturbationOperator, GammaOperator>();
+        services.AddSingleton<IImagePerturbationOperator, SaturationOperator>();
+        services.AddSingleton<IImagePerturbationOperator, ColorBiasOperator>();
+        services.AddSingleton<IImagePerturbationOperator, GaussianBlurOperator>();
+        services.AddSingleton<IImagePerturbationOperator, MedianBlurOperator>();
+        services.AddSingleton<IImagePerturbationOperator, UnsharpMaskOperator>();
+        services.AddSingleton<IImagePerturbationOperator, ScaleOperator>();
+        services.AddSingleton<IImagePerturbationOperator, CropOperator>();
+        services.AddSingleton<IImagePerturbationOperator, PadOperator>();
+        services.AddSingleton<IImagePerturbationOperator, TranslateOperator>();
+        services.AddSingleton<IImagePerturbationOperator, RotateOperator>();
+        services.AddSingleton<IImagePerturbationOperator, PerspectiveOperator>();
+        services.AddSingleton<IImagePerturbationOperator, JpegReencodeOperator>();
+        services.AddSingleton<PerturbationChainExecutor>();
+        services.AddSingleton<IWatermarkDiagnosticReader, WatermarkDiagnosticReader>();
+        services.AddSingleton<RobustnessReportSerializer>();
+        services.AddSingleton<IPrepareRobustnessBaselineUseCase, PrepareRobustnessBaselineUseCase>();
+        services.AddSingleton<IPlanRobustnessExperimentUseCase, PlanRobustnessExperimentUseCase>();
+        services.AddSingleton<IRunRobustnessExperimentUseCase, RunRobustnessExperimentUseCase>();
+        services.AddSingleton<IExportRobustnessReportUseCase, RobustnessReportExportUseCase>();
         return services;
     }
 }

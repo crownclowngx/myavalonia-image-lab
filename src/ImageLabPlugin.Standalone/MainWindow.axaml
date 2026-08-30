@@ -18,5 +18,8 @@
     <TabItem Header="图像比较实验室">
       <ContentControl x:Name="ComparePreview" />
     </TabItem>
+    <TabItem Header="鲁棒性实验室">
+      <ContentControl x:Name="RobustnessPreview" />
+    </TabItem>
   </TabControl>
 </Window>

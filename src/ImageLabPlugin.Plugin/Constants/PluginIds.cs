@@ -20,4 +20,8 @@ public static class PluginIds
     /// <summary>“图像比较实验室”多实例工作上下文的持久身份。</summary>
     public static readonly DocumentTypeId ImageCompareLabDocument =
         new("myavalonia.plugin.image.lab.document.image-compare-lab");
+
+    /// <summary>“鲁棒性实验室”多实例受控实验工作上下文的持久身份。</summary>
+    public static readonly DocumentTypeId RobustnessLabDocument =
+        new("myavalonia.plugin.image.lab.document.robustness-lab");
 }

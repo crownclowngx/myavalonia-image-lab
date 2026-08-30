@@ -7,6 +7,8 @@ namespace ImageLabPlugin.Infrastructure.Watermarking;
 
 internal sealed record HeaderReadResult(WatermarkFrameHeader Header, int CorrectedSymbols, double Confidence);
 internal sealed record DataReadResult(byte[] EncodedData, double Confidence);
+/// <summary>副本投票前后的只读物理判决；数组是诊断适配器的短生命周期私有值，不进入报告。</summary>
+internal sealed record PhysicalChannelRead(bool[] PhysicalBits, byte[] VotedBytes, double MeanConfidence, double P10Confidence);
 
 /// <summary>在 Y 通道的 8×8 DCT 中频系数上承载 V1 Frame。</summary>
 /// <remarks>
@@ -132,40 +134,21 @@ internal sealed class FrequencyWatermarkCarrier(
 
     public HeaderReadResult ReadHeader(PixelImage image, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(image);
-        var slots = CreateSlots(image);
-        if (slots.Count < ControlSlotCount)
-        {
-            throw new InvalidDataException("图片没有足够的载体槽位，无法包含 V1 Control Channel。");
-        }
+        var channel = ReadHeaderChannel(image, cancellationToken);
+        var header = frameProtocol.DecodeHeader(channel.VotedBytes, out var corrected);
+        return new HeaderReadResult(header, corrected, channel.MeanConfidence);
+    }
 
-        var indices = CreateControlIndices(slots.Count);
-        var encodedHeader = new byte[WatermarkFrameProtocol.EncodedHeaderLength];
-        var cache = new Dictionary<int, double[]>();
-        var luma = ColorSpaceConverter.ExtractLuma(image);
-        double confidenceSum = 0;
-        var bitCount = encodedHeader.Length * 8;
+    /// <summary>即使 Header 的 RS/CRC 最终失败，也保留可比较的控制信道物理读数。</summary>
+    public PhysicalChannelRead ReadHeaderChannel(PixelImage image, CancellationToken cancellationToken)
+    {
+        var original = CreateControlIndices(CreateSlotsChecked(image).Count);
+        var bitCount = WatermarkFrameProtocol.EncodedHeaderLength * 8;
+        var bitMajor = new int[original.Length];
         for (var bit = 0; bit < bitCount; bit++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            double score = 0;
-            double weight = 0;
             for (var copy = 0; copy < HeaderRedundancy; copy++)
-            {
-                var slot = slots[indices[(copy * bitCount) + bit]];
-                var decision = ReadSlot(image, luma, slot, HeaderQimStep, cache);
-                var decisionWeight = 0.25d + (0.75d * decision.Confidence);
-                score += decision.Bit ? decisionWeight : -decisionWeight;
-                weight += decisionWeight;
-                confidenceSum += decision.Confidence;
-            }
-
-            WriteBit(encodedHeader, bit, score >= 0);
-            _ = weight;
-        }
-
-        var header = frameProtocol.DecodeHeader(encodedHeader, out var corrected);
-        return new HeaderReadResult(header, corrected, confidenceSum / (bitCount * HeaderRedundancy));
+                bitMajor[(bit * HeaderRedundancy) + copy] = original[(copy * bitCount) + bit];
+        return ReadPhysicalChannel(image, bitMajor, HeaderRedundancy, WatermarkFrameProtocol.EncodedHeaderLength, HeaderQimStep, cancellationToken);
     }
 
     public DataReadResult ReadData(
@@ -191,29 +174,44 @@ internal sealed class FrequencyWatermarkCarrier(
             throw new InvalidDataException("Header 声明的数据长度超过图片实际载体容量。");
         }
 
-        var encodedData = new byte[header.EncodedLength];
-        var cache = new Dictionary<int, double[]>();
-        var luma = ColorSpaceConverter.ExtractLuma(image);
-        var cursor = 0;
-        double confidenceSum = 0;
-        for (var bit = 0; bit < encodedData.Length * 8; bit++)
+        var channel = ReadPhysicalChannel(image, indices[..requiredSlots], profile.DataRedundancy, header.EncodedLength, profile.DataQimStep, cancellationToken);
+        return new DataReadResult(channel.VotedBytes, channel.MeanConfidence);
+    }
+
+    public PhysicalChannelRead ReadDataChannel(PixelImage image, WatermarkFrameHeader header, ReadOnlySpan<byte> mappingKey, CancellationToken cancellationToken)
+    {
+        var slots = CreateSlotsChecked(image); var control = CreateControlIndices(slots.Count); var reserved = new bool[slots.Count];
+        foreach (var index in control) reserved[index] = true;
+        var profile = EmbeddingProfile.Resolve(header.Profile); var indices = CreateDataIndices(reserved, mappingKey);
+        var required = checked(header.EncodedLength * 8 * profile.DataRedundancy);
+        if (required > indices.Length) throw new InvalidDataException("Header 声明的数据长度超过图片实际载体容量。");
+        return ReadPhysicalChannel(image, indices[..required], profile.DataRedundancy, header.EncodedLength, profile.DataQimStep, cancellationToken);
+    }
+
+    private PhysicalChannelRead ReadPhysicalChannel(PixelImage image, ReadOnlySpan<int> indices, int redundancy, int byteLength, double step, CancellationToken token)
+    {
+        var slots = CreateSlotsChecked(image); var voted = new byte[byteLength]; var physical = new bool[checked(byteLength * 8 * redundancy)];
+        var confidences = new double[physical.Length]; var cache = new Dictionary<int, double[]>(); var luma = ColorSpaceConverter.ExtractLuma(image); var cursor = 0;
+        for (var bit = 0; bit < byteLength * 8; bit++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            double score = 0;
-            for (var copy = 0; copy < profile.DataRedundancy; copy++)
+            token.ThrowIfCancellationRequested(); double score = 0d;
+            for (var copy = 0; copy < redundancy; copy++)
             {
-                var decision = ReadSlot(image, luma, slots[indices[cursor++]], profile.DataQimStep, cache);
-                var weight = 0.25d + (0.75d * decision.Confidence);
-                score += decision.Bit ? weight : -weight;
-                confidenceSum += decision.Confidence;
+                var decision = ReadSlot(image, luma, slots[indices[cursor]], step, cache); physical[cursor] = decision.Bit; confidences[cursor] = decision.Confidence; cursor++;
+                var weight = 0.25d + (0.75d * decision.Confidence); score += decision.Bit ? weight : -weight;
             }
-
-            WriteBit(encodedData, bit, score >= 0);
+            WriteBit(voted, bit, score >= 0d);
         }
+        Array.Sort(confidences); var mean = confidences.Length == 0 ? 0d : confidences.Average();
+        var p10 = confidences.Length == 0 ? 0d : confidences[(int)Math.Floor((confidences.Length - 1) * 0.1d)];
+        return new PhysicalChannelRead(physical, voted, mean, p10);
+    }
 
-        return new DataReadResult(
-            encodedData,
-            confidenceSum / Math.Max(1, encodedData.Length * 8 * profile.DataRedundancy));
+    private static List<CarrierSlot> CreateSlotsChecked(PixelImage image)
+    {
+        ArgumentNullException.ThrowIfNull(image); var slots = CreateSlots(image);
+        if (slots.Count < ControlSlotCount) throw new InvalidDataException("图片没有足够的载体槽位，无法包含 V1 Control Channel。");
+        return slots;
     }
 
     private int FindMaximumProtectedLength(int physicalBytes)

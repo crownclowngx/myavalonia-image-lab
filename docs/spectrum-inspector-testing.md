@@ -17,8 +17,8 @@
 - DCT 常量块、IDCT 往返、频带分类、非完整边缘块以及调用层不得重复 `-128` 的回归。
 - 全通逐字节短路、DC-only 重建、虚部残差和 Alpha 保持。
 - schema 1 快照、非法参数回退、恢复不自动分析、Revision、Scope 隔离和迟到结果拒绝。
-- 四个真实 View 的 Headless 加载，以及正式 Avalonia PNG 编解码器驱动的分析—预览—重建闭环。
-- Module 只按固定顺序贡献四个 Persistable Document，零 Tool；算法 singleton、Document scoped。
+- 五个真实 View 的 Headless 加载，以及正式 Avalonia PNG 编解码器驱动的分析—预览—重建闭环。
+- Module 当前按固定顺序贡献五个 Persistable Document，零 Tool；算法 singleton、Document scoped。
 
 ## 本地命令
 

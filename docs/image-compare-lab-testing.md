@@ -12,7 +12,7 @@
 - Application 只有准备、投影、像素检查和摘要导出四个窄用例；图片、报告选择、剪贴板和原子写入按意图隔离。
 - Document 不执行完整像素扫描、编解码或 JSON 写入；每实例拥有独立 Session、generation、取消源和 Bitmap。
 - 无状态领域组件与用例登记 singleton，Document scoped，View transient；两个 Scope 的比较路径与 Session 互不影响。
-- Module 固定贡献四个 Persistable Document、零普通 Document、零 Tool；没有 AIFLOW、Workflow Action 或 Workbench Command。
+- Module 当前固定贡献五个 Persistable Document、零普通 Document、零 Tool；新增第五个鲁棒性实验室不改变比较实验室边界，且仍没有 AIFLOW、Workflow Action 或 Workbench Command。
 - 未新增第三方 NuGet、Windows CI 或发布流程。
 
 ## 数值与领域门禁

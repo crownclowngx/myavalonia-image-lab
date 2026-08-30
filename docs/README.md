@@ -38,7 +38,11 @@ Standalone 适合快速检查 AXAML、编译绑定、命令和插件自身对象
 
 1. [未来可能支持能力列表](future-capabilities.md)
 2. [V1 鲁棒性实验室实施计划](design/robustness-lab-v1-implementation-plan.md)
-3. [V1 图像比较实验室实施计划](design/image-compare-lab-v1-implementation-plan.md)
+3. [鲁棒性实验室用户指南](robustness-lab-user-guide.md)
+4. [鲁棒性实验室测试门禁](robustness-lab-testing.md)
+5. [鲁棒性报告 schema](design/robustness-lab-report-schema.md)
+6. [鲁棒性实验室 G0–G9 实施记录](plan-history/robustness-lab/README.md)
+7. [V1 图像比较实验室实施计划](design/image-compare-lab-v1-implementation-plan.md)
 4. [图像比较实验室用户指南](image-compare-lab-user-guide.md)
 5. [图像比较实验室测试门禁](image-compare-lab-testing.md)
 6. [图像比较实验室 G0–G7 实施记录](plan-history/image-compare-lab/README.md)
@@ -63,6 +67,6 @@ Standalone 适合快速检查 AXAML、编译绑定、命令和插件自身对象
 - 新增插件运行时 NuGet 包时，要同时更新根目录 `Directory.Packages.props`、Plugin 项目的
   `PackageReference` 和 `ManagedPluginPrivatePackage`；完整示例见部署文档。
 - 当前交付目标是 Windows x64；插件替换后必须完整重启 Host，不支持热更新。
-- 当前实现登记四个 Persistable Document；图像比较实验室是第四个多实例、可持久化工作上下文。
+- 当前实现登记五个 Persistable Document；鲁棒性实验室是第五个多实例、可持久化工作上下文。
 - 当前不登记 Tool、Workflow Action 或 Workbench Command，也不使用 AIFLOW。
 - 当前不执行 Windows CI、真实 Host、ZIP 和发布封板；这些结论不能由 Standalone 代替。

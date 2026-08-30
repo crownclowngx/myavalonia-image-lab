@@ -6,7 +6,7 @@ namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
 internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
-    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, ITextClipboard
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -62,6 +62,12 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
                 FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }]
             },
             cancellationToken);
+
+    public Task<string?> PickJsonOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出鲁棒性 JSON 报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }] }, cancellationToken);
+
+    public Task<string?> PickCsvOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出鲁棒性 CSV 案例表", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }] }, cancellationToken);
 
     public Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken) =>
         interaction.TrySetClipboardTextAsync(text, cancellationToken);

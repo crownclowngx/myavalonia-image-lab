@@ -34,7 +34,7 @@ ImageLab 的长期边界是：
 
 ## 当前能力基线
 
-当前 V1 已经提供四个 Persistable Document：“水印写入”“提取与验证”“频域分析器”和“图像比较实验室”。底层已经具备：
+当前 V1 已经提供五个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”和“鲁棒性实验室”。底层已经具备：
 
 - 自有 RGBA8888 `PixelImage` 与受限图像尺寸模型。
 - RGB 与 YCbCr 亮度投影和重建。
@@ -94,12 +94,12 @@ V1 已按独立[实施计划](design/image-compare-lab-v1-implementation-plan.md
 不做隐式缩放或对齐。局部 SSIM、MS-SSIM、Delta E、边缘/纹理指标和对齐继续留在独立后续设计中确定
 精度、性能和数据集门禁，不属于当前 V1。
 
-### 3. Robustness Lab／鲁棒性实验室
+### 3. Robustness Lab／鲁棒性实验室（V1 已实现）
 
 用于把水印算法放入可配置的图像扰动链中，测量水印在不同强度和不同处理顺序下的存活情况。它不只是一个
 “攻击按钮”，而应提供参数扫描、结果比较和失败原因解释。
 
-候选扰动算子：
+V1 已实现扰动算子：
 
 - JPEG 重编码及质量参数扫描。
 - 等比例和非等比例缩放。
@@ -110,7 +110,7 @@ V1 已按独立[实施计划](design/image-compare-lab-v1-implementation-plan.md
 - 亮度、对比度、Gamma、饱和度和色偏变化。
 - 多个扰动算子按顺序组合。
 
-候选结果：
+V1 已实现结果：
 
 - 是否检测到支持的水印。
 - Payload 是否完整恢复和完整性是否有效。
@@ -122,6 +122,11 @@ V1 已按独立[实施计划](design/image-compare-lab-v1-implementation-plan.md
 - 扰动链中首次发生不可恢复失败的位置。
 
 JPEG 在这里表示图像传输信道中的有损扰动，不表示 ImageLab 要发展为通用格式转换器。
+
+实现采用一个扫描轴、最多 12 步、101 点、20 trial、300 案例和 1,200 分步观察的受控模型；随机噪声使用
+SHA-256/SplitMix64-v1 稳定派生，正式水印仍使用密码学随机源。完整实现证据见 `docs/plan-history/robustness-lab/`。
+多参数网格、自动攻击搜索、外部已有水印图观察模式、隐藏几何配准、并行批处理和运行时第三方算子继续属于 V2 候选，
+不得以通用工作流或 AIFLOW 偷渡进 V1。
 
 ### 4. Image Fingerprint／感知指纹
 

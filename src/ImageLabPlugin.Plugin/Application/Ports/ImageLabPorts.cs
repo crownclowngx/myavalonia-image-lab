@@ -40,6 +40,13 @@ internal interface IComparisonReportFileDialog
     Task<string?> PickSummaryOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>鲁棒性报告的窄文件意图；JSON 与 CSV 分开选择，避免一个万能文件服务持续膨胀。</summary>
+internal interface IRobustnessReportFileDialog
+{
+    Task<string?> PickJsonOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>文本剪贴板窄端口；失败以 false 返回，Document 可以保留有效比较结果并提示重试。</summary>
 internal interface ITextClipboard
 {

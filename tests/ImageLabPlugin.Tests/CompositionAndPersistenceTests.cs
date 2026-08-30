@@ -5,6 +5,7 @@ using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
+using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -19,14 +20,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献四个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献五个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -50,12 +51,17 @@ public sealed class CompositionAndPersistenceTests
         var secondSpectrum = secondScope.ServiceProvider.GetRequiredService<SpectrumInspectorDocument>();
         var compare = firstScope.ServiceProvider.GetRequiredService<ImageCompareLabDocument>();
         var secondCompare = secondScope.ServiceProvider.GetRequiredService<ImageCompareLabDocument>();
+        var robustness = firstScope.ServiceProvider.GetRequiredService<RobustnessLabDocument>();
+        var secondRobustness = secondScope.ServiceProvider.GetRequiredService<RobustnessLabDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
         Assert.NotSame(first, spectrum);
         Assert.NotSame(spectrum, secondSpectrum);
         Assert.NotSame(compare, secondCompare);
+        Assert.NotSame(robustness, secondRobustness);
+        robustness.SourcePath = "scope-robustness-one";
+        Assert.Empty(secondRobustness.SourcePath);
         compare.ReferencePath = "scope-compare-one";
         Assert.Empty(secondCompare.ReferencePath);
         spectrum.SourcePath = "scope-spectrum-one";

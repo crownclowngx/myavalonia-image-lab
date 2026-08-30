@@ -18,6 +18,9 @@ using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
+using ImageLabPlugin.Features.RobustnessLab;
+using ImageLabPlugin.Domain.Robustness;
+using ImageLabPlugin.Infrastructure.Robustness;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -59,7 +62,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 四个真实Document视图与比较轻量控件可在Headless环境独立加载()
+    public void 五个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -67,6 +70,9 @@ public sealed class ImageCodecAndUseCaseTests
         var compareView = new ImageCompareLabView();
         var viewport = new ComparisonViewportControl();
         var histogram = new ComparisonHistogramControl();
+        var robustnessView = new RobustnessLabView();
+        var curve = new RobustnessCurveControl();
+        var matrix = new RobustnessMatrixControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -77,6 +83,9 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotSame(spectrumView.Content, compareView.Content);
         Assert.NotNull(viewport);
         Assert.NotNull(histogram);
+        Assert.NotNull(robustnessView.Content);
+        Assert.NotNull(curve);
+        Assert.NotNull(matrix);
     }
 
     [Fact]
@@ -99,6 +108,19 @@ public sealed class ImageCodecAndUseCaseTests
             Assert.InRange(Math.Abs(expected[i + 2] - actual[i + 2]), 0, 3);
             Assert.Equal(expected[i + 3], actual[i + 3]);
         }
+    }
+
+    [Fact]
+    public async Task 鲁棒性JpegStrategy使用正式Codec并阻断Alpha()
+    {
+        var operation = new JpegReencodeOperator(new AvaloniaImageCodec());
+        var key = new RobustnessCaseKey(EmbeddingProfileId.Robust, 0, 95m, 0);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => operation.ApplyAsync(
+            CreateTexturedImage(64, 48, includeAlpha: true), new JpegParameters(95), new(1, key, "jpeg", PerturbationKind.JpegReencode), default).AsTask());
+
+        var opaque = CreateTexturedImage(64, 48, includeAlpha: false);
+        var output = await operation.ApplyAsync(opaque, new JpegParameters(95), new(1, key, "jpeg", PerturbationKind.JpegReencode), default);
+        Assert.Equal(opaque.Size, output.Size); Assert.NotEqual(opaque.Rgba.ToArray(), output.Rgba.ToArray());
     }
 
     [Fact]

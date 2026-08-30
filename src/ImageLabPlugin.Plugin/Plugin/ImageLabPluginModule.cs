@@ -4,6 +4,7 @@ using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
+using ImageLabPlugin.Features.RobustnessLab;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -38,5 +39,11 @@ public sealed class ImageLabPluginModule : IPluginModule
                 "图像比较实验室",
                 "以同步视图、像素差异、客观指标和直方图比较两张同尺寸图片",
                 "图像分析"));
+        registration.AddPersistableDocument<RobustnessLabDocument, RobustnessLabView>(
+            new DocumentDescriptor(
+                PluginIds.RobustnessLabDocument,
+                "鲁棒性实验室",
+                "以可复现扰动链、参数扫描和分步诊断测量 ImageLab 水印的恢复边界",
+                "图像安全"));
     }
 }

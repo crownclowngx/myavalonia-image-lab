@@ -1,0 +1,84 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.RobustnessLab.RobustnessLabView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:ImageLabPlugin.Features.RobustnessLab"
+    xmlns:domain="clr-namespace:ImageLabPlugin.Domain.Robustness"
+    x:DataType="local:RobustnessLabDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBox PlaceholderText="原始载体图片路径" Text="{Binding SourcePath}" />
+      <Button Grid.Column="1" Content="选择图片" Command="{Binding SelectSourceCommand}" />
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="14">
+        <Grid ColumnDefinitions="2*,3*" ColumnSpacing="14" Margin="8">
+          <ScrollViewer>
+            <StackPanel Spacing="8">
+              <TextBlock Text="受控基线" FontWeight="SemiBold" />
+              <TextBox AcceptsReturn="True" MinHeight="80" PlaceholderText="实验 Payload（内联文本不会写入快照或报告）" Text="{Binding PayloadText}" />
+              <TextBox PasswordChar="●" PlaceholderText="密码（可选，不写入快照或报告）" Text="{Binding Password}" />
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <CheckBox Content="隐蔽" IsChecked="{Binding UseStealth}" />
+                <CheckBox Content="均衡" IsChecked="{Binding UseBalanced}" />
+                <CheckBox Content="鲁棒" IsChecked="{Binding UseRobust}" />
+              </StackPanel>
+              <TextBlock Text="扰动链（列表顺序就是执行顺序）" FontWeight="SemiBold" />
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <ComboBox Width="190" ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedKindId}" />
+                <Button Content="添加" Command="{Binding AddStepCommand}" />
+              </StackPanel>
+              <ListBox MinHeight="170" ItemsSource="{Binding Steps}" SelectedItem="{Binding SelectedStep}">
+                <ListBox.ItemTemplate><DataTemplate x:DataType="local:RobustnessStepItem"><StackPanel Orientation="Horizontal" Spacing="8"><CheckBox IsChecked="{Binding Enabled}" /><TextBlock Text="{Binding Summary}" TextWrapping="Wrap" /></StackPanel></DataTemplate></ListBox.ItemTemplate>
+              </ListBox>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Content="删除" Command="{Binding RemoveStepCommand}" CommandParameter="{Binding SelectedStep}" />
+                <Button Content="复制" Command="{Binding CopyStepCommand}" CommandParameter="{Binding SelectedStep}" />
+                <Button Content="上移" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedStep}" />
+                <Button Content="下移" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedStep}" />
+              </StackPanel>
+              <TextBlock Text="选中步骤与扫描参数" FontWeight="SemiBold" />
+              <ComboBox ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedStep.KindId}" />
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="6"><TextBox PlaceholderText="稳定参数 ID" Text="{Binding SelectedStep.ParameterId}" /><NumericUpDown Grid.Column="1" Value="{Binding SelectedStep.Value}" Increment="0.01" /></Grid>
+            </StackPanel>
+          </ScrollViewer>
+          <ScrollViewer Grid.Column="1">
+            <StackPanel Spacing="8">
+              <TextBlock Text="单参数扫描与资源预检" FontWeight="SemiBold" />
+              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                <NumericUpDown Value="{Binding ScanStart}" Increment="0.01" PlaceholderText="起点" />
+                <NumericUpDown Grid.Column="1" Value="{Binding ScanEnd}" Increment="0.01" PlaceholderText="终点" />
+                <NumericUpDown Grid.Column="2" Value="{Binding ScanStep}" Minimum="0.0001" Increment="0.01" PlaceholderText="步长" />
+              </Grid>
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="6"><NumericUpDown Minimum="1" Maximum="20" Value="{Binding TrialCount}" /><NumericUpDown Grid.Column="1" Value="{Binding ExperimentSeed}" /></Grid>
+              <CheckBox Content="逐步探针（定位第一次不可恢复观察位置）" IsChecked="{Binding ProbeEachStep}" />
+              <TextBlock Text="随机噪声使用 SHA-256/SplitMix64-v1 派生；不会复用水印密码学随机源。" TextWrapping="Wrap" Opacity="0.75" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="预检" Command="{Binding PreflightCommand}" />
+                <Button Content="运行" Command="{Binding RunCommand}" IsEnabled="{Binding !IsBusy}" />
+                <Button Content="取消" Command="{Binding CancelCommand}" IsEnabled="{Binding IsBusy}" />
+              </StackPanel>
+              <TextBlock Text="{Binding PreflightSummary}" TextWrapping="Wrap" />
+              <ProgressBar Minimum="0" Maximum="{Binding TotalCases}" Value="{Binding CompletedCases}" />
+              <TextBlock Text="指标语义" FontWeight="SemiBold" />
+              <TextBlock Text="成功要求正式提取、Payload 相等且完整性有效。Physical BER 位于副本投票前；Voted BER 位于 RS 前。尺寸变化时 PSNR/SSIM 为 N/A，不自动缩放或配准。" TextWrapping="Wrap" />
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+        <Grid Grid.Column="1" RowDefinitions="2*,*,Auto" Margin="8" RowSpacing="8">
+          <local:RobustnessCurveControl Points="{Binding CurvePoints}" MinHeight="180" />
+          <local:RobustnessMatrixControl Grid.Row="1" Points="{Binding CurvePoints}" MinHeight="100" />
+          <StackPanel Grid.Row="2" Spacing="6">
+            <TextBlock Text="等价数值表（图形不以颜色独占信息）" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding CurvePoints}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="domain:RobustnessCurvePoint"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Profile}" /><TextBlock Text="{Binding ScanValue}" /><TextBlock Text="{Binding SuccessRate}" /><TextBlock Text="{Binding CompletedTrials, StringFormat='n={0}'}" /></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            <TextBlock Text="{Binding ResultSummary}" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="导出 JSON" Command="{Binding ExportJsonCommand}" IsEnabled="{Binding HasResult}" /><Button Content="导出 CSV" Command="{Binding ExportCsvCommand}" IsEnabled="{Binding HasResult}" /></StackPanel>
+          </StackPanel>
+        </Grid>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" /><TextBlock Grid.Column="1" Text="{Binding CompletedCases, StringFormat='案例 {0}'}" /></Grid>
+    </Border>
+  </Grid>
+</UserControl>

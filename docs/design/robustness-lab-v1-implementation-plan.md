@@ -1,25 +1,25 @@
 # ImageLabPlugin V1 鲁棒性实验室实施计划
 
-> 计划状态：待实施；本文只冻结设计、实施顺序与开发门禁，不代表功能已经完成  
+> 计划状态：G0–G9 开发实现与本地自动门禁完成；真实 Host、ZIP、Windows CI 与发布封板按要求延期
 > 基线日期：2026-08-30  
 > 产品名称：Robustness Lab／鲁棒性实验室  
 > 技术基线：.NET 10、Avalonia 12、Managed Plugin SDK 3.3  
-> 当前自动基线：Debug 97/97 通过、零跳过  
+> 起始自动基线：Debug 97/97 通过、零跳过；完成证据：Debug/Release 120/120 通过、零跳过、零警告
 > 核心路线：受控水印基线 + 有序扰动链 + 单参数扫描 + 分步诊断 + Profile 横向比较 + 版本化实验报告  
 > 实施原则：SOLID 是首要约束；设计模式朴素使用；先冻结指标和随机性，再实现算子、诊断、用例、Document 与界面
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 待实施 | 冻结产品范围、术语、指标、随机性、资源和失败语义 | `docs/plan-history/robustness-lab/g0-product-and-metric-baseline.md` |
-| G1 | 待实施 | 建立实验配方、扫描计划、结果值对象和资源预算验证 | `docs/plan-history/robustness-lab/g1-experiment-domain.md` |
-| G2 | 待实施 | 完成确定性像素、噪声和颜色扰动算子 | `docs/plan-history/robustness-lab/g2-pixel-and-color-operators.md` |
-| G3 | 待实施 | 完成模糊、锐化和几何扰动算子 | `docs/plan-history/robustness-lab/g3-filter-and-geometry-operators.md` |
-| G4 | 待实施 | 完成 JPEG 信道和显式扰动链执行器 | `docs/plan-history/robustness-lab/g4-jpeg-and-chain-execution.md` |
-| G5 | 待实施 | 建立水印原始读数、BER、纠错和失败原因诊断 | `docs/plan-history/robustness-lab/g5-watermark-diagnostics.md` |
-| G6 | 待实施 | 完成扫描编排、分步探针、Profile 矩阵、质量指标和 Session | `docs/plan-history/robustness-lab/g6-experiment-use-cases.md` |
-| G7 | 待实施 | 完成 Persistable Document、取消、快照、导出和资源生命周期 | `docs/plan-history/robustness-lab/g7-document-lifecycle.md` |
-| G8 | 待实施 | 完成曲线、矩阵、分步解释和可访问界面 | `docs/plan-history/robustness-lab/g8-ui-and-explanation.md` |
-| G9 | 待实施 | 完成本地双配置门禁、专用文档与开发阶段封板 | `docs/plan-history/robustness-lab/g9-local-sealing.md` |
+| G0 | 完成 | 冻结产品范围、术语、指标、随机性、资源和失败语义 | `docs/plan-history/robustness-lab/g0-product-and-metric-baseline.md` |
+| G1 | 完成 | 建立实验配方、扫描计划、结果值对象和资源预算验证 | `docs/plan-history/robustness-lab/g1-experiment-domain.md` |
+| G2 | 完成 | 完成确定性像素、噪声和颜色扰动算子 | `docs/plan-history/robustness-lab/g2-pixel-and-color-operators.md` |
+| G3 | 完成 | 完成模糊、锐化和几何扰动算子 | `docs/plan-history/robustness-lab/g3-filter-and-geometry-operators.md` |
+| G4 | 完成 | 完成 JPEG 信道和显式扰动链执行器 | `docs/plan-history/robustness-lab/g4-jpeg-and-chain-execution.md` |
+| G5 | 完成 | 建立水印原始读数、BER、纠错和失败原因诊断 | `docs/plan-history/robustness-lab/g5-watermark-diagnostics.md` |
+| G6 | 完成 | 完成扫描编排、分步探针、Profile 矩阵、质量指标和 Session | `docs/plan-history/robustness-lab/g6-experiment-use-cases.md` |
+| G7 | 完成 | 完成 Persistable Document、取消、快照、导出和资源生命周期 | `docs/plan-history/robustness-lab/g7-document-lifecycle.md` |
+| G8 | 完成 | 完成曲线、矩阵、分步解释和可访问界面 | `docs/plan-history/robustness-lab/g8-ui-and-explanation.md` |
+| G9 | 完成（本地开发） | 完成本地双配置门禁、专用文档与开发阶段封板 | `docs/plan-history/robustness-lab/g9-local-sealing.md` |
 
 本文定义 ImageLab 在频域水印、频域分析器和图像比较实验室之后的下一个产品能力。它不是一个只有
 “攻击图片”按钮的演示页，而是一个可以复现实验配方、解释第一次失败位置、比较三种 Profile 并导出原始结果的
@@ -1226,41 +1226,41 @@ internal static ulong DeriveTrialSeed(...)
 
 ### 产品与实验语义
 
-- [ ] 受控基线未扰动时完整回读；
-- [ ] 一个参数轴、Profile 和 trial 维度清晰；
-- [ ] 所有候选算子有固定参数、单位、恒等值和边界；
-- [ ] 链顺序、分步探针和第一次失败语义可见；
-- [ ] JPEG 只作为有损信道，不提供格式转换产品入口；
-- [ ] N/A、失败、取消和未测量不会混淆。
+- [x] 受控基线未扰动时完整回读；
+- [x] 一个参数轴、Profile 和 trial 维度清晰；
+- [x] 所有候选算子有固定参数、单位、恒等值和边界；
+- [x] 链顺序、分步探针和第一次失败语义可见；
+- [x] JPEG 只作为有损信道，不提供格式转换产品入口；
+- [x] N/A、失败、取消和未测量不会混淆。
 
 ### SOLID 与生命周期
 
-- [ ] Domain、Application、Feature、Infrastructure 依赖方向正确；
-- [ ] 算子单责，Strategy 显式登记且没有反射/工厂堆叠；
-- [ ] Document 不执行算法、编解码、BER 或文件写入；
-- [ ] 两个 Scope、取消、generation、关闭和迟到结果安全；
-- [ ] Session 内存受控，敏感缓冲区及时清零；
-- [ ] 第五个 Persistable Document 身份和快照稳定。
+- [x] Domain、Application、Feature、Infrastructure 依赖方向正确；
+- [x] 算子单责，Strategy 显式登记且没有反射/工厂堆叠；
+- [x] Document 不执行算法、编解码、BER 或文件写入；
+- [x] 两个 Scope、取消、generation、关闭和迟到结果安全；
+- [x] Session 内存受控，敏感缓冲区及时清零；
+- [x] 第五个 Persistable Document 身份和快照稳定。
 
 ### 数值、诊断与资源
 
-- [ ] 随机派生可复现且不影响密码学随机性；
-- [ ] Physical BER、Voted BER、Header/Data RS 和置信度有 Golden Vector；
-- [ ] Profile 基线与正式提取器完全复用；
-- [ ] 两组质量与 16×16 局部网格语义准确；
-- [ ] 300 案例、1,200 分步观察、16M 像素上限在运行前验证；
-- [ ] 串行执行和中间图片释放有结构证据。
+- [x] 随机派生可复现且不影响密码学随机性；
+- [x] Physical BER、Voted BER、Header/Data RS 和置信度有 Golden Vector；
+- [x] Profile 基线与正式提取器完全复用；
+- [x] 两组质量与 16×16 局部网格语义准确；
+- [x] 300 案例、1,200 分步观察、16M 像素上限在运行前验证；
+- [x] 串行执行和中间图片释放有结构证据。
 
 ### 测试与文档
 
-- [ ] 现有 97 项起始回归不放宽，最终实际测试数已记录；
-- [ ] 算子、BER、聚合、Document、报告与 UI 的单元测试门禁齐全；
-- [ ] Debug/Release、locked restore 和 warn-as-error 本地门禁通过；
-- [ ] JSON/CSV、快照、隐私、Headless View 和组合根测试齐全；
-- [ ] 根 README、docs 索引、未来能力和公共边界已同步；
-- [ ] 用户指南、测试门禁、报告 schema 与 G0–G9 记录齐全；
-- [ ] 无 AIFLOW、Workflow Action、Workbench Command；
-- [ ] 无 Windows CI、ZIP、真实 Host 或发布完成声明。
+- [x] 现有 97 项起始回归不放宽，最终实际测试数已记录；
+- [x] 算子、BER、聚合、Document、报告与 UI 的单元测试门禁齐全；
+- [x] Debug/Release、locked restore 和 warn-as-error 本地门禁通过；
+- [x] JSON/CSV、快照、隐私、Headless View 和组合根测试齐全；
+- [x] 根 README、docs 索引、未来能力和公共边界已同步；
+- [x] 用户指南、测试门禁、报告 schema 与 G0–G9 记录齐全；
+- [x] 无 AIFLOW、Workflow Action、Workbench Command；
+- [x] 无 Windows CI、ZIP、真实 Host 或发布完成声明。
 
 只有以上开发项有实际证据后，状态才可写为“开发实现与本地自动门禁完成”。这仍不等于已经发布；发布阶段必须另行
 执行真实 Host、正式包、目标设备和授权语料门禁。
