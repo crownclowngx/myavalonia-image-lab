@@ -22,7 +22,7 @@ ImageLab 当前提供四项核心能力：频域隐式水印、频域分析器�
 - `mathematical-principles.md`：涉及的数学原理背景；
 - `history/`：实施阶段记录。
 
-公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)。
+公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；下一项“感知指纹”已有独立的 [V1 实施计划](design/image-fingerprint/implementation.md)，但当前尚未实现，不能按用户说明书使用。
 
 ## 项目与最短开发流程
 
