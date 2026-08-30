@@ -27,3 +27,7 @@ dotnet run --project src/ImageLabPlugin.Standalone
 频域分析器从 [V1 实施计划](docs/design/spectrum-inspector-v1-implementation-plan.md) 开始；使用方式和数值语义见
 [频域分析器用户指南](docs/spectrum-inspector-user-guide.md)，自动证据见
 [频域分析器测试门禁](docs/spectrum-inspector-testing.md)。
+
+下一个计划能力是“图像比较实验室”，当前只有独立的
+[V1 实施计划](docs/design/image-compare-lab-v1-implementation-plan.md)，尚未登记第四个 Document，也不应把计划内容
+描述为已实现功能。

@@ -37,18 +37,19 @@ Standalone 适合快速检查 AXAML、编译绑定、命令和插件自身对象
 ## 产品与开发文档
 
 1. [未来可能支持能力列表](future-capabilities.md)
-2. [V1 频域分析器实施计划](design/spectrum-inspector-v1-implementation-plan.md)
-3. [频域分析器用户指南](spectrum-inspector-user-guide.md)
-4. [频域分析器测试门禁](spectrum-inspector-testing.md)
-5. [频域分析器 G0–G7 实施记录](plan-history/spectrum-inspector/README.md)
-6. [V1 频域隐式水印实施计划](design/frequency-watermark-v1-implementation-plan.md)
-7. [公共图像领域边界](design/image-domain-boundaries.md)
-8. [V1 线格式、密码学与安全边界](design/frequency-watermark-v1-protocol.md)
-9. [水印用户使用说明](frequency-watermark-user-guide.md)
-10. [水印自动测试与质量门禁](frequency-watermark-testing.md)
-11. [水印 G0–G9 实施记录](plan-history/frequency-watermark/README.md)
-12. [项目、Host 与 Standalone 窗口职责](project-and-window-responsibilities.md)
-13. [临时部署、正式发布与验收](deployment-and-release.md)
+2. [V1 图像比较实验室实施计划](design/image-compare-lab-v1-implementation-plan.md)
+3. [V1 频域分析器实施计划](design/spectrum-inspector-v1-implementation-plan.md)
+4. [频域分析器用户指南](spectrum-inspector-user-guide.md)
+5. [频域分析器测试门禁](spectrum-inspector-testing.md)
+6. [频域分析器 G0–G7 实施记录](plan-history/spectrum-inspector/README.md)
+7. [V1 频域隐式水印实施计划](design/frequency-watermark-v1-implementation-plan.md)
+8. [公共图像领域边界](design/image-domain-boundaries.md)
+9. [V1 线格式、密码学与安全边界](design/frequency-watermark-v1-protocol.md)
+10. [水印用户使用说明](frequency-watermark-user-guide.md)
+11. [水印自动测试与质量门禁](frequency-watermark-testing.md)
+12. [水印 G0–G9 实施记录](plan-history/frequency-watermark/README.md)
+13. [项目、Host 与 Standalone 窗口职责](project-and-window-responsibilities.md)
+14. [临时部署、正式发布与验收](deployment-and-release.md)
 
 ## 开发前记住
 
@@ -58,5 +59,6 @@ Standalone 适合快速检查 AXAML、编译绑定、命令和插件自身对象
 - 新增插件运行时 NuGet 包时，要同时更新根目录 `Directory.Packages.props`、Plugin 项目的
   `PackageReference` 和 `ManagedPluginPrivatePackage`；完整示例见部署文档。
 - 当前交付目标是 Windows x64；插件替换后必须完整重启 Host，不支持热更新。
-- 当前登记三个 Persistable Document，不登记 Tool、Workflow Action 或 Workbench Command。
+- 当前实现登记三个 Persistable Document；图像比较实验室计划作为第四个 Persistable Document，尚未实现。
+- 当前不登记 Tool、Workflow Action 或 Workbench Command，也不使用 AIFLOW。
 - 当前不执行 Windows CI、真实 Host、ZIP 和发布封板；这些结论不能由 Standalone 代替。

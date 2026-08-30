@@ -74,7 +74,7 @@ V1 已实现能力：
 V1 实施证据见 `docs/plan-history/spectrum-inspector/`。后续扩展必须留在 Frequency Filter、Mask Editor、
 Periodic Noise Removal 等独立设计中，不能静默扩大 V1。
 
-### 2. Image Compare Lab／图像比较实验室
+### 2. Image Compare Lab／图像比较实验室（V1 已进入设计）
 
 用于比较两张尺寸相同或经过对齐的图像，既服务水印质量检查，也可成为所有图像处理实验的统一结果评估器。
 
@@ -92,7 +92,10 @@ Periodic Noise Removal 等独立设计中，不能静默扩大 V1。
 - 尺寸不同图像的显式对齐、缩放策略和可见警告。
 - 输出统一的比较摘要，供其他实验 Document 复用。
 
-第一阶段可以直接扩展现有 PSNR、SSIM 和差异投影；局部 SSIM、Delta E 和对齐应在独立设计中确定精度与性能。
+V1 已建立独立[实施计划](design/image-compare-lab-v1-implementation-plan.md)：先完成同尺寸双图的同步视觉比较、
+像素检查、固定量纲差异/热力图、PSNR、全局 SSIM、六通道直方图和统一摘要。尺寸不同只给出可见阻断，
+不做隐式缩放或对齐。局部 SSIM、MS-SSIM、Delta E、边缘/纹理指标和对齐继续留在独立后续设计中确定
+精度、性能和数据集门禁；“已进入设计”不表示生产功能已经实现。
 
 ### 3. Robustness Lab／鲁棒性实验室
 
