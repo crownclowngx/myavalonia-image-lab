@@ -1,0 +1,41 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.WatermarkInspect.WatermarkInspectView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.WatermarkInspect"
+    x:DataType="vm:WatermarkInspectDocument">
+  <Grid Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="12">
+    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+      <Button Command="{Binding SelectSourceCommand}" Content="选择图片" />
+      <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="PNG/JPEG 路径" />
+      <Button Grid.Column="2" Command="{Binding InspectCommand}" Content="检测" />
+      <Button Grid.Column="3" Command="{Binding ExtractCommand}" Content="提取并验证" />
+      <Button Grid.Column="4" Command="{Binding ExportPayloadCommand}" Content="导出 Payload" IsEnabled="{Binding HasRecoveredPayload}" />
+      <Button Grid.Column="5" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsBusy}" />
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12">
+      <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+        <Image Source="{Binding SourcePreview}" Stretch="Uniform" />
+      </Border>
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="10">
+          <TextBlock FontSize="20" FontWeight="SemiBold" Text="检测与验证" />
+          <TextBlock Text="{Binding DetectionSummary}" TextWrapping="Wrap" />
+          <TextBox PasswordChar="●" Text="{Binding Password}" PlaceholderText="密码不会写入 Document 快照" IsVisible="{Binding NeedsPassword}" />
+          <TextBlock FontWeight="SemiBold" Text="验证报告" />
+          <TextBlock Text="{Binding VerificationReport}" TextWrapping="Wrap" />
+          <TextBlock FontWeight="SemiBold" Text="Payload 预览" />
+          <TextBox AcceptsReturn="True" IsReadOnly="True" MinHeight="180" Text="{Binding PayloadPreview}" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding DetectionSummary}" TextWrapping="Wrap" />
+        <ProgressBar Grid.Column="1" Width="120" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

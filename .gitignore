@@ -1,0 +1,10 @@
+/src/ImageLabPlugin.Standalone/obj
+/tests/ImageLabPlugin.Tests/obj
+/src/ImageLabPlugin.Plugin/obj
+/src/ImageLabPlugin.Standalone/bin
+/tests/ImageLabPlugin.Tests/bin
+/src/ImageLabPlugin.Plugin/bin
+/src/ImageLabPlugin.Plugin/artifacts
+/.idea
+/.vs
+*.user
