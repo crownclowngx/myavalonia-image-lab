@@ -19,6 +19,10 @@
 3. 可选声明 Workbench Command 及其菜单位置，但不保存 Document 实例或执行回调；
 4. 把 Model 与 View 的对应关系交给 Host。
 
+`ImageLabPluginServices.AddImageLabPluginServices` 是唯一业务服务入口，但内部按公共基础、平台端口、水印、频域、
+图像比较、鲁棒性、感知指纹、位平面、LSB 和卷积十个边界拆分登记函数。该拆分只改善组合根可读性，
+不能把领域服务改成 Service Locator，也不能改变 singleton 算法与 scoped Document 的既有生命周期。
+
 Host 读取构建生成的 `plugin.manifest.json`，检查 Plugin SDK 兼容区间，加载唯一的 `IPluginModule`，再按
 登记结果创建 Document Scope、Tool singleton、View 和 Dock 适配对象。插件不应扫描 Host、直接操作
 Host 容器，或保存 `IPluginRegistration` 供运行时使用。

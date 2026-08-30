@@ -35,32 +35,34 @@ public static class ImageLabPluginServices
     public static IServiceCollection AddImageLabPluginServices(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
+
+        AddSharedDomainServices(services);
+        AddInfrastructurePorts(services);
+        AddWatermarkServices(services);
+        AddSpectrumServices(services);
+        AddImageComparisonServices(services);
+        AddRobustnessServices(services);
+        AddFingerprintServices(services);
+        AddBitPlaneServices(services);
+        AddLsbSteganographyServices(services);
+        AddConvolutionServices(services);
+        return services;
+    }
+
+    /// <summary>登记被多个产品领域复用的图像、DCT 与 FFT 数值基础。</summary>
+    private static void AddSharedDomainServices(IServiceCollection services)
+    {
         services.AddSingleton<Dct8x8Transform>();
         services.AddSingleton<LowFrequencyDctTransform>();
-        services.AddSingleton<FingerprintLumaNormalizer>();
-        services.AddSingleton<FingerprintDistanceCalculator>();
-        services.AddSingleton<FingerprintDecisionPolicy>();
-        services.AddSingleton<IImageFingerprintAlgorithm, AverageHashAlgorithm>();
-        services.AddSingleton<IImageFingerprintAlgorithm, DifferenceHashAlgorithm>();
-        services.AddSingleton<IImageFingerprintAlgorithm, PerceptualHashAlgorithm>();
-        services.AddSingleton<FrequencySpectrumProjector>();
         services.AddSingleton<ImageChannelConverter>();
         services.AddSingleton<ImageAnalysisProxyProjector>();
-        services.AddSingleton<ImagePairValidator>();
-        services.AddSingleton<FullReferenceQualityAnalyzer>();
-        services.AddSingleton<ImageHistogramAnalyzer>();
-        services.AddSingleton<ImageDifferenceProxyAnalyzer>();
-        services.AddSingleton<ImageDifferenceProxyProjector>();
-        services.AddSingleton<DifferenceHeatmapProjector>();
-        services.AddSingleton<ImagePairPixelInspector>();
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
-        services.AddSingleton<SpectrumProjector>();
-        services.AddSingleton<DctSpectrumProjector>();
-        services.AddSingleton<DctBlockAnalyzer>();
-        services.AddSingleton<RadialEnergyAnalyzer>();
-        services.AddSingleton<FrequencyBandMaskFactory>();
-        services.AddSingleton<ReedSolomonCodec>();
+    }
+
+    /// <summary>登记 Avalonia、文件系统和安全随机源等领域外端口。</summary>
+    private static void AddInfrastructurePorts(IServiceCollection services)
+    {
         services.AddSingleton<IRandomSource, CryptographicRandomSource>();
         services.AddSingleton<IImageCodec, AvaloniaImageCodec>();
         services.AddSingleton<IAtomicFileWriter, AtomicFileWriter>();
@@ -71,23 +73,56 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRobustnessReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IFingerprintReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ILsbReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
-        services.AddSingleton<ILsbPayloadFileReader, LsbPayloadFileReader>();
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
-        services.AddSingleton<ImageComparisonSummarySerializer>();
+    }
+
+    /// <summary>登记频域隐式水印协议、载体和四个应用用例。</summary>
+    private static void AddWatermarkServices(IServiceCollection services)
+    {
+        services.AddSingleton<ReedSolomonCodec>();
         services.AddSingleton<WatermarkFrameProtocol>();
         services.AddSingleton<FrequencyWatermarkCarrier>();
         services.AddSingleton<IEstimateWatermarkCapacityUseCase, EstimateWatermarkCapacityUseCase>();
         services.AddSingleton<IInspectWatermarkUseCase, InspectWatermarkUseCase>();
         services.AddSingleton<IExtractWatermarkUseCase, ExtractWatermarkUseCase>();
         services.AddSingleton<IEmbedWatermarkUseCase, EmbedWatermarkUseCase>();
+    }
+
+    /// <summary>登记全局 FFT、分块 DCT、频带分析和频谱投影用例。</summary>
+    private static void AddSpectrumServices(IServiceCollection services)
+    {
+        services.AddSingleton<FrequencySpectrumProjector>();
+        services.AddSingleton<SpectrumProjector>();
+        services.AddSingleton<DctSpectrumProjector>();
+        services.AddSingleton<DctBlockAnalyzer>();
+        services.AddSingleton<RadialEnergyAnalyzer>();
+        services.AddSingleton<FrequencyBandMaskFactory>();
         services.AddSingleton<IAnalyzeSpectrumUseCase, AnalyzeSpectrumUseCase>();
         services.AddSingleton<IInspectDctBlockUseCase, InspectDctBlockUseCase>();
         services.AddSingleton<IReconstructSpectrumBandUseCase, ReconstructSpectrumBandUseCase>();
         services.AddSingleton<IProjectSpectrumUseCase, ProjectSpectrumUseCase>();
+    }
+
+    /// <summary>登记同尺寸图像比较、差异投影、指标和摘要导出。</summary>
+    private static void AddImageComparisonServices(IServiceCollection services)
+    {
+        services.AddSingleton<ImagePairValidator>();
+        services.AddSingleton<FullReferenceQualityAnalyzer>();
+        services.AddSingleton<ImageHistogramAnalyzer>();
+        services.AddSingleton<ImageDifferenceProxyAnalyzer>();
+        services.AddSingleton<ImageDifferenceProxyProjector>();
+        services.AddSingleton<DifferenceHeatmapProjector>();
+        services.AddSingleton<ImagePairPixelInspector>();
+        services.AddSingleton<ImageComparisonSummarySerializer>();
         services.AddSingleton<IPrepareImageComparisonUseCase, PrepareImageComparisonUseCase>();
         services.AddSingleton<IProjectImageDifferenceUseCase, ProjectImageDifferenceUseCase>();
         services.AddSingleton<IInspectImagePairUseCase, InspectImagePairUseCase>();
         services.AddSingleton<IExportComparisonSummaryUseCase, ExportComparisonSummaryUseCase>();
+    }
+
+    /// <summary>登记受控扰动 Strategy、实验协调、诊断与报告用例。</summary>
+    private static void AddRobustnessServices(IServiceCollection services)
+    {
         services.AddSingleton<RobustnessRecipeValidator>();
         services.AddSingleton<RobustnessExperimentPlanner>();
         services.AddSingleton<IImagePerturbationOperator, DeterministicPixelOperator>();
@@ -115,12 +150,28 @@ public static class ImageLabPluginServices
         services.AddSingleton<IPlanRobustnessExperimentUseCase, PlanRobustnessExperimentUseCase>();
         services.AddSingleton<IRunRobustnessExperimentUseCase, RunRobustnessExperimentUseCase>();
         services.AddSingleton<IExportRobustnessReportUseCase, RobustnessReportExportUseCase>();
+    }
+
+    /// <summary>登记 aHash、dHash、pHash 及指纹比较与稳定性用例。</summary>
+    private static void AddFingerprintServices(IServiceCollection services)
+    {
+        services.AddSingleton<FingerprintLumaNormalizer>();
+        services.AddSingleton<FingerprintDistanceCalculator>();
+        services.AddSingleton<FingerprintDecisionPolicy>();
+        services.AddSingleton<IImageFingerprintAlgorithm, AverageHashAlgorithm>();
+        services.AddSingleton<IImageFingerprintAlgorithm, DifferenceHashAlgorithm>();
+        services.AddSingleton<IImageFingerprintAlgorithm, PerceptualHashAlgorithm>();
         services.AddSingleton<FingerprintReportSerializer>();
         services.AddSingleton<IPrepareFingerprintComparisonUseCase, PrepareFingerprintComparisonUseCase>();
         services.AddSingleton<IFingerprintStabilityChannel, FingerprintStabilityChannel>();
         services.AddSingleton<IRunFingerprintStabilityUseCase, RunFingerprintStabilityUseCase>();
         services.AddSingleton<IExportFingerprintReportUseCase, FingerprintReportExportUseCase>();
         services.AddSingleton<IFingerprintObservationProbe, FingerprintObservationProbe>();
+    }
+
+    /// <summary>登记位平面抽取、统计、投影、探针和 PNG 重建用例。</summary>
+    private static void AddBitPlaneServices(IServiceCollection services)
+    {
         services.AddSingleton<BitPlaneChannelExtractor>();
         services.AddSingleton<BitPlaneStatisticsAnalyzer>();
         services.AddSingleton<BitPlaneProjector>();
@@ -130,6 +181,12 @@ public static class ImageLabPluginServices
         services.AddSingleton<IAnalyzeBitPlaneChannelUseCase, AnalyzeBitPlaneChannelUseCase>();
         services.AddSingleton<IProjectBitPlaneViewUseCase, ProjectBitPlaneViewUseCase>();
         services.AddSingleton<IExportBitPlaneImageUseCase, ExportBitPlaneImageUseCase>();
+    }
+
+    /// <summary>登记独立 ILSB Frame、槽位策略、统计、脆弱性和导出用例。</summary>
+    private static void AddLsbSteganographyServices(IServiceCollection services)
+    {
+        services.AddSingleton<ILsbPayloadFileReader, LsbPayloadFileReader>();
         services.AddSingleton<LsbFrameCodec>();
         services.AddSingleton<LsbCapacityCalculator>();
         services.AddSingleton<ILsbSlotOrder, SequentialLsbSlotOrder>();
@@ -149,6 +206,11 @@ public static class ImageLabPluginServices
         services.AddSingleton<IExportLsbReportUseCase, ExportLsbReportUseCase>();
         services.AddSingleton<ILoadLsbPayloadUseCase, LoadLsbPayloadUseCase>();
         services.AddSingleton<IInspectLsbPixelUseCase, InspectLsbPixelUseCase>();
+    }
+
+    /// <summary>登记卷积核、空间执行、频响、解释及代理/完整尺寸用例。</summary>
+    private static void AddConvolutionServices(IServiceCollection services)
+    {
         // 卷积领域类均为无状态数学服务；Document/Session 才拥有每实例图片、结果和取消状态。
         services.AddSingleton<ConvolutionKernelParser>();
         services.AddSingleton<ConvolutionPresetFactory>();
@@ -164,6 +226,5 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRenderKernelResponseUseCase, RenderKernelResponseUseCase>();
         services.AddSingleton<IRenderFullConvolutionUseCase, RenderFullConvolutionUseCase>();
         services.AddSingleton<IExportConvolutionImageUseCase, ExportConvolutionImageUseCase>();
-        return services;
     }
 }
