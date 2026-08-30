@@ -8,6 +8,7 @@ using ImageLabPlugin.Infrastructure.Robustness;
 using ImageLabPlugin.Domain.Imaging;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;
+using System.Diagnostics;
 
 namespace ImageLabPlugin.Tests;
 
@@ -82,6 +83,28 @@ public sealed class RobustnessReportAndDocumentTests
         Assert.False(document.HasResult); Assert.Contains("配方已变化", document.StatusMessage, StringComparison.Ordinal); Assert.Throws<ObjectDisposedException>(baseline.ThrowIfDisposed);
     }
 
+    [Fact]
+    public async Task 同步CPU型用例不会阻塞运行命令且取消保持可交互()
+    {
+        var blocking = new BlockingPrepare(); using var document = CreateDocument(blocking);
+        await document.InitializeAsync(new NewDocumentActivation("background"), default); document.SourcePath = "source.png";
+
+        var stopwatch = Stopwatch.StartNew();
+        var operation = document.RunCommand.ExecuteAsync(null);
+        stopwatch.Stop();
+        await blocking.Started.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+        // ExecuteAsync 必须在同步用例完成前立即交还调用线程；否则 Avalonia Dispatcher 会被冻结。
+        Assert.True(stopwatch.Elapsed < TimeSpan.FromMilliseconds(500), $"运行命令返回耗时 {stopwatch.Elapsed}。");
+        Assert.True(document.IsBusy); Assert.True(document.IsPreparingBaseline); Assert.False(document.IsRecipeEditable);
+        Assert.Contains("后台", document.OperationStage, StringComparison.Ordinal);
+
+        document.CancelCommand.Execute(null);
+        await operation.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.False(document.IsBusy); Assert.False(document.IsPreparingBaseline); Assert.True(document.IsRecipeEditable);
+        Assert.Contains("取消", document.OperationStage, StringComparison.Ordinal);
+    }
+
     private static WatermarkDiagnosticResult Diagnostic(bool success) => new(success, success ? WatermarkDetectionStatus.RecoveredIntegrityValid : WatermarkDetectionStatus.UnrecoverableDamage,
         success ? IntegrityStatus.Valid : IntegrityStatus.Invalid, success, null, null, success ? RobustnessFailureReason.None : RobustnessFailureReason.DataUnrecoverable, "test");
 
@@ -94,6 +117,17 @@ public sealed class RobustnessReportAndDocumentTests
         public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public Task<RobustnessBaselineSession> ExecuteAsync(PrepareRobustnessBaselineRequest request, CancellationToken cancellationToken) { Started.TrySetResult(); return _completion.Task; }
         public void Complete(RobustnessBaselineSession session) => _completion.SetResult(session);
+    }
+    private sealed class BlockingPrepare : IPrepareRobustnessBaselineUseCase
+    {
+        public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public Task<RobustnessBaselineSession> ExecuteAsync(PrepareRobustnessBaselineRequest request, CancellationToken cancellationToken)
+        {
+            Started.TrySetResult();
+            cancellationToken.WaitHandle.WaitOne(TimeSpan.FromSeconds(5));
+            cancellationToken.ThrowIfCancellationRequested();
+            throw new InvalidOperationException("测试未请求取消。");
+        }
     }
     private sealed class NeverRun : IRunRobustnessExperimentUseCase { public Task<RobustnessExperimentSession> ExecuteAsync(RobustnessBaselineSession baseline, RobustnessExecutionPlan plan, IProgress<RobustnessProgress>? progress, CancellationToken cancellationToken) => throw new InvalidOperationException(); }
     private sealed class NeverExport : IExportRobustnessReportUseCase

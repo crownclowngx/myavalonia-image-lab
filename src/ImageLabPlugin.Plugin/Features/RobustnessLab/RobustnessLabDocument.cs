@@ -74,6 +74,8 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private int _completedCases;
     [ObservableProperty] private int _totalCases;
+    [ObservableProperty] private bool _isPreparingBaseline;
+    [ObservableProperty] private string _operationStage = "空闲";
     [ObservableProperty] private string _statusMessage = "请选择载体图片，输入 Payload，并配置扰动链。";
     [ObservableProperty] private string _preflightSummary = "尚未预检。";
     [ObservableProperty] private string _resultSummary = "运行完成后显示成功率、BER 与首次失败位置。";
@@ -84,6 +86,8 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     public DocumentPresentationState Presentation => _presentation;
     public bool IsDirty => _revision != _acceptedRevision;
     public bool HasResult => _session is not null;
+    /// <summary>后台实验运行时锁定配方编辑，但保留结果浏览和取消交互。</summary>
+    public bool IsRecipeEditable => !IsBusy;
     public event EventHandler? PresentationChanged;
     public event EventHandler? IsDirtyChanged;
 
@@ -106,7 +110,14 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     [RelayCommand] private void CopyStep(RobustnessStepItem? item) { if (item is null || Steps.Count >= RobustnessLimits.MaximumSteps) return; var index = Steps.IndexOf(item); Steps.Insert(index + 1, new(Guid.NewGuid().ToString("N"), item.KindId, item.Enabled, item.ParameterId, item.Value)); }
     [RelayCommand] private void MoveUp(RobustnessStepItem? item) { if (item is null) return; var index = Steps.IndexOf(item); if (index > 0) Steps.Move(index, index - 1); }
     [RelayCommand] private void MoveDown(RobustnessStepItem? item) { if (item is null) return; var index = Steps.IndexOf(item); if (index >= 0 && index < Steps.Count - 1) Steps.Move(index, index + 1); }
-    [RelayCommand] private void Cancel() => _cancellation?.Cancel();
+    [RelayCommand]
+    private void Cancel()
+    {
+        if (_cancellation is null) return;
+        OperationStage = "正在取消…";
+        StatusMessage = "已请求取消；当前算子会在下一个安全取消检查点停止。";
+        _cancellation.Cancel();
+    }
 
     [RelayCommand]
     private void Preflight()
@@ -118,17 +129,45 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     [RelayCommand]
     private async Task RunAsync()
     {
+        if (IsBusy) return;
         if (string.IsNullOrWhiteSpace(SourcePath)) { StatusMessage = "请先选择载体图片。"; return; }
         var generation = ++_generation; CancelAndDispose(); _cancellation = CancellationTokenSource.CreateLinkedTokenSource(_lifetime.ClosingToken); var current = _cancellation; var token = current.Token;
-        InvalidateResult(disposeBaseline: true); IsBusy = true; StatusMessage = "正在建立受控基线…";
+        InvalidateResult(disposeBaseline: true); IsBusy = true; IsPreparingBaseline = true;
+        OperationStage = "正在后台建立受控水印基线…";
+        StatusMessage = "正在建立受控基线；界面可继续浏览，配方在本轮完成前保持锁定。";
         try
         {
             var profiles = GetProfiles(); var recipe = BuildRecipe(); var plan = _plan.Execute(recipe, profiles); TotalCases = plan.Cases.Count; CompletedCases = 0;
-            var baseline = await _prepare.ExecuteAsync(new(SourcePath, Encoding.UTF8.GetBytes(PayloadText), PayloadContentType.Text, profiles, string.IsNullOrEmpty(Password) ? null : Password), token).ConfigureAwait(true);
+            var request = new PrepareRobustnessBaselineRequest(
+                SourcePath,
+                Encoding.UTF8.GetBytes(PayloadText),
+                PayloadContentType.Text,
+                profiles,
+                string.IsNullOrEmpty(Password) ? null : Password);
+            // 水印嵌入、DCT 和图片算子主要是同步 CPU 工作。即使用例返回 Task，直接调用仍会在第一个真正的
+            // 异步边界前占住 Avalonia UI 线程。这里把完整用例调度到线程池；Document 仍只负责编排和提交结果，
+            // 不执行任何像素循环，await 后再回到 UI 上下文更新绑定属性。
+            var baseline = await Task.Run(
+                () => _prepare.ExecuteAsync(request, token),
+                token).ConfigureAwait(true);
             if (!CanCommit(generation)) { baseline.Dispose(); return; }
-            _baseline = baseline; StatusMessage = "基线回读通过，正在串行执行扫描…";
-            var progress = new Progress<RobustnessProgress>(value => { if (generation == _generation) { CompletedCases = value.CompletedCases; TotalCases = value.TotalCases; } });
-            var session = await _run.ExecuteAsync(baseline, plan, progress, token).ConfigureAwait(true);
+            _baseline = baseline; IsPreparingBaseline = false;
+            OperationStage = $"正在后台执行案例 0/{plan.Cases.Count}…";
+            StatusMessage = "基线回读通过，正在后台串行执行扫描；可以查看界面或随时取消。";
+            // Progress 在 UI 线程创建，后台用例 Report 时会投递回当前 SynchronizationContext，避免工作线程
+            // 直接修改 Avalonia 绑定属性。
+            var progress = new Progress<RobustnessProgress>(value =>
+            {
+                if (generation != _generation) return;
+                CompletedCases = value.CompletedCases;
+                TotalCases = value.TotalCases;
+                OperationStage = value.CurrentCase is null
+                    ? $"正在汇总 {value.CompletedCases}/{value.TotalCases} 个案例…"
+                    : $"正在后台执行案例 {Math.Min(value.CompletedCases + 1, value.TotalCases)}/{value.TotalCases}：{value.CurrentCase}";
+            });
+            var session = await Task.Run(
+                () => _run.ExecuteAsync(baseline, plan, progress, token),
+                token).ConfigureAwait(true);
             if (!CanCommit(generation)) { session.Dispose(); return; }
             _session = session; CurvePoints = session.Report.Curves; OnPropertyChanged(nameof(HasResult));
             var successes = session.Report.Cases.Count(value => value.FinalDiagnostic?.Success == true); var firstFailures = session.Report.Cases.Count(value => value.FirstObservedUnrecoverableStep is not null);
@@ -136,10 +175,32 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
             StatusMessage = session.Report.IsComplete
                 ? "实验完成；结果只保存在当前 Document Session，可导出版本化 JSON/CSV。"
                 : "实验已取消；已完成案例保留为不完整报告，未完成 trial 未进入成功率分母。";
+            OperationStage = session.Report.IsComplete ? "已完成" : "已取消，已保留不完整结果";
         }
-        catch (OperationCanceledException) when (token.IsCancellationRequested) { if (!_lifetime.IsClosing && generation == _generation) StatusMessage = "实验已取消；未完成 trial 未进入成功率分母。"; }
-        catch (Exception exception) { if (generation == _generation) StatusMessage = $"实验失败：{exception.Message}"; }
-        finally { if (ReferenceEquals(_cancellation, current)) IsBusy = false; }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            if (!_lifetime.IsClosing && generation == _generation)
+            {
+                StatusMessage = "实验已取消；未完成 trial 未进入成功率分母。";
+                OperationStage = "已取消";
+            }
+        }
+        catch (Exception exception)
+        {
+            if (generation == _generation)
+            {
+                StatusMessage = $"实验失败：{exception.Message}";
+                OperationStage = "执行失败";
+            }
+        }
+        finally
+        {
+            if (ReferenceEquals(_cancellation, current))
+            {
+                IsPreparingBaseline = false;
+                IsBusy = false;
+            }
+        }
     }
 
     [RelayCommand] private async Task ExportJsonAsync() { var report = _session?.Report; if (report is null) return; var path = await _reports.PickJsonOutputAsync($"robustness-{report.RecipeHash}.json", _lifetime.ClosingToken); if (path is not null) { try { await _export.ExportJsonAsync(report, path, _lifetime.ClosingToken); StatusMessage = "JSON 报告已原子导出。"; } catch (Exception e) { StatusMessage = $"导出失败：{e.Message}"; } } }
@@ -157,6 +218,7 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     partial void OnSourcePathChanged(string value) => RecipeChanged(); partial void OnPayloadTextChanged(string value) => RecipeChanged(); partial void OnPasswordChanged(string value) => RecipeChanged();
     partial void OnUseStealthChanged(bool value) => RecipeChanged(); partial void OnUseBalancedChanged(bool value) => RecipeChanged(); partial void OnUseRobustChanged(bool value) => RecipeChanged();
     partial void OnScanStartChanged(decimal value) => RecipeChanged(); partial void OnScanEndChanged(decimal value) => RecipeChanged(); partial void OnScanStepChanged(decimal value) => RecipeChanged(); partial void OnTrialCountChanged(int value) => RecipeChanged(); partial void OnExperimentSeedChanged(long value) => RecipeChanged(); partial void OnProbeEachStepChanged(bool value) => RecipeChanged();
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(IsRecipeEditable));
 
     private RobustnessRecipe BuildRecipe()
     {
