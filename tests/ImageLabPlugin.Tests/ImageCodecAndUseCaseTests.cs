@@ -17,6 +17,7 @@ using MyAvaloniaManagement.PluginSdk;
 using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
+using ImageLabPlugin.Features.ImageCompareLab;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -58,17 +59,24 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 三个真实Document视图可在Headless环境独立加载()
+    public void 四个真实Document视图与比较轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
         var spectrumView = new SpectrumInspectorView();
+        var compareView = new ImageCompareLabView();
+        var viewport = new ComparisonViewportControl();
+        var histogram = new ComparisonHistogramControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
         Assert.NotSame(embedView.Content, inspectView.Content);
         Assert.NotNull(spectrumView.Content);
         Assert.NotSame(inspectView.Content, spectrumView.Content);
+        Assert.NotNull(compareView.Content);
+        Assert.NotSame(spectrumView.Content, compareView.Content);
+        Assert.NotNull(viewport);
+        Assert.NotNull(histogram);
     }
 
     [Fact]

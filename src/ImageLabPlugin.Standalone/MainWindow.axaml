@@ -15,5 +15,8 @@
     <TabItem Header="频域分析器">
       <ContentControl x:Name="SpectrumPreview" />
     </TabItem>
+    <TabItem Header="图像比较实验室">
+      <ContentControl x:Name="ComparePreview" />
+    </TabItem>
   </TabControl>
 </Window>

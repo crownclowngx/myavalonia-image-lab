@@ -16,4 +16,8 @@ public static class PluginIds
     /// <summary>“频域分析器”多实例工作上下文的持久身份。</summary>
     public static readonly DocumentTypeId SpectrumInspectorDocument =
         new("myavalonia.plugin.image.lab.document.spectrum-inspector");
+
+    /// <summary>“图像比较实验室”多实例工作上下文的持久身份。</summary>
+    public static readonly DocumentTypeId ImageCompareLabDocument =
+        new("myavalonia.plugin.image.lab.document.image-compare-lab");
 }

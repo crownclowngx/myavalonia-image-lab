@@ -34,7 +34,7 @@ ImageLab 的长期边界是：
 
 ## 当前能力基线
 
-当前 V1 已经提供三个 Persistable Document：“水印写入”“提取与验证”和“频域分析器”。底层已经具备：
+当前 V1 已经提供四个 Persistable Document：“水印写入”“提取与验证”“频域分析器”和“图像比较实验室”。底层已经具备：
 
 - 自有 RGBA8888 `PixelImage` 与受限图像尺寸模型。
 - RGB 与 YCbCr 亮度投影和重建。
@@ -74,28 +74,25 @@ V1 已实现能力：
 V1 实施证据见 `docs/plan-history/spectrum-inspector/`。后续扩展必须留在 Frequency Filter、Mask Editor、
 Periodic Noise Removal 等独立设计中，不能静默扩大 V1。
 
-### 2. Image Compare Lab／图像比较实验室（V1 已进入设计）
+### 2. Image Compare Lab／图像比较实验室（V1 已实现）
 
 用于比较两张尺寸相同或经过对齐的图像，既服务水印质量检查，也可成为所有图像处理实验的统一结果评估器。
 
-候选能力：
+V1 已实现能力：
 
 - 左右并排、拖动分割线、透明叠加和闪烁对比。
 - 像素级 RGB、亮度和绝对差异查看。
 - 可调放大倍数的差异图和伪彩色差异热力图。
-- PSNR、全局 SSIM 和局部 SSIM Map。
-- MS-SSIM 等多尺度结构相似度。
-- CIE Lab 空间中的 Delta E 2000 感知色差。
-- 边缘差异、梯度差异和纹理差异。
+- PSNR-Y、PSNR-RGB、全局 SSIM-Y 与 RGB/Alpha 误差统计。
 - RGB、亮度和色度直方图对比。
 - 鼠标悬停查看两张图对应像素及其数值变化。
-- 尺寸不同图像的显式对齐、缩放策略和可见警告。
+- 尺寸不同图像的结构化可见阻断，不执行隐式变换。
 - 输出统一的比较摘要，供其他实验 Document 复用。
 
-V1 已建立独立[实施计划](design/image-compare-lab-v1-implementation-plan.md)：先完成同尺寸双图的同步视觉比较、
+V1 已按独立[实施计划](design/image-compare-lab-v1-implementation-plan.md)完成同尺寸双图的同步视觉比较、
 像素检查、固定量纲差异/热力图、PSNR、全局 SSIM、六通道直方图和统一摘要。尺寸不同只给出可见阻断，
 不做隐式缩放或对齐。局部 SSIM、MS-SSIM、Delta E、边缘/纹理指标和对齐继续留在独立后续设计中确定
-精度、性能和数据集门禁；“已进入设计”不表示生产功能已经实现。
+精度、性能和数据集门禁，不属于当前 V1。
 
 ### 3. Robustness Lab／鲁棒性实验室
 

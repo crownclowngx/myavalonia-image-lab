@@ -2,7 +2,8 @@
 
 ## 当前证据
 
-基线日期：2026-08-30。当前测试总数为 **68**，Debug 与 Release 配置均为 68/68 通过，零跳过；
+频域分析器封板时基线为 68 项；仓库在图像比较实验室完成后的当前测试总数为 **97**，Debug 与 Release 配置均为
+97/97 通过，零跳过；
 `--locked-mode` restore 和两种配置的 `-warnaserror` build 均通过。Release 在这里仅表示本地编译配置回归，
 没有执行 ZIP、Windows CI、真实 Host 或任何发布门禁。
 
@@ -16,8 +17,8 @@
 - DCT 常量块、IDCT 往返、频带分类、非完整边缘块以及调用层不得重复 `-128` 的回归。
 - 全通逐字节短路、DC-only 重建、虚部残差和 Alpha 保持。
 - schema 1 快照、非法参数回退、恢复不自动分析、Revision、Scope 隔离和迟到结果拒绝。
-- 三个真实 View 的 Headless 加载，以及正式 Avalonia PNG 编解码器驱动的分析—预览—重建闭环。
-- Module 只按固定顺序贡献三个 Persistable Document，零 Tool；算法 singleton、Document scoped。
+- 四个真实 View 的 Headless 加载，以及正式 Avalonia PNG 编解码器驱动的分析—预览—重建闭环。
+- Module 只按固定顺序贡献四个 Persistable Document，零 Tool；算法 singleton、Document scoped。
 
 ## 本地命令
 

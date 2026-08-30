@@ -4,6 +4,7 @@ using ImageLabPlugin.Constants;
 using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;
 using ImageLabPlugin.Features.SpectrumInspector;
+using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -18,14 +19,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献三个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献四个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -47,11 +48,16 @@ public sealed class CompositionAndPersistenceTests
         var inspect = firstScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
         var spectrum = firstScope.ServiceProvider.GetRequiredService<SpectrumInspectorDocument>();
         var secondSpectrum = secondScope.ServiceProvider.GetRequiredService<SpectrumInspectorDocument>();
+        var compare = firstScope.ServiceProvider.GetRequiredService<ImageCompareLabDocument>();
+        var secondCompare = secondScope.ServiceProvider.GetRequiredService<ImageCompareLabDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
         Assert.NotSame(first, spectrum);
         Assert.NotSame(spectrum, secondSpectrum);
+        Assert.NotSame(compare, secondCompare);
+        compare.ReferencePath = "scope-compare-one";
+        Assert.Empty(secondCompare.ReferencePath);
         spectrum.SourcePath = "scope-spectrum-one";
         Assert.Empty(secondSpectrum.SourcePath);
         Assert.Same(

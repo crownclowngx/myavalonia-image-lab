@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
 using ImageLabPlugin.Application.SpectrumAnalysis;
+using ImageLabPlugin.Application.ImageComparison;
+using ImageLabPlugin.Domain.Comparison;
 using ImageLabPlugin.Domain.Frequency;
 using ImageLabPlugin.Domain.Imaging;
 using ImageLabPlugin.Infrastructure.Cryptography;
@@ -23,6 +25,13 @@ public static class ImageLabPluginServices
         services.AddSingleton<FrequencySpectrumProjector>();
         services.AddSingleton<ImageChannelConverter>();
         services.AddSingleton<ImageAnalysisProxyProjector>();
+        services.AddSingleton<ImagePairValidator>();
+        services.AddSingleton<FullReferenceQualityAnalyzer>();
+        services.AddSingleton<ImageHistogramAnalyzer>();
+        services.AddSingleton<ImageDifferenceProxyAnalyzer>();
+        services.AddSingleton<ImageDifferenceProxyProjector>();
+        services.AddSingleton<DifferenceHeatmapProjector>();
+        services.AddSingleton<ImagePairPixelInspector>();
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
         services.AddSingleton<SpectrumProjector>();
@@ -37,6 +46,9 @@ public static class ImageLabPluginServices
         services.AddSingleton<AvaloniaImageLabFileDialog>();
         services.AddSingleton<IImageFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPayloadFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IComparisonReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ImageComparisonSummarySerializer>();
         services.AddSingleton<WatermarkFrameProtocol>();
         services.AddSingleton<FrequencyWatermarkCarrier>();
         services.AddSingleton<IEstimateWatermarkCapacityUseCase, EstimateWatermarkCapacityUseCase>();
@@ -47,6 +59,10 @@ public static class ImageLabPluginServices
         services.AddSingleton<IInspectDctBlockUseCase, InspectDctBlockUseCase>();
         services.AddSingleton<IReconstructSpectrumBandUseCase, ReconstructSpectrumBandUseCase>();
         services.AddSingleton<IProjectSpectrumUseCase, ProjectSpectrumUseCase>();
+        services.AddSingleton<IPrepareImageComparisonUseCase, PrepareImageComparisonUseCase>();
+        services.AddSingleton<IProjectImageDifferenceUseCase, ProjectImageDifferenceUseCase>();
+        services.AddSingleton<IInspectImagePairUseCase, InspectImagePairUseCase>();
+        services.AddSingleton<IExportComparisonSummaryUseCase, ExportComparisonSummaryUseCase>();
         return services;
     }
 }

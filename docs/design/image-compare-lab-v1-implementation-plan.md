@@ -1,6 +1,6 @@
 # ImageLabPlugin V1 图像比较实验室实施计划
 
-> 计划状态：待实施；本文只冻结设计、实施顺序与门禁，不代表功能已经完成  
+> 计划状态：开发实现与本地自动门禁完成；人工/发布阶段延期
 > 基线日期：2026-08-30  
 > 产品名称：Image Compare Lab／图像比较实验室  
 > 技术基线：.NET 10、Avalonia 12、Managed Plugin SDK 3.3  
@@ -9,14 +9,14 @@
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 待开始 | 冻结 V1 产品范围、术语、指标、资源、持久化和失败语义 | `docs/plan-history/image-compare-lab/g0-product-and-numeric-baseline.md` |
-| G1 | 待开始 | 建立双图比较值对象，并把现有质量计算改造成低内存、可取消的公共基础 | `docs/plan-history/image-compare-lab/g1-comparison-domain-foundation.md` |
-| G2 | 待开始 | 完成像素检查、差异投影、伪彩色热力图和六通道直方图 | `docs/plan-history/image-compare-lab/g2-difference-and-histogram.md` |
-| G3 | 待开始 | 完成比较 Session、应用用例、统一摘要和 JSON 输出 | `docs/plan-history/image-compare-lab/g3-use-cases-and-summary.md` |
-| G4 | 待开始 | 完成 Persistable Document、取消、快照、迟到结果和资源生命周期 | `docs/plan-history/image-compare-lab/g4-document-lifecycle.md` |
-| G5 | 待开始 | 完成并排、分割、叠加、闪烁、同步缩放和悬停联动界面 | `docs/plan-history/image-compare-lab/g5-ui-and-interaction.md` |
-| G6 | 待开始 | 接入 Module、Standalone、Headless UI 和跨 Document 复用入口 | `docs/plan-history/image-compare-lab/g6-integration.md` |
-| G7 | 待开始 | 完成本地双配置门禁、专用文档、人工验收和开发阶段封板 | `docs/plan-history/image-compare-lab/g7-local-sealing.md` |
+| G0 | 已完成 | 冻结 V1 产品范围、术语、指标、资源、持久化和失败语义 | `docs/plan-history/image-compare-lab/g0-product-and-numeric-baseline.md` |
+| G1 | 已完成 | 建立双图比较值对象，并把现有质量计算改造成低内存、可取消的公共基础 | `docs/plan-history/image-compare-lab/g1-comparison-domain-foundation.md` |
+| G2 | 已完成 | 完成像素检查、差异投影、伪彩色热力图和六通道直方图 | `docs/plan-history/image-compare-lab/g2-difference-and-histogram.md` |
+| G3 | 已完成 | 完成比较 Session、应用用例、统一摘要和 JSON 输出 | `docs/plan-history/image-compare-lab/g3-use-cases-and-summary.md` |
+| G4 | 已完成 | 完成 Persistable Document、取消、快照、迟到结果和资源生命周期 | `docs/plan-history/image-compare-lab/g4-document-lifecycle.md` |
+| G5 | 已完成 | 完成并排、分割、叠加、闪烁、同步缩放和悬停联动界面 | `docs/plan-history/image-compare-lab/g5-ui-and-interaction.md` |
+| G6 | 已完成 | 接入 Module、Standalone、Headless UI 和跨 Document 复用入口 | `docs/plan-history/image-compare-lab/g6-integration.md` |
+| G7 | 自动门禁完成；人工验收延期 | 完成本地双配置门禁、专用文档、人工验收和开发阶段封板 | `docs/plan-history/image-compare-lab/g7-local-sealing.md` |
 
 本文定义 ImageLab 在“频域隐式水印”和“频域分析器”之后的第三个产品能力、第四个 Persistable Document。
 它不是图片编辑器，也不负责猜测两张不同尺寸图片应该怎样缩放或配准。V1 只对像素坐标一一对应的同尺寸图片
@@ -1122,41 +1122,41 @@ V1 只新增 Document 和摘要 schema，尚无旧 Image Compare Lab 快照或�
 
 ### 产品与交互
 
-- [ ] 第四个贡献是 Persistable Document，不是 singleton Tool；
-- [ ] 参考/待比较、交换和尺寸阻断语义清晰；
-- [ ] 并排、分割、叠加和闪烁对比可用；
-- [ ] 同步缩放、平移、准线和像素悬停准确；
-- [ ] RGB 差异、两种热力图和六通道直方图可用；
-- [ ] 摘要复制和原子 JSON 导出可用；
-- [ ] UI 不输出未经验证的通用质量等级或阈值。
+- [x] 第四个贡献是 Persistable Document，不是 singleton Tool；
+- [x] 参考/待比较、交换和尺寸阻断语义清晰；
+- [x] 并排、分割、叠加和闪烁对比可用；
+- [x] 同步缩放、平移、准线和像素悬停准确；
+- [x] RGB 差异、两种热力图和六通道直方图可用；
+- [x] 摘要复制和原子 JSON 导出可用；
+- [x] UI 不输出未经验证的通用质量等级或阈值。
 
 ### SOLID 与生命周期
 
-- [ ] Domain、Application、Feature、Infrastructure 依赖方向正确；
-- [ ] Document 不直接执行像素扫描、图片解码或 JSON 写入；
-- [ ] 领域类职责窄，没有万能 CompareService 或算法注册中心；
-- [ ] 文件、剪贴板和应用用例接口满足接口隔离；
-- [ ] 多 Scope 状态完全隔离；
-- [ ] Session、投影和 Bitmap 所有权明确；
-- [ ] 取消、关闭、防抖、闪烁停止和迟到结果保护有测试；
-- [ ] 快照不包含大对象，恢复不自动比较。
+- [x] Domain、Application、Feature、Infrastructure 依赖方向正确；
+- [x] Document 不直接执行像素扫描、图片解码或 JSON 写入；
+- [x] 领域类职责窄，没有万能 CompareService 或算法注册中心；
+- [x] 文件、剪贴板和应用用例接口满足接口隔离；
+- [x] 多 Scope 状态完全隔离；
+- [x] Session、投影和 Bitmap 所有权明确；
+- [x] 取消、关闭、防抖、闪烁停止和迟到结果保护有测试；
+- [x] 快照不包含大对象，恢复不自动比较。
 
 ### 数值与资源
 
-- [ ] PSNR-Y、PSNR-RGB、全局 SSIM-Y 和误差公式有 Golden Vector；
-- [ ] Alpha、透明 RGB、颜色公式和变化符号有门禁；
-- [ ] 质量计算不再分配两份全尺寸亮度数组；
-- [ ] 两张全图、两张显示代理、一份基础差异场和当前投影不突破结构预算；
-- [ ] 热力图固定量纲、颜色表和饱和提示正确；
-- [ ] 六通道直方图每个计数总和守恒；
-- [ ] 尺寸不同不会产生伪指标或隐式变换。
+- [x] PSNR-Y、PSNR-RGB、全局 SSIM-Y 和误差公式有 Golden Vector；
+- [x] Alpha、透明 RGB、颜色公式和变化符号有门禁；
+- [x] 质量计算不再分配两份全尺寸亮度数组；
+- [x] 两张全图、两张显示代理、一份基础差异场和当前投影不突破结构预算；
+- [x] 热力图固定量纲、颜色表和饱和提示正确；
+- [x] 六通道直方图每个计数总和守恒；
+- [x] 尺寸不同不会产生伪指标或隐式变换。
 
 ### 测试与文档
 
-- [ ] 现有 68 个测试全部保持通过；
-- [ ] 新增 Domain、投影、用例、Document、UI、组合和 JSON 测试；
-- [ ] Debug/Release 本地门禁通过；
-- [ ] 用户指南、测试门禁、文档索引、公共领域边界和未来能力已同步；
-- [ ] G0–G7 记录包含真实数据、偏差、风险和回滚；
-- [ ] 文档没有宣称已执行真实 Host、ZIP、Windows CI 或正式发布封板；
-- [ ] 局部 SSIM、MS-SSIM、Delta E、边缘/纹理和对齐仍处于独立后续设计，不混入 V1。
+- [x] 现有 68 个测试全部保持通过；
+- [x] 新增 Domain、投影、用例、Document、UI、组合和 JSON 测试；
+- [x] Debug/Release 本地门禁通过；
+- [x] 用户指南、测试门禁、文档索引、公共领域边界和未来能力已同步；
+- [x] G0–G7 记录包含真实数据、偏差、风险和回滚；
+- [x] 文档没有宣称已执行真实 Host、ZIP、Windows CI 或正式发布封板；
+- [x] 局部 SSIM、MS-SSIM、Delta E、边缘/纹理和对齐仍处于独立后续设计，不混入 V1。

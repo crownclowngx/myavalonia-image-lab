@@ -34,6 +34,18 @@ internal interface IPayloadFileDialog
     Task<string?> PickPayloadExportAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>只表达“选择比较摘要输出位置”的意图，避免比较功能依赖图片或 Payload 保存选项。</summary>
+internal interface IComparisonReportFileDialog
+{
+    Task<string?> PickSummaryOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
+/// <summary>文本剪贴板窄端口；失败以 false 返回，Document 可以保留有效比较结果并提示重试。</summary>
+internal interface ITextClipboard
+{
+    Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken);
+}
+
 internal interface IRandomSource
 {
     void Fill(Span<byte> destination);

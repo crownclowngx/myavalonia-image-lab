@@ -5,7 +5,8 @@ using MyAvaloniaManagement.PluginSdk.UI;
 namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
-internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) : IImageFileDialog, IPayloadFileDialog
+internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -51,4 +52,17 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
                 SuggestedFileName = suggestedName
             },
             cancellationToken);
+
+    public Task<string?> PickSummaryOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "导出图像比较摘要",
+                SuggestedFileName = suggestedName,
+                FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }]
+            },
+            cancellationToken);
+
+    public Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken) =>
+        interaction.TrySetClipboardTextAsync(text, cancellationToken);
 }

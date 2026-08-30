@@ -1,0 +1,113 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.ImageCompareLab.ImageCompareLabView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.ImageCompareLab"
+    x:DataType="vm:ImageCompareLabDocument">
+  <Grid Margin="12" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+    <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
+      <Button Command="{Binding SelectReferenceCommand}" Content="选择参考图" ToolTip.Tip="选择 PNG/JPEG 参考图" />
+      <TextBox Grid.Column="1" Text="{Binding ReferencePath}" PlaceholderText="参考图 PNG/JPEG 路径" />
+      <Button Grid.Column="2" Command="{Binding SelectCandidateCommand}" Content="选择待比较图" ToolTip.Tip="选择 PNG/JPEG 待比较图" />
+      <TextBox Grid.Column="3" Text="{Binding CandidatePath}" PlaceholderText="待比较图 PNG/JPEG 路径" />
+      <Button Grid.Column="4" Command="{Binding SwapCommand}" Content="交换" ToolTip.Tip="交换参考/待比较角色并重新比较" />
+      <Button Grid.Column="5" Command="{Binding CompareCommand}" Content="比较" />
+      <Button Grid.Column="6" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsBusy}" />
+      <Button Grid.Column="7" Command="{Binding CopySummaryCommand}" Content="复制摘要" IsEnabled="{Binding HasSummary}" />
+      <Button Grid.Column="8" Command="{Binding ExportSummaryCommand}" Content="导出 JSON" IsEnabled="{Binding HasSummary}" />
+    </Grid>
+
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock VerticalAlignment="Center" Text="模式" />
+        <ComboBox Width="110" ItemsSource="{Binding ModeOptions}" SelectedItem="{Binding SelectedMode}" IsEnabled="{Binding HasSession}" />
+        <Button Command="{Binding FitViewportCommand}" Content="适应" />
+        <Button Command="{Binding ActualPixelsCommand}" Content="100%" ToolTip.Tip="代理像素 1:1" />
+        <Button Command="{Binding ZoomOutCommand}" Content="−" />
+        <Button Command="{Binding ZoomInCommand}" Content="+" />
+        <TextBlock VerticalAlignment="Center" Text="中心 X/Y" />
+        <NumericUpDown Width="76" Minimum="0" Maximum="1" Increment="0.05" Value="{Binding ViewportCenterX}" />
+        <NumericUpDown Width="76" Minimum="0" Maximum="1" Increment="0.05" Value="{Binding ViewportCenterY}" />
+        <TextBlock VerticalAlignment="Center" Text="分割" />
+        <Slider Width="90" Minimum="0" Maximum="1" Value="{Binding SplitRatio}" />
+        <TextBlock VerticalAlignment="Center" Text="叠加" />
+        <Slider Width="90" Minimum="0" Maximum="1" Value="{Binding OverlayOpacity}" />
+        <TextBlock VerticalAlignment="Center" Text="闪烁 ms" />
+        <NumericUpDown Width="88" Minimum="250" Maximum="2000" Increment="50" Value="{Binding BlinkIntervalMilliseconds}" />
+        <CheckBox Content="暂停闪烁" IsChecked="{Binding IsBlinkPaused}" />
+        <TextBlock VerticalAlignment="Center" Text="差异倍率" />
+        <ComboBox Width="70" ItemsSource="{Binding AmplificationOptions}" SelectedItem="{Binding DifferenceAmplification}" />
+        <ComboBox Width="92" ItemsSource="{Binding HeatmapSourceOptions}" SelectedItem="{Binding SelectedHeatmapSource}" />
+      </StackPanel>
+    </ScrollViewer>
+
+    <Grid Grid.Row="2" ColumnDefinitions="3*,240" ColumnSpacing="8">
+      <Grid RowDefinitions="3*,Auto,2*" RowSpacing="6">
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <vm:ComparisonViewportControl x:Name="Viewport"
+              AutomationProperties.Name="同步图像比较视口"
+              ReferenceImage="{Binding ReferencePreview}"
+              CandidateImage="{Binding CandidatePreview}"
+              ProjectionImage="{Binding ProjectionPreview}"
+              Mode="{Binding DisplayMode}"
+              SplitRatio="{Binding SplitRatio}"
+              OverlayOpacity="{Binding OverlayOpacity}"
+              Zoom="{Binding Zoom}"
+              CenterX="{Binding ViewportCenterX}"
+              CenterY="{Binding ViewportCenterY}"
+              ShowCandidateBlinkFrame="{Binding ShowCandidateBlinkFrame}"
+              ShowCrosshair="{Binding ShowCrosshair}"
+              SelectedX="{Binding SelectedProxyX}"
+              SelectedY="{Binding SelectedProxyY}"
+              PointerPressed="OnViewportPointerPressed"
+              PointerMoved="OnViewportPointerMoved"
+              PointerReleased="OnViewportPointerReleased"
+              PointerWheelChanged="OnViewportPointerWheelChanged" />
+        </Border>
+        <TextBlock Grid.Row="1" Text="蓝线：参考图；橙线：待比较图。直方图只描述边际分布，不证明空间结构相同。" TextWrapping="Wrap" Opacity="0.8" />
+        <Border Grid.Row="2" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+          <Grid RowDefinitions="Auto,*">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock VerticalAlignment="Center" Text="六通道直方图" FontWeight="SemiBold" />
+              <ComboBox Width="70" ItemsSource="{Binding HistogramChannelOptions}" SelectedItem="{Binding SelectedHistogramChannel}" />
+              <CheckBox Content="log10(count+1)" IsChecked="{Binding UseLogarithmicHistogram}" />
+            </StackPanel>
+            <vm:ComparisonHistogramControl Grid.Row="1" MinHeight="110"
+                AutomationProperties.Name="参考图与待比较图六通道直方图"
+                ReferenceBins="{Binding ReferenceHistogramBins}"
+                CandidateBins="{Binding CandidateHistogramBins}"
+                UseLogarithmicScale="{Binding UseLogarithmicHistogram}" />
+          </Grid>
+        </Border>
+      </Grid>
+
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="7">
+          <TextBlock FontSize="18" FontWeight="SemiBold" Text="比较摘要" />
+          <TextBlock Text="完整像素指标" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding MetricsSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="投影解释" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding ProjectionSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="像素对（Δ=待比较−参考）" FontWeight="SemiBold" />
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <NumericUpDown Width="82" Minimum="0" Value="{Binding SelectedSourceX}" />
+            <NumericUpDown Width="82" Minimum="0" Value="{Binding SelectedSourceY}" />
+            <Button Command="{Binding InspectPixelCommand}" Content="检查" IsEnabled="{Binding HasSession}" />
+          </StackPanel>
+          <CheckBox Content="显示像素准线" IsChecked="{Binding ShowCrosshair}" />
+          <TextBlock Text="{Binding PixelSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="透明像素仍按未预乘 RGB 参与颜色指标；Alpha 单独报告。" TextWrapping="Wrap" Opacity="0.75" />
+          <TextBlock Text="闪烁可能引起视觉不适，默认暂停，间隔下限 250 ms。" TextWrapping="Wrap" Opacity="0.75" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="3" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="2*,3*,Auto" ColumnSpacing="10">
+        <TextBlock Text="{Binding SizeSummary}" TextWrapping="Wrap" />
+        <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+        <ProgressBar Grid.Column="2" Width="120" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>
