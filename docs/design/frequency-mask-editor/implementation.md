@@ -4,7 +4,7 @@
 > 基线日期：2026-08-31<br>
 > 技术基线：.NET 10、Avalonia 12、Managed Plugin SDK 3.3<br>
 > 起始证据：G0 实跑 locked restore 成功，Debug/Release warn-as-error build 均 0 警告、0 错误，两配置 test 均 362/362 通过、0 失败、0 跳过<br>
-> 完成证据：G9 实跑 Debug/Release build 均 0 警告、0 错误，两配置 test 均 407/407 通过、0 失败、0 跳过；`git diff --check` 通过<br>
+> 完成证据：G9 实跑 Debug/Release build 均 0 警告、0 错误，两配置 test 均 408/408 通过、0 失败、0 跳过；`git diff --check` 通过<br>
 > 核心路线：有界分析代理 + 共享 FFT Session + 实数共轭对称增益遮罩 + 可重放编辑配方 + 防抖 IFFT + 空间域重建与解释性诊断<br>
 > 首要规定：SOLID 优先；设计模式朴素使用；生产代码使用详细中文注释；数值、资源和生命周期门禁先于 UI
 
@@ -1018,6 +1018,7 @@ Standalone 可以证明真实 Module/DI/View、编译绑定、主要交互、取
 | --- | --- |
 | 单边写入导致复数残差 | 共轭写入唯一入口、导入只重放 Recipe、执行前全网格验证、IFFT `1E-8` 硬门禁 |
 | Pointer 事件频率改变结果 | 固定路径插值、stamp 内去重、gesture 结束后形成单操作 Golden |
+| 释放 capture 同步清空待提交手势 | 手势状态先冻结独立快照再释放 capture，capture-lost 顺序回归用例覆盖 |
 | 2048² 历史内存爆炸 | 操作记录重放、点数/JSON 上限、不保存 mask snapshot |
 | 快速绘制导致 UI 卡顿 | 即时轻量预览、节流 IFFT、单活动任务、取消和最后 generation 获胜 |
 | 共享核心重构破坏 Frequency Filter | G1 前补 Golden、保留适配入口、完整 362 基线回归、失败整体回滚 |

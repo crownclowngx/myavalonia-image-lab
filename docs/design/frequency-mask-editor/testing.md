@@ -13,7 +13,7 @@ dotnet test tests/ImageLabPlugin.Tests/ImageLabPlugin.Tests.csproj -c Release --
 git diff --check
 ```
 
-Debug/Release 均为 407/407 通过、0 失败、0 跳过；两配置构建 0 警告、0 错误。相对 G0 新增 45 个 runner 用例。
+Debug/Release 均为 408/408 通过、0 失败、0 跳过；两配置构建 0 警告、0 错误。相对 G0 新增 46 个 runner 用例。
 
 ## 已证明
 
@@ -25,6 +25,7 @@ Debug/Release 均为 407/407 通过、0 失败、0 跳过；两配置构建 0 �
 - 六通道回写与 Alpha、质量诊断、探针、完整尺寸和 stale 导出；
 - 一次解码、Session dispose、原子端口、轻量快照和两个 Scope 隔离；
 - 第十二个稳定 Document、零 Tool、Headless View/Canvas、letterbox 映射；
+- 手势完成会在释放 Pointer capture 前冻结独立路径，即使释放同步触发 capture-lost 取消回调，已绘制路径仍会完整提交；
 - Domain/Document 依赖扫描、中文设计注释、产品 NuGet 白名单、无 AIFLOW/Windows CI/发布配置。
 
 ## 没有证明

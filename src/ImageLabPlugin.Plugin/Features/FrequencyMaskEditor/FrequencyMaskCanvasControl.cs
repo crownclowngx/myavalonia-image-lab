@@ -18,14 +18,57 @@ internal sealed class FrequencyMaskHoverEventArgs(double x, double y) : EventArg
     public double Y { get; } = y;
 }
 
+/// <summary>管理一次指针拖动手势的临时路径与生命周期。</summary>
+/// <remarks>
+/// 画布只负责把 Avalonia 指针事件翻译为调用；该对象保证“冻结结果—清理状态—释放 capture”的固定顺序。
+/// 这个顺序不能交给事件调用者自行拼装，因为释放 capture 可能同步触发取消回调。
+/// </remarks>
+internal sealed class FrequencyMaskGestureState
+{
+    private readonly List<NormalizedFrequencyPoint> _points = [];
+
+    public bool IsActive { get; private set; }
+    public IReadOnlyList<NormalizedFrequencyPoint> Points => _points;
+
+    public void Begin(NormalizedFrequencyPoint point)
+    {
+        _points.Clear();
+        _points.Add(point);
+        IsActive = true;
+    }
+
+    public void Append(NormalizedFrequencyPoint point)
+    {
+        if (IsActive && _points.Count < FrequencyMaskOperation.MaximumStrokePoints)
+            _points.Add(point);
+    }
+
+    /// <summary>先保存不受后续回调影响的路径快照，再释放指针 capture。</summary>
+    public IReadOnlyList<NormalizedFrequencyPoint> Complete(Action releaseCapture)
+    {
+        ArgumentNullException.ThrowIfNull(releaseCapture);
+        if (!IsActive) return Array.Empty<NormalizedFrequencyPoint>();
+
+        var completed = _points.ToArray();
+        Cancel();
+        releaseCapture();
+        return completed;
+    }
+
+    public void Cancel()
+    {
+        IsActive = false;
+        _points.Clear();
+    }
+}
+
 /// <summary>绘制频谱和遮罩覆盖层，并仅转发归一化指针意图。</summary>
 /// <remarks>
 /// 控件不知道 FFT 自然索引、共轭公式、增益数组和历史；letterbox、DPI 与 Pointer capture 是它唯一负责的边界。
 /// </remarks>
 internal sealed class FrequencyMaskCanvasControl : Control
 {
-    private readonly List<NormalizedFrequencyPoint> _gesture = [];
-    private bool _dragging;
+    private readonly FrequencyMaskGestureState _gesture = new();
 
     public static readonly StyledProperty<Bitmap?> SpectrumProperty =
         AvaloniaProperty.Register<FrequencyMaskCanvasControl, Bitmap?>(nameof(Spectrum));
@@ -81,9 +124,7 @@ internal sealed class FrequencyMaskCanvasControl : Control
     {
         base.OnPointerPressed(e);
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed || !TryMap(e.GetPosition(this), out var point)) return;
-        _gesture.Clear();
-        _gesture.Add(point);
-        _dragging = true;
+        _gesture.Begin(point);
         InvalidateVisual();
         e.Pointer.Capture(this);
         e.Handled = true;
@@ -94,10 +135,10 @@ internal sealed class FrequencyMaskCanvasControl : Control
         base.OnPointerMoved(e);
         if (!TryMap(e.GetPosition(this), out var point)) return;
         Hovered?.Invoke(this, new FrequencyMaskHoverEventArgs(point.X, point.Y));
-        if (!_dragging || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
-        var previous = _gesture[^1];
+        if (!_gesture.IsActive || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
+        var previous = _gesture.Points[^1];
         if (Math.Sqrt(Math.Pow(point.X - previous.X, 2d) + Math.Pow(point.Y - previous.Y, 2d)) < 0.0005d) return;
-        if (_gesture.Count < FrequencyMaskOperation.MaximumStrokePoints) _gesture.Add(point);
+        _gesture.Append(point);
         InvalidateVisual();
         e.Handled = true;
     }
@@ -105,22 +146,22 @@ internal sealed class FrequencyMaskCanvasControl : Control
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
-        if (!_dragging) return;
-        if (TryMap(e.GetPosition(this), out var point) && _gesture[^1] != point && _gesture.Count < FrequencyMaskOperation.MaximumStrokePoints)
-            _gesture.Add(point);
-        _dragging = false;
-        e.Pointer.Capture(null);
-        GestureCompleted?.Invoke(this, new FrequencyMaskGestureEventArgs(_gesture.ToArray()));
-        _gesture.Clear();
+        if (!_gesture.IsActive) return;
+        if (TryMap(e.GetPosition(this), out var point) && _gesture.Points[^1] != point)
+            _gesture.Append(point);
+
+        // Complete 在内部先冻结路径，再执行 capture 释放；即使同步进入
+        // OnPointerCaptureLost 并再次取消状态，已返回的独立快照也不会丢失。
+        var completedGesture = _gesture.Complete(() => e.Pointer.Capture(null));
         InvalidateVisual();
+        GestureCompleted?.Invoke(this, new FrequencyMaskGestureEventArgs(completedGesture));
         e.Handled = true;
     }
 
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
     {
         base.OnPointerCaptureLost(e);
-        _dragging = false;
-        _gesture.Clear();
+        _gesture.Cancel();
         InvalidateVisual();
     }
 
@@ -135,13 +176,13 @@ internal sealed class FrequencyMaskCanvasControl : Control
 
     private void DrawGesturePreview(DrawingContext context, Rect destination)
     {
-        if (_gesture.Count == 0) return;
+        if (_gesture.Points.Count == 0) return;
         var pen = new Pen(Brushes.Orange, 2d);
-        var previous = ToCanvas(destination, _gesture[0]);
+        var previous = ToCanvas(destination, _gesture.Points[0]);
         context.DrawEllipse(null, pen, previous, 3d, 3d);
-        for (var i = 1; i < _gesture.Count; i++)
+        for (var i = 1; i < _gesture.Points.Count; i++)
         {
-            var current = ToCanvas(destination, _gesture[i]);
+            var current = ToCanvas(destination, _gesture.Points[i]);
             context.DrawLine(pen, previous, current);
             previous = current;
         }

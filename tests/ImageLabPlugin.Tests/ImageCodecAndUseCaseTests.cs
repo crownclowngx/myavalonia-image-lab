@@ -169,6 +169,31 @@ public sealed class ImageCodecAndUseCaseTests
     }
 
     [Fact]
+    public void 频谱遮罩手势在capture丢失回调前冻结完整路径()
+    {
+        var state = new FrequencyMaskGestureState();
+        var start = new NormalizedFrequencyPoint(0.2d, 0.4d);
+        var middle = new NormalizedFrequencyPoint(0.5d, 0.4d);
+        var end = new NormalizedFrequencyPoint(0.8d, 0.4d);
+        state.Begin(start);
+        state.Append(middle);
+        state.Append(end);
+
+        var releaseWasCalled = false;
+        var completed = state.Complete(() =>
+        {
+            releaseWasCalled = true;
+            // 模拟 e.Pointer.Capture(null) 同步触发 OnPointerCaptureLost。
+            state.Cancel();
+        });
+
+        Assert.True(releaseWasCalled);
+        Assert.Equal([start, middle, end], completed);
+        Assert.False(state.IsActive);
+        Assert.Empty(state.Points);
+    }
+
+    [Fact]
     public async Task Lsb使用正式Png编解码完成真实双重回读且Jpeg预设返回Ber()
     {
         var codec = new AvaloniaImageCodec();

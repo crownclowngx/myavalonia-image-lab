@@ -11,6 +11,6 @@
 | [G6](g6-document-and-composition.md) | Document、快照、Scope、稳定 ID 与取消 |
 | [G7](g7-canvas-and-view.md) | 画布、手势预览、双探针与 Headless View |
 | [G8](g8-documentation-and-review.md) | 专用文档、索引与 SOLID 审查 |
-| [G9](g9-local-gates.md) | 407/407 双配置本地门禁 |
+| [G9](g9-local-gates.md) | 408/408 双配置本地门禁 |
 
 这些记录是本地开发证据，不是发布记录。

@@ -232,7 +232,7 @@ Convolution Playground 的 raw double 空间卷积，提供标准径向响应、
 
 V1 已按[专用实现与证据入口](design/frequency-mask-editor/README.md)完成并登记为第十二个多实例 Persistable Document：
 使用实数 `[0,1]` 增益、不可关闭的共轭安全写入、有界操作记录、512/1024/2048 分析代理、防抖 IFFT、
-六通道重建、严格配方 JSON 和双频点探针。Debug/Release 为 407/407、零跳过，构建零警告/零错误；
+六通道重建、严格配方 JSON 和双频点探针。Debug/Release 为 408/408、零跳过，构建零警告/零错误；
 不使用 AIFLOW，未新增 Windows CI，也未执行发布门禁。
 
 ### 11. Periodic Noise Removal／周期噪声与陷波器
