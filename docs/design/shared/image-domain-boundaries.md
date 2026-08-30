@@ -54,11 +54,20 @@ Domain/Fingerprinting
 Domain/Frequency
   OrthogonalDctBasis             不决定中心化语义的正交 DCT 数值基元
   LowFrequencyDctTransform       32×32 输入的左上 8×8 低频 DCT
+
+Domain/Checksums
+  Crc32                          协议中立 IEEE CRC-32 数值原语；不承担认证
+
+Domain/Steganography
+  LsbFrameCodec                  独立 ILSB Frame 与结构化读取状态
+  LsbSlotLayout/ILsbSlotOrder    Alpha=255、RGB 顺序与两个朴素 Strategy
+  LsbEmbedding/Extraction        不变输入 replacement 与严格回读
+  LsbStatisticsAnalyzer          Scope、位分布、PoV 卡方和方向邻接
 ```
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。六个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。八个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -76,6 +85,8 @@ Domain/Frequency
 - 鲁棒性算子永不原地修改输入；随机算子从案例稳定事实派生子种子，不能使用 `Random.Shared` 或水印安全随机源。
 - 指纹 Session 长期只持有两张完整图和两张 1024 代理；算法 singleton 不缓存图片或矩阵。稳定性最多 21 点串行执行，只保留当前样本预览。
 - 缩放/裁剪/补边改变尺寸后，全参考质量明确为 `N/A/SizeMismatch`；平移、固定画布旋转和透视按同坐标质量统计，不做隐藏配准。
+- LSB 只把 Alpha=255 像素作为 R/G/B 槽位；输入不原地修改，Frame/位置/统计属于独立 Steganography 领域，不复用 DCT 水印 Frame 或 Carrier。
+- LSB Session 由单个 scoped Document 独占，释放时清零 Frame；位置图和 bit 图最大边 1024，受控扰动每次从同一 stego 基线开始。
 
 ## 扩展规则
 

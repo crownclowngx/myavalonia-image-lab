@@ -7,6 +7,7 @@ using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
+using ImageLabPlugin.Features.LsbSteganographyLab;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -59,5 +60,11 @@ public sealed class ImageLabPluginModule : IPluginModule
                 "位平面观察器",
                 "拆分 R、G、B、Alpha 或 Y 的 8 个位平面并观察掩码重建结果",
                 "图像分析"));
+        registration.AddPersistableDocument<LsbSteganographyLabDocument, LsbSteganographyLabView>(
+            new DocumentDescriptor(
+                PluginIds.LsbSteganographyLabDocument,
+                "LSB 隐写与统计实验",
+                "以像素低位写入、位置可视化、统计对比和受控扰动观察 LSB 隐写的可检测性与脆弱性",
+                "图像安全"));
     }
 }

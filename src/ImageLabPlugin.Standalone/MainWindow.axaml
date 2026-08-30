@@ -27,5 +27,8 @@
     <TabItem Header="位平面观察器">
       <ContentControl x:Name="BitPlanePreview" />
     </TabItem>
+    <TabItem Header="LSB 隐写与统计实验">
+      <ContentControl x:Name="LsbPreview" />
+    </TabItem>
   </TabControl>
 </Window>

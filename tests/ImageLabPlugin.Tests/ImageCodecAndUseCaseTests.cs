@@ -25,6 +25,11 @@ using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Application.BitPlanes;
 using ImageLabPlugin.Domain.BitPlanes;
+using ImageLabPlugin.Application.LsbSteganography;
+using ImageLabPlugin.Domain.Steganography;
+using ImageLabPlugin.Domain.Comparison;
+using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Features.LsbSteganographyLab;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -66,7 +71,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 七个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 八个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -82,6 +87,7 @@ public sealed class ImageCodecAndUseCaseTests
         var fingerprintCurve = new FingerprintStabilityControl();
         var bitPlaneView = new BitPlaneViewerView();
         var bitPlanePreview = new BitPlanePreviewControl();
+        var lsbView = new LsbSteganographyLabView();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -100,6 +106,32 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(fingerprintCurve);
         Assert.NotNull(bitPlaneView.Content);
         Assert.NotNull(bitPlanePreview);
+        Assert.NotNull(lsbView.Content);
+        Assert.NotSame(bitPlaneView.Content, lsbView.Content);
+    }
+
+    [Fact]
+    public async Task Lsb使用正式Png编解码完成真实双重回读且Jpeg预设返回Ber()
+    {
+        var codec = new AvaloniaImageCodec();
+        var source = CreateTexturedImage(40, 40, includeAlpha: false);
+        var session = new LsbExperimentSession("memory.png", source, new LsbSlotLayout(source));
+        var recipe = new LsbRecipe(LsbChannelStrategy.RgbRoundRobin, 0, LsbPlacementKind.PseudoRandom, 20260830);
+        ILsbSlotOrder[] orders = [new SequentialLsbSlotOrder(), new PseudoRandomLsbSlotOrder()];
+        using var payload = LsbPayload.FromText("真实 PNG 回读");
+        var embed = new EmbedAndAnalyzeLsbUseCase(new LsbFrameCodec(), new LsbCapacityCalculator(), new LsbEmbeddingEngine(orders),
+            new LsbExtractionEngine(new LsbFrameCodec(), orders), new LsbStatisticsAnalyzer(), new LsbPreviewProjector(), codec);
+
+        var result = await embed.ExecuteAsync(session, payload, recipe, LsbStatisticsScope.EligibleImage, CancellationToken.None);
+        var fragility = new RunLsbFragilityUseCase([new JpegReencodeOperator(codec)], new LsbExtractionEngine(new LsbFrameCodec(), orders),
+            new FullReferenceQualityAnalyzer(new ImagePairValidator()));
+        var attacked = await fragility.ExecuteAsync(session, LsbFragilityPreset.Jpeg95, CancellationToken.None);
+
+        Assert.Equal(LsbReadStatus.Success, result.SelfCheck.Status);
+        Assert.True(session.HasVerifiedStego);
+        Assert.Equal(source.Size, attacked.Image.Size);
+        Assert.True(attacked.FrameBer.ComparedBits > 0);
+        Assert.NotNull(attacked.PsnrRgbDb);
     }
 
     [Fact]

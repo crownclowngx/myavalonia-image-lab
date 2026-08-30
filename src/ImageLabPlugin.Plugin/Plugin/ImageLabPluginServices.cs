@@ -21,6 +21,9 @@ using ImageLabPlugin.Domain.Fingerprinting;
 using ImageLabPlugin.Infrastructure.Fingerprinting;
 using ImageLabPlugin.Application.BitPlanes;
 using ImageLabPlugin.Domain.BitPlanes;
+using ImageLabPlugin.Application.LsbSteganography;
+using ImageLabPlugin.Domain.Steganography;
+using ImageLabPlugin.Infrastructure.Steganography;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -65,6 +68,8 @@ public static class ImageLabPluginServices
         services.AddSingleton<IComparisonReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IRobustnessReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IFingerprintReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ILsbReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ILsbPayloadFileReader, LsbPayloadFileReader>();
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ImageComparisonSummarySerializer>();
         services.AddSingleton<WatermarkFrameProtocol>();
@@ -123,6 +128,25 @@ public static class ImageLabPluginServices
         services.AddSingleton<IAnalyzeBitPlaneChannelUseCase, AnalyzeBitPlaneChannelUseCase>();
         services.AddSingleton<IProjectBitPlaneViewUseCase, ProjectBitPlaneViewUseCase>();
         services.AddSingleton<IExportBitPlaneImageUseCase, ExportBitPlaneImageUseCase>();
+        services.AddSingleton<LsbFrameCodec>();
+        services.AddSingleton<LsbCapacityCalculator>();
+        services.AddSingleton<ILsbSlotOrder, SequentialLsbSlotOrder>();
+        services.AddSingleton<ILsbSlotOrder, PseudoRandomLsbSlotOrder>();
+        services.AddSingleton<LsbEmbeddingEngine>();
+        services.AddSingleton<LsbExtractionEngine>();
+        services.AddSingleton<LsbStatisticsAnalyzer>();
+        services.AddSingleton<LsbPreviewProjector>();
+        services.AddSingleton<LsbPixelInspector>();
+        services.AddSingleton<LsbExperimentReportSerializer>();
+        services.AddSingleton<IPrepareLsbExperimentUseCase, PrepareLsbExperimentUseCase>();
+        services.AddSingleton<IEstimateLsbCapacityUseCase, EstimateLsbCapacityUseCase>();
+        services.AddSingleton<IEmbedAndAnalyzeLsbUseCase, EmbedAndAnalyzeLsbUseCase>();
+        services.AddSingleton<IExtractLsbPayloadUseCase, ExtractLsbPayloadUseCase>();
+        services.AddSingleton<IRunLsbFragilityUseCase, RunLsbFragilityUseCase>();
+        services.AddSingleton<IExportLsbImageUseCase, ExportLsbImageUseCase>();
+        services.AddSingleton<IExportLsbReportUseCase, ExportLsbReportUseCase>();
+        services.AddSingleton<ILoadLsbPayloadUseCase, LoadLsbPayloadUseCase>();
+        services.AddSingleton<IInspectLsbPixelUseCase, InspectLsbPixelUseCase>();
         return services;
     }
 }

@@ -8,6 +8,7 @@ using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
+using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -22,14 +23,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献七个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献八个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -59,6 +60,8 @@ public sealed class CompositionAndPersistenceTests
         var secondFingerprint = secondScope.ServiceProvider.GetRequiredService<ImageFingerprintDocument>();
         var bitPlane = firstScope.ServiceProvider.GetRequiredService<BitPlaneViewerDocument>();
         var secondBitPlane = secondScope.ServiceProvider.GetRequiredService<BitPlaneViewerDocument>();
+        var lsb = firstScope.ServiceProvider.GetRequiredService<LsbSteganographyLabDocument>();
+        var secondLsb = secondScope.ServiceProvider.GetRequiredService<LsbSteganographyLabDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -68,6 +71,11 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(robustness, secondRobustness);
         Assert.NotSame(fingerprint, secondFingerprint);
         Assert.NotSame(bitPlane, secondBitPlane);
+        Assert.NotSame(lsb, secondLsb);
+        lsb.SourcePath = "scope-lsb-one";
+        lsb.SeedText = "42";
+        Assert.Empty(secondLsb.SourcePath);
+        Assert.Equal("1", secondLsb.SeedText);
         bitPlane.SourcePath = "scope-bit-plane-one";
         Assert.Empty(secondBitPlane.SourcePath);
         fingerprint.ReferencePath = "scope-fingerprint-one";

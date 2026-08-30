@@ -53,6 +53,19 @@ internal interface IFingerprintReportFileDialog
     Task<string?> PickFingerprintJsonOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>LSB 报告只允许选择 JSON/CSV 目的地，不暴露图片或 Payload 保存能力。</summary>
+internal interface ILsbReportFileDialog
+{
+    Task<string?> PickLsbJsonOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickLsbCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
+/// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
+internal interface ILsbPayloadFileReader
+{
+    Task<byte[]> ReadAsync(string path, CancellationToken cancellationToken);
+}
+
 /// <summary>文本剪贴板窄端口；失败以 false 返回，Document 可以保留有效比较结果并提示重试。</summary>
 internal interface ITextClipboard
 {

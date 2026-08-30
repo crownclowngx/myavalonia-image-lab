@@ -1,0 +1,118 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.LsbSteganographyLab.LsbSteganographyLabView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.LsbSteganographyLab"
+    x:DataType="vm:LsbSteganographyLabDocument">
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+    <Border Background="#5A2910" BorderBrush="#E6A23C" BorderThickness="1" CornerRadius="4" Padding="10">
+      <StackPanel Spacing="4">
+        <TextBlock Text="{Binding PrimaryNotice}" FontSize="17" FontWeight="Bold" TextWrapping="Wrap" AutomationProperties.Name="LSB 教学安全警示" />
+        <TextBlock Text="{Binding StatisticsNotice}" TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="350,*" ColumnSpacing="12">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="9">
+          <TextBlock Text="载体与 Payload" FontSize="18" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+            <Button Command="{Binding SelectSourceCommand}" Content="选择载体" AutomationProperties.Name="选择 PNG 或 JPEG 载体" />
+            <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="PNG/JPEG 路径" />
+            <Button Grid.Column="2" Command="{Binding PrepareCommand}" Content="准备载体" />
+          </Grid>
+          <ComboBox ItemsSource="{Binding PayloadKindOptions}" SelectedItem="{Binding PayloadKind}" AutomationProperties.Name="Payload 类型" />
+          <TextBox IsVisible="{Binding IsTextPayload}" Text="{Binding PayloadText}" AcceptsReturn="True" MinHeight="90" PlaceholderText="UTF-8 文本，最多 65,536 字节" AutomationProperties.Name="文本 Payload" />
+          <Grid IsVisible="{Binding IsBinaryPayload}" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+            <TextBox Text="{Binding BinaryPayloadPath}" IsReadOnly="True" PlaceholderText="二进制 Payload 路径" />
+            <Button Grid.Column="1" Command="{Binding SelectBinaryPayloadCommand}" Content="选择二进制" />
+          </Grid>
+
+          <TextBlock Text="槽位配方" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
+          <Grid ColumnDefinitions="*,80,*" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" AutomationProperties.Name="通道策略" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding BitOptions}" SelectedItem="{Binding BitPlane}" AutomationProperties.Name="位平面" />
+            <ComboBox Grid.Column="2" ItemsSource="{Binding PlacementOptions}" SelectedItem="{Binding Placement}" AutomationProperties.Name="位置策略" />
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+            <TextBox Text="{Binding SeedText}" PlaceholderText="64 位 seed" AutomationProperties.Name="公开实验 seed" />
+            <Button Grid.Column="1" Command="{Binding RegenerateSeedCommand}" Content="重新生成" />
+          </Grid>
+          <TextBlock Text="{Binding SeedNotice}" Foreground="#E6A23C" TextWrapping="Wrap" />
+          <ComboBox ItemsSource="{Binding StatisticsScopeOptions}" SelectedItem="{Binding StatisticsScope}" AutomationProperties.Name="统计样本范围" />
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+            <TextBlock Text="{Binding CapacitySummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="容量等价数值表" />
+          </Border>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+            <Button Command="{Binding EmbedCommand}" Content="写入并双重自检" IsEnabled="{Binding HasCarrier}" AutomationProperties.Name="执行 LSB 写入" />
+            <Button Grid.Column="1" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsBusy}" />
+          </Grid>
+
+          <TextBlock Text="脆弱性与导出" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding FragilityOptions}" SelectedItem="{Binding SelectedFragility}" AutomationProperties.Name="受控扰动预设" />
+            <Button Grid.Column="1" Command="{Binding RunFragilityCommand}" Content="运行" IsEnabled="{Binding HasVerifiedResult}" />
+          </Grid>
+          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+            <Button Command="{Binding ExportPngCommand}" Content="导出 PNG" IsEnabled="{Binding HasVerifiedResult}" />
+            <Button Grid.Column="1" Command="{Binding ExportJsonCommand}" Content="JSON 报告" IsEnabled="{Binding HasVerifiedResult}" />
+            <Button Grid.Column="2" Command="{Binding ExportCsvCommand}" Content="CSV 报告" IsEnabled="{Binding HasVerifiedResult}" />
+          </Grid>
+          <TextBlock Text="{Binding CrcNotice}" TextWrapping="Wrap" Opacity="0.8" />
+        </StackPanel>
+      </ScrollViewer>
+
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="10">
+          <TextBlock Text="联动预览" FontSize="20" FontWeight="SemiBold" />
+          <Grid RowDefinitions="Auto,240,Auto,240,Auto" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="8">
+              <TextBlock Grid.ColumnSpan="2" Text="所有图使用同一源坐标；蓝=Header，黄=Payload，红=实际变化，深灰=未使用。" TextWrapping="Wrap" />
+              <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+                <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="Cover" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding CoverPreview}" Stretch="Uniform" AutomationProperties.Name="原始载体预览" /></Grid>
+              </Border>
+              <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+                <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="Stego" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding StegoPreview}" Stretch="Uniform" AutomationProperties.Name="写入结果预览" /></Grid>
+              </Border>
+              <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="位置图同时编码区域与是否真实改变；bit 图显示当前代理单元中 1 的比例，不把颜色作为唯一信息。" TextWrapping="Wrap" />
+              <Border Grid.Row="3" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+                <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="写入位置 / 实际变化" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding PlacementPreview}" Stretch="Uniform" AutomationProperties.Name="位置与变化图" /></Grid>
+              </Border>
+              <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,*" ColumnSpacing="6">
+                <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="bit 前" /><Image Grid.Row="1" Source="{Binding BitBeforePreview}" Stretch="Uniform" /></Grid></Border>
+                <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="bit 后" /><Image Grid.Row="1" Source="{Binding BitAfterPreview}" Stretch="Uniform" /></Grid></Border>
+              </Grid>
+            <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="键盘用户可在下方读取与图形等价的精确计数。" TextWrapping="Wrap" />
+          </Grid>
+          <TextBlock Text="原图坐标像素探针" FontSize="18" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="Auto,90,Auto,90,Auto" ColumnSpacing="6">
+            <TextBlock Text="X" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="15999999" Value="{Binding ProbeX}" />
+            <TextBlock Grid.Column="2" Text="Y" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="3" Minimum="0" Maximum="15999999" Value="{Binding ProbeY}" />
+            <Button Grid.Column="4" Command="{Binding InspectPixelCommand}" Content="检查" IsEnabled="{Binding HasVerifiedResult}" />
+          </Grid>
+          <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="像素探针等价数值" />
+          <TextBlock Text="统计与等价数值" FontSize="20" FontWeight="SemiBold" Margin="0,6,0,0" />
+          <TextBlock Text="Frame / 变化 / 质量" FontSize="18" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding FrameSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="Frame 与变化等价数值" />
+          <TextBlock Text="位分布与 Pair of Values 卡方" FontSize="18" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding StatisticsSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="位分布卡方等价数值" />
+          <TextBlock Text="水平与垂直邻接" FontSize="18" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding AdjacencySummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="邻接等价数值" />
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10"><TextBlock Text="{Binding StatisticsNotice}" TextWrapping="Wrap" /></Border>
+          <TextBlock Text="受控扰动" FontSize="20" FontWeight="SemiBold" Margin="0,6,0,0" />
+          <TextBlock Text="每次都从最近一次完整 stego 基线开始；不串联上一次攻击。" TextWrapping="Wrap" />
+          <Image Height="280" Source="{Binding AttackPreview}" Stretch="Uniform" AutomationProperties.Name="扰动结果预览" />
+          <TextBlock Text="{Binding FragilitySummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="BER 与恢复状态等价数值" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.Name="当前操作状态" />
+        <ProgressBar Grid.Column="1" Width="140" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

@@ -30,6 +30,11 @@ internal sealed class DeterministicTrialRandom
 
 internal sealed record DeterministicTrialContext(ulong Seed, RobustnessCaseKey CaseKey, string StepId, PerturbationKind Kind)
 {
+    /// <summary>为不属于频域水印 Profile 矩阵的单次受控实验创建稳定上下文。</summary>
+    /// <remarks>占位 Profile 只参与既有随机派生格式；调用方无需依赖水印领域，也不会触发水印协议或 Carrier。</remarks>
+    public static DeterministicTrialContext ForStandalone(ulong seed, string stepId, PerturbationKind kind) =>
+        new(seed, new(EmbeddingProfileId.Balanced, 0, 0m, 0), stepId, kind);
+
     public DeterministicTrialRandom CreateRandom() => new(DeriveSeed());
 
     public ulong DeriveSeed()

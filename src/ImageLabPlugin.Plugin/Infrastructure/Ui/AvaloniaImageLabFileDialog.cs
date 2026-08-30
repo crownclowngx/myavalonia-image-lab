@@ -6,7 +6,7 @@ namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
 internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
-    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ITextClipboard
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -71,6 +71,12 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
 
     public Task<string?> PickFingerprintJsonOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
         interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出感知指纹报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }] }, cancellationToken);
+
+    public Task<string?> PickLsbJsonOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 LSB 教学实验 JSON 报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }] }, cancellationToken);
+
+    public Task<string?> PickLsbCsvOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 LSB 教学实验 CSV 报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }] }, cancellationToken);
 
     public Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken) =>
         interaction.TrySetClipboardTextAsync(text, cancellationToken);

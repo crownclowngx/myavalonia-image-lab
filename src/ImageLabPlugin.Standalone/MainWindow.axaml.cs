@@ -6,6 +6,7 @@ using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
+using ImageLabPlugin.Features.LsbSteganographyLab;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -20,6 +21,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _robustnessScope;
     private IServiceScope? _fingerprintScope;
     private IServiceScope? _bitPlaneScope;
+    private IServiceScope? _lsbScope;
 
     public MainWindow()
     {
@@ -35,6 +37,7 @@ public sealed partial class MainWindow : Window
         _robustnessScope = services.CreateScope();
         _fingerprintScope = services.CreateScope();
         _bitPlaneScope = services.CreateScope();
+        _lsbScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -49,6 +52,8 @@ public sealed partial class MainWindow : Window
         var fingerprintView = _fingerprintScope.ServiceProvider.GetRequiredService<ImageFingerprintView>();
         var bitPlaneDocument = _bitPlaneScope.ServiceProvider.GetRequiredService<BitPlaneViewerDocument>();
         var bitPlaneView = _bitPlaneScope.ServiceProvider.GetRequiredService<BitPlaneViewerView>();
+        var lsbDocument = _lsbScope.ServiceProvider.GetRequiredService<LsbSteganographyLabDocument>();
+        var lsbView = _lsbScope.ServiceProvider.GetRequiredService<LsbSteganographyLabView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -62,6 +67,8 @@ public sealed partial class MainWindow : Window
         fingerprintDocument.InitializeAsync(new NewDocumentActivation("感知指纹"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         bitPlaneDocument.InitializeAsync(new NewDocumentActivation("位平面观察器"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        lsbDocument.InitializeAsync(new NewDocumentActivation("LSB 隐写与统计实验"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -77,6 +84,8 @@ public sealed partial class MainWindow : Window
         FingerprintPreview.Content = fingerprintView;
         bitPlaneView.DataContext = bitPlaneDocument;
         BitPlanePreview.Content = bitPlaneView;
+        lsbView.DataContext = lsbDocument;
+        LsbPreview.Content = lsbView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -86,6 +95,7 @@ public sealed partial class MainWindow : Window
             robustnessDocument.Dispose();
             fingerprintDocument.Dispose();
             bitPlaneDocument.Dispose();
+            lsbDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -93,6 +103,7 @@ public sealed partial class MainWindow : Window
             _robustnessScope?.Dispose();
             _fingerprintScope?.Dispose();
             _bitPlaneScope?.Dispose();
+            _lsbScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -100,6 +111,7 @@ public sealed partial class MainWindow : Window
             _robustnessScope = null;
             _fingerprintScope = null;
             _bitPlaneScope = null;
+            _lsbScope = null;
         };
     }
 }

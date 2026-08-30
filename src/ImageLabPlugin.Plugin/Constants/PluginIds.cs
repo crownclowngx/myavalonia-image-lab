@@ -32,4 +32,8 @@ public static class PluginIds
     /// <summary>“位平面观察器”单图拆位与掩码重建的多实例持久身份。</summary>
     public static readonly DocumentTypeId BitPlaneViewerDocument =
         new("myavalonia.plugin.image.lab.document.bit-plane-viewer");
+
+    /// <summary>“LSB 隐写与统计实验”多实例教学工作上下文的持久身份。</summary>
+    public static readonly DocumentTypeId LsbSteganographyLabDocument =
+        new("myavalonia.plugin.image.lab.document.lsb-steganography-lab");
 }
