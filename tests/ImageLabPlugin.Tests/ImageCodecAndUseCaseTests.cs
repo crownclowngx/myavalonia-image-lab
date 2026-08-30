@@ -22,6 +22,9 @@ using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Infrastructure.Robustness;
 using ImageLabPlugin.Features.ImageFingerprint;
+using ImageLabPlugin.Features.BitPlaneViewer;
+using ImageLabPlugin.Application.BitPlanes;
+using ImageLabPlugin.Domain.BitPlanes;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -63,7 +66,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 六个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 七个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -77,6 +80,8 @@ public sealed class ImageCodecAndUseCaseTests
         var fingerprintView = new ImageFingerprintView();
         var fingerprintBitmap = new FingerprintBitmapControl();
         var fingerprintCurve = new FingerprintStabilityControl();
+        var bitPlaneView = new BitPlaneViewerView();
+        var bitPlanePreview = new BitPlanePreviewControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -93,6 +98,8 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(fingerprintView.Content);
         Assert.NotNull(fingerprintBitmap);
         Assert.NotNull(fingerprintCurve);
+        Assert.NotNull(bitPlaneView.Content);
+        Assert.NotNull(bitPlanePreview);
     }
 
     [Fact]
@@ -169,6 +176,81 @@ public sealed class ImageCodecAndUseCaseTests
             Assert.Contains("重建完成", document.StatusMessage, StringComparison.Ordinal);
         }
         finally { File.Delete(path); }
+    }
+
+    [Fact]
+    public async Task 位平面Document使用正式编解码器完成五通道统计与四预览闭环()
+    {
+        var codec = new AvaloniaImageCodec();
+        var source = CreateTexturedImage(64, 48, includeAlpha: true);
+        var bytes = await codec.EncodeAsync(source, ImageOutputFormat.Png, 100, CancellationToken.None);
+        var path = Path.Combine(Path.GetTempPath(), $"image-lab-bit-plane-{Guid.NewGuid():N}.png");
+        await File.WriteAllBytesAsync(path, bytes);
+        var extractor = new BitPlaneChannelExtractor();
+        var statistics = new BitPlaneStatisticsAnalyzer();
+        using var document = new BitPlaneViewerDocument(
+            new PrepareBitPlaneSessionUseCase(codec),
+            new AnalyzeBitPlaneChannelUseCase(extractor, statistics),
+            new ProjectBitPlaneViewUseCase(new BitPlaneProjector(), new BitPlanePixelInspector()),
+            new ExportBitPlaneImageUseCase(new BitPlaneReconstructor(), codec, new AtomicFileWriter()),
+            new NullImageDialog(), codec, new TestDocumentLifetime());
+        try
+        {
+            await document.InitializeAsync(new NewDocumentActivation("位平面闭环"), CancellationToken.None);
+            document.SourcePath = path;
+            await document.AnalyzeCommand.ExecuteAsync(null);
+
+            Assert.True(document.HasSession);
+            Assert.NotNull(document.SourcePreview);
+            Assert.NotNull(document.FocusedPreview);
+            Assert.NotNull(document.CombinedPreview);
+            Assert.NotNull(document.ReconstructionPreview);
+            Assert.Equal(8, document.BitRows.Count);
+            Assert.All(document.BitRows, row => Assert.NotNull(row.Statistics));
+            Assert.Contains("投影完成", document.StatusMessage, StringComparison.Ordinal);
+
+            document.SelectedChannel = "Alpha";
+            var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            while (document.IsBusy && DateTime.UtcNow < timeout) await Task.Delay(10);
+            Assert.True(document.IsAlphaChannel);
+            Assert.True(document.ShowReconstructionCheckerboard);
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Fact]
+    public async Task 位平面Document拒绝忽略取消的旧图片迟到结果()
+    {
+        var codec = new AvaloniaImageCodec();
+        var prepare = new SequencedBitPlanePrepareUseCase();
+        var firstPath = Path.GetTempFileName();
+        var secondPath = Path.GetTempFileName();
+        using var document = new BitPlaneViewerDocument(
+            prepare,
+            new AnalyzeBitPlaneChannelUseCase(new BitPlaneChannelExtractor(), new BitPlaneStatisticsAnalyzer()),
+            new ProjectBitPlaneViewUseCase(new BitPlaneProjector(), new BitPlanePixelInspector()),
+            new ExportBitPlaneImageUseCase(new BitPlaneReconstructor(), codec, new AtomicFileWriter()),
+            new NullImageDialog(), codec, new TestDocumentLifetime());
+        try
+        {
+            await document.InitializeAsync(new NewDocumentActivation("迟到门禁"), CancellationToken.None);
+            document.SourcePath = firstPath;
+            var first = document.AnalyzeCommand.ExecuteAsync(null);
+            await prepare.WaitForCallsAsync(1);
+            document.SourcePath = secondPath;
+            var second = document.AnalyzeCommand.ExecuteAsync(null);
+            await prepare.WaitForCallsAsync(2);
+
+            prepare.Complete(1, new PixelImage(new ImageSize(2, 1), [9, 8, 7, 6, 5, 4, 3, 2]));
+            await second;
+            prepare.Complete(0, new PixelImage(new ImageSize(1, 1), [1, 2, 3, 4]));
+            await first;
+
+            Assert.Contains("2×1", document.ImageSummary, StringComparison.Ordinal);
+            Assert.DoesNotContain("1×1", document.ImageSummary, StringComparison.Ordinal);
+            Assert.True(document.HasSession);
+        }
+        finally { File.Delete(firstPath); File.Delete(secondPath); }
     }
 
     [Fact]
@@ -350,6 +432,37 @@ public sealed class ImageCodecAndUseCaseTests
     {
         public Task<string?> PickImageAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(null);
         public Task<string?> PickOutputImageAsync(string suggestedName, CancellationToken cancellationToken) => Task.FromResult<string?>(null);
+    }
+
+    private sealed class SequencedBitPlanePrepareUseCase : IPrepareBitPlaneSessionUseCase
+    {
+        private readonly List<(string Path, TaskCompletionSource<BitPlaneSession> Completion)> _calls = [];
+
+        public Task<BitPlaneSession> ExecuteAsync(string sourcePath, CancellationToken cancellationToken)
+        {
+            // 故意忽略取消，专门证明 Document 的 generation 门禁独立于底层合作程度。
+            var completion = new TaskCompletionSource<BitPlaneSession>(TaskCreationOptions.RunContinuationsAsynchronously);
+            lock (_calls) _calls.Add((sourcePath, completion));
+            return completion.Task;
+        }
+
+        public async Task WaitForCallsAsync(int count)
+        {
+            var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            while (DateTime.UtcNow < timeout)
+            {
+                lock (_calls) if (_calls.Count >= count) return;
+                await Task.Delay(10);
+            }
+            throw new TimeoutException("未观察到预期的位平面准备调用。");
+        }
+
+        public void Complete(int index, PixelImage image)
+        {
+            (string Path, TaskCompletionSource<BitPlaneSession> Completion) call;
+            lock (_calls) call = _calls[index];
+            call.Completion.SetResult(new BitPlaneSession(call.Path, image));
+        }
     }
 
     private sealed class TestDocumentLifetime : IDocumentLifetime

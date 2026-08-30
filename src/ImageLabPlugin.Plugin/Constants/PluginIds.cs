@@ -28,4 +28,8 @@ public static class PluginIds
     /// <summary>“感知指纹”双图比较与稳定性试验的多实例持久身份。</summary>
     public static readonly DocumentTypeId ImageFingerprintDocument =
         new("myavalonia.plugin.image.lab.document.image-fingerprint");
+
+    /// <summary>“位平面观察器”单图拆位与掩码重建的多实例持久身份。</summary>
+    public static readonly DocumentTypeId BitPlaneViewerDocument =
+        new("myavalonia.plugin.image.lab.document.bit-plane-viewer");
 }

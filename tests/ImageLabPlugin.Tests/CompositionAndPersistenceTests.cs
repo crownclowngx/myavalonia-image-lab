@@ -7,6 +7,7 @@ using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
+using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -21,14 +22,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献六个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献七个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -56,6 +57,8 @@ public sealed class CompositionAndPersistenceTests
         var secondRobustness = secondScope.ServiceProvider.GetRequiredService<RobustnessLabDocument>();
         var fingerprint = firstScope.ServiceProvider.GetRequiredService<ImageFingerprintDocument>();
         var secondFingerprint = secondScope.ServiceProvider.GetRequiredService<ImageFingerprintDocument>();
+        var bitPlane = firstScope.ServiceProvider.GetRequiredService<BitPlaneViewerDocument>();
+        var secondBitPlane = secondScope.ServiceProvider.GetRequiredService<BitPlaneViewerDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -64,6 +67,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(compare, secondCompare);
         Assert.NotSame(robustness, secondRobustness);
         Assert.NotSame(fingerprint, secondFingerprint);
+        Assert.NotSame(bitPlane, secondBitPlane);
+        bitPlane.SourcePath = "scope-bit-plane-one";
+        Assert.Empty(secondBitPlane.SourcePath);
         fingerprint.ReferencePath = "scope-fingerprint-one";
         Assert.Empty(secondFingerprint.ReferencePath);
         robustness.SourcePath = "scope-robustness-one";

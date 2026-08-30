@@ -36,8 +36,7 @@ internal static class ColorSpaceConverter
             {
                 var (red, green, blue, _) = source.GetPixel(x, y);
                 var originalY = ToLuma(red, green, blue);
-                var cb = 128d - (0.168736d * red) - (0.331264d * green) + (0.5d * blue);
-                var cr = 128d + (0.5d * red) - (0.418688d * green) - (0.081312d * blue);
+                var original = YCbCrColorSpace.FromRgb(red, green, blue);
                 var targetY = modifiedLuma[x, y];
                 if (Math.Abs(targetY - originalY) < 1e-9)
                 {
@@ -46,11 +45,9 @@ internal static class ColorSpaceConverter
                 }
 
                 // 用完整 YCbCr 逆变换而不是简单给 RGB 同加一个偏移，可以让颜色变化更可控。
-                var restoredRed = targetY + (1.402d * (cr - 128d));
-                var restoredGreen = targetY - (0.344136d * (cb - 128d)) - (0.714136d * (cr - 128d));
-                var restoredBlue = targetY + (1.772d * (cb - 128d));
+                var restored = YCbCrColorSpace.ToRgb(targetY, original.ChromaBlue, original.ChromaRed);
 
-                result.SetRgb(x, y, Clamp(restoredRed), Clamp(restoredGreen), Clamp(restoredBlue));
+                result.SetRgb(x, y, Clamp(restored.Red), Clamp(restored.Green), Clamp(restored.Blue));
             }
         }
 
@@ -58,7 +55,7 @@ internal static class ColorSpaceConverter
     }
 
     public static double ToLuma(byte red, byte green, byte blue) =>
-        (0.299d * red) + (0.587d * green) + (0.114d * blue);
+        YCbCrColorSpace.FromRgb(red, green, blue).Luma;
 
     private static byte Clamp(double value) => (byte)Math.Clamp((int)Math.Round(value), 0, 255);
 }

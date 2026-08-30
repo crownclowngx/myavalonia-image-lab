@@ -19,6 +19,8 @@ using ImageLabPlugin.Infrastructure.Robustness;
 using ImageLabPlugin.Application.Fingerprinting;
 using ImageLabPlugin.Domain.Fingerprinting;
 using ImageLabPlugin.Infrastructure.Fingerprinting;
+using ImageLabPlugin.Application.BitPlanes;
+using ImageLabPlugin.Domain.BitPlanes;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -112,6 +114,15 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRunFingerprintStabilityUseCase, RunFingerprintStabilityUseCase>();
         services.AddSingleton<IExportFingerprintReportUseCase, FingerprintReportExportUseCase>();
         services.AddSingleton<IFingerprintObservationProbe, FingerprintObservationProbe>();
+        services.AddSingleton<BitPlaneChannelExtractor>();
+        services.AddSingleton<BitPlaneStatisticsAnalyzer>();
+        services.AddSingleton<BitPlaneProjector>();
+        services.AddSingleton<BitPlaneReconstructor>();
+        services.AddSingleton<BitPlanePixelInspector>();
+        services.AddSingleton<IPrepareBitPlaneSessionUseCase, PrepareBitPlaneSessionUseCase>();
+        services.AddSingleton<IAnalyzeBitPlaneChannelUseCase, AnalyzeBitPlaneChannelUseCase>();
+        services.AddSingleton<IProjectBitPlaneViewUseCase, ProjectBitPlaneViewUseCase>();
+        services.AddSingleton<IExportBitPlaneImageUseCase, ExportBitPlaneImageUseCase>();
         return services;
     }
 }

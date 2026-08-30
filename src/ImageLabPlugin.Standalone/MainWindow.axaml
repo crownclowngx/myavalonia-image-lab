@@ -24,5 +24,8 @@
     <TabItem Header="感知指纹">
       <ContentControl x:Name="FingerprintPreview" />
     </TabItem>
+    <TabItem Header="位平面观察器">
+      <ContentControl x:Name="BitPlanePreview" />
+    </TabItem>
   </TabControl>
 </Window>

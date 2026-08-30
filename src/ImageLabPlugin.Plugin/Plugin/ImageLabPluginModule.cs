@@ -6,6 +6,7 @@ using ImageLabPlugin.Features.SpectrumInspector;
 using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
+using ImageLabPlugin.Features.BitPlaneViewer;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -51,6 +52,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.ImageFingerprintDocument,
                 "感知指纹",
                 "使用 aHash、dHash 和 pHash 比较两张显式图片的感知相似性与稳定性",
+                "图像分析"));
+        registration.AddPersistableDocument<BitPlaneViewerDocument, BitPlaneViewerView>(
+            new DocumentDescriptor(
+                PluginIds.BitPlaneViewerDocument,
+                "位平面观察器",
+                "拆分 R、G、B、Alpha 或 Y 的 8 个位平面并观察掩码重建结果",
                 "图像分析"));
     }
 }

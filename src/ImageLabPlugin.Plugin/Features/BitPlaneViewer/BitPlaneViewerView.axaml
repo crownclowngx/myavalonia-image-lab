@@ -1,0 +1,87 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.BitPlaneViewer.BitPlaneViewerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.BitPlaneViewer"
+    x:DataType="vm:BitPlaneViewerDocument">
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+      <Button Command="{Binding SelectSourceCommand}" Content="选择图片" />
+      <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="PNG/JPEG 路径" />
+      <ComboBox Grid.Column="2" Width="90" ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" />
+      <Button Grid.Column="3" Command="{Binding AnalyzeCommand}" Content="分析" />
+      <Button Grid.Column="4" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsOperationBusy}" />
+      <Button Grid.Column="5" Command="{Binding ExportCommand}" Content="导出完整 PNG" IsEnabled="{Binding HasSession}" />
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="300,*" ColumnSpacing="10">
+      <ScrollViewer>
+        <StackPanel Spacing="8">
+          <TextBlock FontSize="18" FontWeight="SemiBold" Text="通道与位掩码" />
+          <ItemsControl ItemsSource="{Binding BitRows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:BitPlaneBitRow">
+                <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,0,0,1" Padding="2,5">
+                  <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="6">
+                    <CheckBox IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Command="{Binding FocusCommand}" HorizontalContentAlignment="Left">
+                      <TextBlock Text="{Binding Name}" />
+                    </Button>
+                    <TextBlock Grid.Column="2" Text="{Binding Weight}" VerticalAlignment="Center" FontFamily="Consolas" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding StatisticsText}" FontSize="11" TextWrapping="Wrap" Opacity="0.75" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+            <Button Command="{Binding SelectAllCommand}" Content="全部" />
+            <Button Grid.Column="1" Command="{Binding ClearAllCommand}" Content="清空" />
+          </Grid>
+          <Grid ColumnDefinitions="Auto,70,*" ColumnSpacing="6">
+            <TextBlock Text="仅高位 ≥" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="7" Value="{Binding HighMinimumBit}" />
+            <Button Grid.Column="2" Command="{Binding KeepHighCommand}" Content="应用" />
+          </Grid>
+          <Grid ColumnDefinitions="Auto,70,*" ColumnSpacing="6">
+            <TextBlock Text="仅低位 ≤" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="7" Value="{Binding LowMaximumBit}" />
+            <Button Grid.Column="2" Command="{Binding KeepLowCommand}" Content="应用" />
+          </Grid>
+          <TextBlock Text="{Binding MaskSummary}" FontFamily="Consolas" FontWeight="SemiBold" />
+          <CheckBox IsChecked="{Binding ShowCheckerboard}" Content="Alpha 重建显示棋盘背景" />
+          <CheckBox IsChecked="{Binding ShowExplanation}" Content="显示解释与限制" />
+          <Border IsVisible="{Binding ShowExplanation}" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+            <TextBlock Text="单位平面把 0/1 显示为不透明黑/白；组合图按真实权重显示，不会拉伸。低位杂乱或二元熵接近 1 都不能单独证明存在隐写。透明像素下的 RGB 仍按解码字节分析。" TextWrapping="Wrap" />
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+
+      <Grid Grid.Column="1" RowDefinitions="*,*,Auto" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="8">
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="原图（点击探针）" FontWeight="SemiBold" /><vm:BitPlanePreviewControl Grid.Row="1" MinHeight="180" Source="{Binding SourcePreview}" /></Grid>
+        </Border>
+        <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="焦点单位平面（不透明黑白）" FontWeight="SemiBold" /><vm:BitPlanePreviewControl Grid.Row="1" MinHeight="180" Source="{Binding FocusedPreview}" /></Grid>
+        </Border>
+        <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="组合通道（真实量级）" FontWeight="SemiBold" /><vm:BitPlanePreviewControl Grid.Row="1" MinHeight="180" Source="{Binding CombinedPreview}" /></Grid>
+        </Border>
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="掩码重建" FontWeight="SemiBold" /><vm:BitPlanePreviewControl Grid.Row="1" MinHeight="180" Source="{Binding ReconstructionPreview}" ShowCheckerboard="{Binding ShowReconstructionCheckerboard}" /></Grid>
+        </Border>
+        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+          <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" FontFamily="Consolas" />
+        </Border>
+      </Grid>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="2*,3*,Auto" ColumnSpacing="12">
+        <TextBlock Text="{Binding ImageSummary}" TextWrapping="Wrap" />
+        <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+        <ProgressBar Grid.Column="2" Width="120" IsIndeterminate="True" IsVisible="{Binding IsOperationBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

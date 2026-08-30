@@ -23,8 +23,8 @@ internal sealed class ImageChannelConverter
                     ImageChannel.Green => green,
                     ImageChannel.Blue => blue,
                     ImageChannel.Luma => ColorSpaceConverter.ToLuma(red, green, blue),
-                    ImageChannel.ChromaBlue => ToCb(red, green, blue),
-                    ImageChannel.ChromaRed => ToCr(red, green, blue),
+                    ImageChannel.ChromaBlue => YCbCrColorSpace.FromRgb(red, green, blue).ChromaBlue,
+                    ImageChannel.ChromaRed => YCbCrColorSpace.FromRgb(red, green, blue).ChromaRed,
                     _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, "未知图片通道。")
                 };
             }
@@ -63,18 +63,14 @@ internal sealed class ImageChannelConverter
                     continue;
                 }
 
-                var originalY = ColorSpaceConverter.ToLuma(red, green, blue);
-                var originalCb = ToCb(red, green, blue);
-                var originalCr = ToCr(red, green, blue);
-                var targetY = modified.Channel == ImageChannel.Luma ? value : originalY;
-                var targetCb = modified.Channel == ImageChannel.ChromaBlue ? value : originalCb;
-                var targetCr = modified.Channel == ImageChannel.ChromaRed ? value : originalCr;
-                var restoredRed = targetY + (1.402d * (targetCr - 128d));
-                var restoredGreen = targetY - (0.344136d * (targetCb - 128d)) - (0.714136d * (targetCr - 128d));
-                var restoredBlue = targetY + (1.772d * (targetCb - 128d));
-                var r = Clamp(restoredRed, out var redClipped);
-                var g = Clamp(restoredGreen, out var greenClipped);
-                var b = Clamp(restoredBlue, out var blueClipped);
+                var original = YCbCrColorSpace.FromRgb(red, green, blue);
+                var targetY = modified.Channel == ImageChannel.Luma ? value : original.Luma;
+                var targetCb = modified.Channel == ImageChannel.ChromaBlue ? value : original.ChromaBlue;
+                var targetCr = modified.Channel == ImageChannel.ChromaRed ? value : original.ChromaRed;
+                var restored = YCbCrColorSpace.ToRgb(targetY, targetCb, targetCr);
+                var r = Clamp(restored.Red, out var redClipped);
+                var g = Clamp(restored.Green, out var greenClipped);
+                var b = Clamp(restored.Blue, out var blueClipped);
                 clippedPixels += redClipped || greenClipped || blueClipped ? 1 : 0;
                 result.SetRgb(x, y, r, g, b);
             }
@@ -85,12 +81,6 @@ internal sealed class ImageChannelConverter
 
     public static double NeutralValue(ImageChannel channel) =>
         channel is ImageChannel.ChromaBlue or ImageChannel.ChromaRed ? 128d : 0d;
-
-    private static double ToCb(byte red, byte green, byte blue) =>
-        128d - (0.168736d * red) - (0.331264d * green) + (0.5d * blue);
-
-    private static double ToCr(byte red, byte green, byte blue) =>
-        128d + (0.5d * red) - (0.418688d * green) - (0.081312d * blue);
 
     private static byte Clamp(double value, out bool clipped)
     {
