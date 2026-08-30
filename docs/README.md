@@ -37,14 +37,15 @@ Standalone 适合快速检查 AXAML、编译绑定、命令和插件自身对象
 ## 频域水印文档
 
 1. [未来可能支持能力列表](future-capabilities.md)
-2. [V1 频域隐式水印实施计划](design/frequency-watermark-v1-implementation-plan.md)
-3. [公共图像领域边界](design/image-domain-boundaries.md)
-4. [V1 线格式、密码学与安全边界](design/frequency-watermark-v1-protocol.md)
-5. [用户使用说明](frequency-watermark-user-guide.md)
-6. [自动测试与质量门禁](frequency-watermark-testing.md)
-7. [G0–G9 实施记录](plan-history/frequency-watermark/README.md)
-8. [项目、Host 与 Standalone 窗口职责](project-and-window-responsibilities.md)
-9. [临时部署、正式发布与验收](deployment-and-release.md)
+2. [V1 频域分析器实施计划](design/spectrum-inspector-v1-implementation-plan.md)
+3. [V1 频域隐式水印实施计划](design/frequency-watermark-v1-implementation-plan.md)
+4. [公共图像领域边界](design/image-domain-boundaries.md)
+5. [V1 线格式、密码学与安全边界](design/frequency-watermark-v1-protocol.md)
+6. [用户使用说明](frequency-watermark-user-guide.md)
+7. [自动测试与质量门禁](frequency-watermark-testing.md)
+8. [G0–G9 实施记录](plan-history/frequency-watermark/README.md)
+9. [项目、Host 与 Standalone 窗口职责](project-and-window-responsibilities.md)
+10. [临时部署、正式发布与验收](deployment-and-release.md)
 
 ## 开发前记住
 
