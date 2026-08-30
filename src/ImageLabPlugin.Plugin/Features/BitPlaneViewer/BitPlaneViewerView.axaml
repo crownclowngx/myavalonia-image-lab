@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:ImageLabPlugin.Features.BitPlaneViewer"
     x:DataType="vm:BitPlaneViewerDocument">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" />
+  </UserControl.Styles>
   <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
     <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
       <Button Command="{Binding SelectSourceCommand}" Content="选择图片" />
@@ -38,12 +41,12 @@
             <Button Command="{Binding SelectAllCommand}" Content="全部" />
             <Button Grid.Column="1" Command="{Binding ClearAllCommand}" Content="清空" />
           </Grid>
-          <Grid ColumnDefinitions="Auto,70,*" ColumnSpacing="6">
+          <Grid ColumnDefinitions="Auto,120,*" ColumnSpacing="6">
             <TextBlock Text="仅高位 ≥" VerticalAlignment="Center" />
             <NumericUpDown Grid.Column="1" Minimum="0" Maximum="7" Value="{Binding HighMinimumBit}" />
             <Button Grid.Column="2" Command="{Binding KeepHighCommand}" Content="应用" />
           </Grid>
-          <Grid ColumnDefinitions="Auto,70,*" ColumnSpacing="6">
+          <Grid ColumnDefinitions="Auto,120,*" ColumnSpacing="6">
             <TextBlock Text="仅低位 ≤" VerticalAlignment="Center" />
             <NumericUpDown Grid.Column="1" Minimum="0" Maximum="7" Value="{Binding LowMaximumBit}" />
             <Button Grid.Column="2" Command="{Binding KeepLowCommand}" Content="应用" />

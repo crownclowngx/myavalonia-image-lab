@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:ImageLabPlugin.Features.LsbSteganographyLab"
     x:DataType="vm:LsbSteganographyLabDocument">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" />
+  </UserControl.Styles>
   <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
     <Border Background="#5A2910" BorderBrush="#E6A23C" BorderThickness="1" CornerRadius="4" Padding="10">
       <StackPanel Spacing="4">
@@ -84,7 +87,7 @@
             <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="键盘用户可在下方读取与图形等价的精确计数。" TextWrapping="Wrap" />
           </Grid>
           <TextBlock Text="原图坐标像素探针" FontSize="18" FontWeight="SemiBold" />
-          <Grid ColumnDefinitions="Auto,90,Auto,90,Auto" ColumnSpacing="6">
+          <Grid ColumnDefinitions="Auto,120,Auto,120,Auto" ColumnSpacing="6">
             <TextBlock Text="X" VerticalAlignment="Center" />
             <NumericUpDown Grid.Column="1" Minimum="0" Maximum="15999999" Value="{Binding ProbeX}" />
             <TextBlock Grid.Column="2" Text="Y" VerticalAlignment="Center" />

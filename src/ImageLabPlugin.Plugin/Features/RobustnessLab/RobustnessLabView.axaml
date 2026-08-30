@@ -5,6 +5,9 @@
     xmlns:local="clr-namespace:ImageLabPlugin.Features.RobustnessLab"
     xmlns:domain="clr-namespace:ImageLabPlugin.Domain.Robustness"
     x:DataType="local:RobustnessLabDocument">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" />
+  </UserControl.Styles>
   <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsEnabled="{Binding IsRecipeEditable}">
       <TextBox PlaceholderText="原始载体图片路径" Text="{Binding SourcePath}" />

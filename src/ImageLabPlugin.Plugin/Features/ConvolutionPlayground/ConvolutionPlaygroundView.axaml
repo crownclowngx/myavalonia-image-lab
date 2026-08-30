@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:ImageLabPlugin.Features.ConvolutionPlayground"
     x:DataType="vm:ConvolutionPlaygroundDocument">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" />
+  </UserControl.Styles>
   <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
     <Border Background="#153A52" BorderBrush="#4CA6D8" BorderThickness="1" CornerRadius="4" Padding="10">
       <TextBlock Text="可解释的真二维卷积实验台：矩阵按中心锚点读取 f(x-kx,y-ky)。代理用于交互，只有显式完整尺寸结果可导出 PNG。" TextWrapping="Wrap" AutomationProperties.Name="卷积约定与导出说明" />
@@ -28,26 +31,38 @@
           <TextBlock Text="{Binding FullResultSummary}" TextWrapping="Wrap" FontFamily="Consolas" />
 
           <TextBlock Text="核与参数" FontSize="18" FontWeight="SemiBold" Margin="0,5,0,0" />
-          <Grid ColumnDefinitions="*,90,Auto" ColumnSpacing="6">
+          <Grid ColumnDefinitions="*,120,Auto" ColumnSpacing="6">
             <ComboBox ItemsSource="{Binding PresetOptions}" SelectedItem="{Binding SelectedPreset}" AutomationProperties.Name="卷积核预设稳定 ID" />
             <NumericUpDown Grid.Column="1" Minimum="3" Maximum="31" Increment="2" Value="{Binding KernelSize}" AutomationProperties.Name="奇数核尺寸" />
             <Button Grid.Column="2" Command="{Binding ApplyPresetCommand}" Content="应用预设" />
           </Grid>
-          <Grid ColumnDefinitions="Auto,70,Auto,70,Auto,70" ColumnSpacing="5">
-            <TextBlock Text="sigma" VerticalAlignment="Center" />
-            <NumericUpDown Grid.Column="1" Minimum="0.1" Maximum="5" Increment="0.1" Value="{Binding Sigma}" />
-            <TextBlock Grid.Column="2" Text="amount" VerticalAlignment="Center" />
-            <NumericUpDown Grid.Column="3" Minimum="0" Maximum="5" Increment="0.1" Value="{Binding Amount}" />
-            <TextBlock Grid.Column="4" Text="A" VerticalAlignment="Center" />
-            <NumericUpDown Grid.Column="5" Minimum="1" Maximum="6" Increment="0.1" Value="{Binding HighBoostA}" />
+          <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="6">
+            <StackPanel Spacing="3">
+              <TextBlock Text="sigma" />
+              <NumericUpDown Minimum="0.1" Maximum="5" Increment="0.1" Value="{Binding Sigma}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="3">
+              <TextBlock Text="amount" />
+              <NumericUpDown Minimum="0" Maximum="5" Increment="0.1" Value="{Binding Amount}" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Spacing="3">
+              <TextBlock Text="高提升 A" />
+              <NumericUpDown Minimum="1" Maximum="6" Increment="0.1" Value="{Binding HighBoostA}" />
+            </StackPanel>
           </Grid>
-          <Grid ColumnDefinitions="Auto,70,Auto,70,Auto,70" ColumnSpacing="5">
-            <TextBlock Text="运动长度" VerticalAlignment="Center" />
-            <NumericUpDown Grid.Column="1" Minimum="1" Maximum="31" Increment="1" Value="{Binding MotionLength}" />
-            <TextBlock Grid.Column="2" Text="角度°" VerticalAlignment="Center" />
-            <NumericUpDown Grid.Column="3" Minimum="-360" Maximum="360" Increment="15" Value="{Binding AngleDegrees}" />
-            <TextBlock Grid.Column="4" Text="浮雕强度" VerticalAlignment="Center" />
-            <NumericUpDown Grid.Column="5" Minimum="0" Maximum="5" Increment="0.1" Value="{Binding EmbossStrength}" />
+          <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="6">
+            <StackPanel Spacing="3">
+              <TextBlock Text="运动长度" />
+              <NumericUpDown Minimum="1" Maximum="31" Increment="1" Value="{Binding MotionLength}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="3">
+              <TextBlock Text="角度°" />
+              <NumericUpDown Minimum="-360" Maximum="360" Increment="15" Value="{Binding AngleDegrees}" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Spacing="3">
+              <TextBlock Text="浮雕强度" />
+              <NumericUpDown Minimum="0" Maximum="5" Increment="0.1" Value="{Binding EmbossStrength}" />
+            </StackPanel>
           </Grid>
           <TextBox Text="{Binding KernelText}" AcceptsReturn="True" MinHeight="145" FontFamily="Consolas" TextWrapping="NoWrap" AutomationProperties.Name="自定义核矩阵，按行输入" />
           <TextBlock Text="列可用空格、Tab、逗号或分号；行用换行。必须是 3..31 的奇数方阵，数字使用点号小数。" TextWrapping="Wrap" Opacity="0.8" />
@@ -56,11 +71,11 @@
           </Border>
 
           <TextBlock Text="边界、归一化与通道" FontSize="18" FontWeight="SemiBold" Margin="0,5,0,0" />
-          <Grid ColumnDefinitions="*,100" ColumnSpacing="6">
+          <Grid ColumnDefinitions="*,120" ColumnSpacing="6">
             <ComboBox ItemsSource="{Binding BorderOptions}" SelectedItem="{Binding SelectedBorder}" AutomationProperties.Name="边界策略" />
             <NumericUpDown Grid.Column="1" Minimum="-1024" Maximum="1024" Value="{Binding ConstantBorderValue}" AutomationProperties.Name="常量边界值" />
           </Grid>
-          <Grid ColumnDefinitions="*,100,100" ColumnSpacing="6">
+          <Grid ColumnDefinitions="*,120,120" ColumnSpacing="6">
             <ComboBox ItemsSource="{Binding NormalizationOptions}" SelectedItem="{Binding SelectedNormalization}" AutomationProperties.Name="归一化策略" />
             <NumericUpDown Grid.Column="1" Minimum="-1000000" Maximum="1000000" Value="{Binding ExplicitDivisor}" AutomationProperties.Name="显式除数" />
             <NumericUpDown Grid.Column="2" Minimum="-4096" Maximum="4096" Value="{Binding Bias}" AutomationProperties.Name="输出偏置" />
@@ -92,7 +107,7 @@
           <TextBlock Text="{Binding ResultSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="代理结果数值摘要" />
           <TextBlock Text="{Binding ResponseSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="频率响应数值摘要" />
           <TextBlock Text="像素探针与贡献" FontSize="18" FontWeight="SemiBold" />
-          <Grid ColumnDefinitions="Auto,90,Auto,90,Auto" ColumnSpacing="6">
+          <Grid ColumnDefinitions="Auto,120,Auto,120,Auto" ColumnSpacing="6">
             <TextBlock Text="X" VerticalAlignment="Center" />
             <NumericUpDown Grid.Column="1" Minimum="0" Maximum="2047" Value="{Binding ProbeX}" />
             <TextBlock Grid.Column="2" Text="Y" VerticalAlignment="Center" />

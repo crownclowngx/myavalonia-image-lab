@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:ImageLabPlugin.Features.WatermarkInspect"
     x:DataType="vm:WatermarkInspectDocument">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" />
+  </UserControl.Styles>
   <Grid Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="12">
     <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
       <Button Command="{Binding SelectSourceCommand}" Content="选择图片" />

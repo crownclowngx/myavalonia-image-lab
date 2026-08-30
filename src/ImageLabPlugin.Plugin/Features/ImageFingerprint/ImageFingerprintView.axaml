@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:ImageLabPlugin.Features.ImageFingerprint"
     x:DataType="vm:ImageFingerprintDocument">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ImageLabDocumentStyles.axaml" />
+  </UserControl.Styles>
   <Grid Margin="12" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
     <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
       <Button Command="{Binding SelectReferenceCommand}" Content="选择参考图" AutomationProperties.Name="选择感知指纹参考图" />

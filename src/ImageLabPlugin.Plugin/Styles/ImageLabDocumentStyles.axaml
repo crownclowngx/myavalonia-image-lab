@@ -1,0 +1,6 @@
+<Styles xmlns="https://github.com/avaloniaui">
+  <!-- Keep enough editable area beside the spinner buttons for signs and decimals. -->
+  <Style Selector="NumericUpDown">
+    <Setter Property="MinWidth" Value="120" />
+  </Style>
+</Styles>

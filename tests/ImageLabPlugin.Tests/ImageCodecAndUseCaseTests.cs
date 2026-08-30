@@ -1,6 +1,8 @@
 using System.Text;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Headless;
+using Avalonia.LogicalTree;
 using Avalonia.Skia;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
@@ -112,6 +114,38 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotSame(bitPlaneView.Content, lsbView.Content);
         Assert.NotNull(convolutionView.Content);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
+    }
+
+    [Fact]
+    public void 所有Document数值输入框保留可读编辑宽度()
+    {
+        UserControl[] views =
+        [
+            new WatermarkEmbedView(),
+            new SpectrumInspectorView(),
+            new ImageCompareLabView(),
+            new RobustnessLabView(),
+            new BitPlaneViewerView(),
+            new LsbSteganographyLabView(),
+            new ConvolutionPlaygroundView()
+        ];
+
+        var numericInputs = new List<NumericUpDown>();
+        foreach (var view in views)
+        {
+            var window = new Window { Width = 1280, Height = 850, Content = view };
+            window.Show();
+            var viewInputs = view.GetLogicalDescendants().OfType<NumericUpDown>().ToArray();
+            Assert.All(viewInputs, input =>
+            {
+                Assert.True(input.MinWidth >= 120);
+                Assert.True(input.Bounds.Width >= 120);
+            });
+            numericInputs.AddRange(viewInputs);
+            window.Close();
+        }
+
+        Assert.Equal(32, numericInputs.Count);
     }
 
     [Fact]
