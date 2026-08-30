@@ -63,11 +63,20 @@ Domain/Steganography
   LsbSlotLayout/ILsbSlotOrder    Alpha=255、RGB 顺序与两个朴素 Strategy
   LsbEmbedding/Extraction        不变输入 replacement 与严格回读
   LsbStatisticsAnalyzer          Scope、位分布、PoV 卡方和方向邻接
+
+Domain/Convolution
+  ConvolutionKernel              3..31 奇数方、中心锚点、不可变系数
+  ConvolutionPresetFactory       显式有限目录，不执行图片处理
+  BorderIndexMapper              Constant/Replicate/Reflect-101/Wrap
+  SpatialConvolver               行优先真二维卷积与 raw/裁切统计
+  GradientCombiner               Gx/Gy 的非线性 Magnitude 组合
+  KernelFrequencyResponseAnalyzer 256² 归一化核响应与双核摘要
+  ConvolutionDifference/Inspector 同尺寸差异和逐项贡献
 ```
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。八个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。九个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -87,6 +96,8 @@ Domain/Steganography
 - 缩放/裁剪/补边改变尺寸后，全参考质量明确为 `N/A/SizeMismatch`；平移、固定画布旋转和透视按同坐标质量统计，不做隐藏配准。
 - LSB 只把 Alpha=255 像素作为 R/G/B 槽位；输入不原地修改，Frame/位置/统计属于独立 Steganography 领域，不复用 DCT 水印 Frame 或 Carrier。
 - LSB Session 由单个 scoped Document 独占，释放时清零 Frame；位置图和 bit 图最大边 1024，受控扰动每次从同一 stego 基线开始。
+- 卷积 Session 由单个 scoped Document 独占完整源图和 512/1024/2048 代理；Alpha 不参与，完整结果绑定 recipe fingerprint，参数变化后禁止导出。
+- 核响应固定 256²，只包含归一化线性核；偏置、边界、字节裁切和 Magnitude 非线性不进入 H(u,v)。
 
 ## 扩展规则
 

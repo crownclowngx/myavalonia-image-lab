@@ -11,6 +11,7 @@
 | [感知指纹](image-fingerprint/README.md) | 判断两张显式图片的感知指纹是否接近 | aHash、dHash、pHash、汉明距离、稳定性与报告 |
 | [位平面观察器](bit-plane-viewer/README.md) | 观察 R/G/B/Alpha/Y 的各个位及掩码重建 | 8 位掩码、位统计、探针、五通道重建与 PNG 导出 |
 | [LSB 隐写与统计实验](lsb-steganography-lab/README.md) | 在像素低位写入有限载荷并观察脆弱性 | ILSB Frame、槽位、统计、BER、报告和资源边界 |
+| [卷积核实验台](convolution-playground/README.md) | 编辑卷积核并联动观察空间结果与频率响应 | 真卷积、边界、归一化、双核梯度、解释与门禁 |
 
 跨能力的架构、领域边界、工作台命令、工作流和发布资料见 [公共设计资料](shared/README.md)。
 
@@ -24,4 +25,4 @@
 - `testing.md`：自动测试、本地命令、已证明与未证明的结论。
 - `history/`：各阶段实际实施记录，不作为当前入口文档。
 
-七项能力均已完成开发实现与本地自动门禁；这些状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。
+八项能力均已完成开发实现与本地自动门禁。上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。

@@ -9,6 +9,7 @@ using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
+using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using ImageLabPlugin.Domain.Frequency;
@@ -23,14 +24,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献八个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献九个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -62,6 +63,8 @@ public sealed class CompositionAndPersistenceTests
         var secondBitPlane = secondScope.ServiceProvider.GetRequiredService<BitPlaneViewerDocument>();
         var lsb = firstScope.ServiceProvider.GetRequiredService<LsbSteganographyLabDocument>();
         var secondLsb = secondScope.ServiceProvider.GetRequiredService<LsbSteganographyLabDocument>();
+        var convolution = firstScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundDocument>();
+        var secondConvolution = secondScope.ServiceProvider.GetRequiredService<ConvolutionPlaygroundDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -72,6 +75,11 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(fingerprint, secondFingerprint);
         Assert.NotSame(bitPlane, secondBitPlane);
         Assert.NotSame(lsb, secondLsb);
+        Assert.NotSame(convolution, secondConvolution);
+        convolution.SourcePath = "scope-convolution-one";
+        convolution.KernelText = "0 0 0\n0 1 0\n0 0 0";
+        Assert.Empty(secondConvolution.SourcePath);
+        Assert.NotEqual(convolution.KernelText, secondConvolution.KernelText);
         lsb.SourcePath = "scope-lsb-one";
         lsb.SeedText = "42";
         Assert.Empty(secondLsb.SourcePath);

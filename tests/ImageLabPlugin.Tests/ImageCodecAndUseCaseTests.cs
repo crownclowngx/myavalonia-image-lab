@@ -30,6 +30,7 @@ using ImageLabPlugin.Domain.Steganography;
 using ImageLabPlugin.Domain.Comparison;
 using ImageLabPlugin.Domain.Robustness.Operators;
 using ImageLabPlugin.Features.LsbSteganographyLab;
+using ImageLabPlugin.Features.ConvolutionPlayground;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -71,7 +72,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 八个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 九个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -88,6 +89,7 @@ public sealed class ImageCodecAndUseCaseTests
         var bitPlaneView = new BitPlaneViewerView();
         var bitPlanePreview = new BitPlanePreviewControl();
         var lsbView = new LsbSteganographyLabView();
+        var convolutionView = new ConvolutionPlaygroundView();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -108,6 +110,8 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(bitPlanePreview);
         Assert.NotNull(lsbView.Content);
         Assert.NotSame(bitPlaneView.Content, lsbView.Content);
+        Assert.NotNull(convolutionView.Content);
+        Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
     [Fact]

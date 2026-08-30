@@ -34,7 +34,7 @@ ImageLab 的长期边界是：
 
 ## 当前能力基线
 
-当前 V1 已经提供八个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”和“LSB 隐写与统计实验”。底层已经具备：
+当前 V1 已经提供九个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”和“卷积核实验台”。底层已经具备：
 
 - 自有 RGBA8888 `PixelImage` 与受限图像尺寸模型。
 - RGB 与 YCbCr 亮度投影和重建。
@@ -175,7 +175,7 @@ LSB 写入、统计隐写检测、AIFLOW、Windows CI 和发布门禁仍不在�
 
 V1 已按[专用实施与证据入口](design/lsb-steganography-lab/README.md)实现独立 `ILSB` Frame、R/G/B/RGB、bit0/1、顺序/伪随机位置、PNG 双重自检、位分布/PoV 卡方/邻接统计和有限脆弱性预设。该能力明确标注为教学和实验用途，不能宣称不可检测，也不与现有鲁棒频域水印混为同一协议。
 
-### 7. Convolution Playground／卷积核实验台
+### 7. Convolution Playground／卷积核实验台（V1 已实现）
 
 允许选择或输入卷积核，并实时查看空间域卷积结果：
 
@@ -187,6 +187,10 @@ V1 已按[专用实施与证据入口](design/lsb-steganography-lab/README.md)�
 - 原图、结果、差异和频率响应联动。
 
 它不应演变为普通美图滤镜集合，重点应放在核参数、频率响应和可解释重建上。
+
+V1 已按[专用实施与证据入口](design/convolution-playground/README.md)实现为第九个多实例 Persistable Document，使用
+3×3 至 31×31 奇数方核、真二维离散卷积、四种边界与归一化、六单通道/RGB、双核梯度、分析代理联动、
+256² 核频响、像素贡献和显式完整尺寸 PNG 导出；没有引入 AIFLOW、通用滤镜链、Windows CI 或发布门禁。
 
 ### 8. Wavelet Lab／小波实验室
 

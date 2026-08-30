@@ -1,6 +1,6 @@
 # ImageLab 文档中心
 
-ImageLab 当前提供七项核心能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器和 LSB 隐写与统计实验。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
+ImageLab 当前提供八项核心能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验和卷积核实验台。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
 
 ## 我是第一次使用
 
@@ -13,6 +13,7 @@ ImageLab 当前提供七项核心能力：频域隐式水印、频域分析器�
 5. [感知指纹新手说明书](design/image-fingerprint/user-manual.md)：比较两张图片的 aHash、dHash 和 pHash。
 6. [位平面观察器新手说明书](design/bit-plane-viewer/user-manual.md)：从 bit 7、bit 0 和掩码开始观察 8 位通道。
 7. [LSB 隐写与统计实验新手说明书](design/lsb-steganography-lab/user-manual.md)：写入独立像素域 Frame，并观察位置、统计和脆弱性。
+8. [卷积核实验台新手说明书](design/convolution-playground/user-manual.md)：编辑空间核并观察边界、差异、频响和像素贡献。
 
 ## 我需要开发或维护
 
@@ -25,7 +26,7 @@ ImageLab 当前提供七项核心能力：频域隐式水印、频域分析器�
 - `mathematical-principles.md`：涉及的数学原理背景；
 - `history/`：实施阶段记录。
 
-公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；LSB 能力从[专用入口](design/lsb-steganography-lab/README.md)进入。
+公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；卷积能力从[专用入口](design/convolution-playground/README.md)进入。
 
 ## 项目与最短开发流程
 
@@ -54,6 +55,6 @@ Standalone 适合检查 AXAML、编译绑定、命令和插件对象图，不能
 - `myavalonia.plugin.image.lab` 是持久身份，不能随显示名或目录名改变。
 - manifest 由构建生成，不手工长期维护。
 - 插件只通过公开 Plugin SDK 接入 Host，不引用 Host 内部项目。
-- 当前实现登记八个 Persistable Document，分别是水印写入、提取与验证、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器和 LSB 隐写与统计实验。
+- 当前实现登记九个 Persistable Document，分别是水印写入、提取与验证、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验和卷积核实验台。
 - 当前不登记 Tool、Workflow Action 或 Workbench Command，也不使用 AIFLOW。
 - 当前没有执行 Windows CI、真实 Host、ZIP 和发布封板，不能用 Standalone 结果冒充这些结论。

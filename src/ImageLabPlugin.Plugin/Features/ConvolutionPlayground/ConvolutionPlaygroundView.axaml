@@ -1,0 +1,120 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.ConvolutionPlayground.ConvolutionPlaygroundView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.ConvolutionPlayground"
+    x:DataType="vm:ConvolutionPlaygroundDocument">
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+    <Border Background="#153A52" BorderBrush="#4CA6D8" BorderThickness="1" CornerRadius="4" Padding="10">
+      <TextBlock Text="可解释的真二维卷积实验台：矩阵按中心锚点读取 f(x-kx,y-ky)。代理用于交互，只有显式完整尺寸结果可导出 PNG。" TextWrapping="Wrap" AutomationProperties.Name="卷积约定与导出说明" />
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="370,*" ColumnSpacing="12">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="8">
+          <TextBlock Text="图片与执行" FontSize="18" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+            <Button Command="{Binding SelectSourceCommand}" Content="选择图片" AutomationProperties.Name="选择 PNG 或 JPEG" />
+            <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="PNG/JPEG 路径" />
+            <Button Grid.Column="2" Command="{Binding LoadSourceCommand}" Content="载入并预览" />
+          </Grid>
+          <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding AnalysisEdgeOptions}" SelectedItem="{Binding AnalysisMaximumEdge}" AutomationProperties.Name="分析代理最大边" />
+            <Button Grid.Column="1" Command="{Binding RenderPreviewCommand}" Content="重新预览" IsEnabled="{Binding HasSession}" />
+            <Button Grid.Column="2" Command="{Binding RenderFullCommand}" Content="完整尺寸" IsEnabled="{Binding HasSession}" />
+            <Button Grid.Column="3" Command="{Binding CancelCommand}" Content="取消" IsEnabled="{Binding IsOperationBusy}" />
+          </Grid>
+          <Button Command="{Binding ExportCommand}" Content="导出当前完整尺寸 PNG" IsEnabled="{Binding CanExport}" />
+          <TextBlock Text="{Binding FullResultSummary}" TextWrapping="Wrap" FontFamily="Consolas" />
+
+          <TextBlock Text="核与参数" FontSize="18" FontWeight="SemiBold" Margin="0,5,0,0" />
+          <Grid ColumnDefinitions="*,90,Auto" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding PresetOptions}" SelectedItem="{Binding SelectedPreset}" AutomationProperties.Name="卷积核预设稳定 ID" />
+            <NumericUpDown Grid.Column="1" Minimum="3" Maximum="31" Increment="2" Value="{Binding KernelSize}" AutomationProperties.Name="奇数核尺寸" />
+            <Button Grid.Column="2" Command="{Binding ApplyPresetCommand}" Content="应用预设" />
+          </Grid>
+          <Grid ColumnDefinitions="Auto,70,Auto,70,Auto,70" ColumnSpacing="5">
+            <TextBlock Text="sigma" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1" Minimum="0.1" Maximum="5" Increment="0.1" Value="{Binding Sigma}" />
+            <TextBlock Grid.Column="2" Text="amount" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="3" Minimum="0" Maximum="5" Increment="0.1" Value="{Binding Amount}" />
+            <TextBlock Grid.Column="4" Text="A" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="5" Minimum="1" Maximum="6" Increment="0.1" Value="{Binding HighBoostA}" />
+          </Grid>
+          <Grid ColumnDefinitions="Auto,70,Auto,70,Auto,70" ColumnSpacing="5">
+            <TextBlock Text="运动长度" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1" Minimum="1" Maximum="31" Increment="1" Value="{Binding MotionLength}" />
+            <TextBlock Grid.Column="2" Text="角度°" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="3" Minimum="-360" Maximum="360" Increment="15" Value="{Binding AngleDegrees}" />
+            <TextBlock Grid.Column="4" Text="浮雕强度" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="5" Minimum="0" Maximum="5" Increment="0.1" Value="{Binding EmbossStrength}" />
+          </Grid>
+          <TextBox Text="{Binding KernelText}" AcceptsReturn="True" MinHeight="145" FontFamily="Consolas" TextWrapping="NoWrap" AutomationProperties.Name="自定义核矩阵，按行输入" />
+          <TextBlock Text="列可用空格、Tab、逗号或分号；行用换行。必须是 3..31 的奇数方阵，数字使用点号小数。" TextWrapping="Wrap" Opacity="0.8" />
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+            <TextBlock Text="{Binding KernelSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="核矩阵等价数值摘要" />
+          </Border>
+
+          <TextBlock Text="边界、归一化与通道" FontSize="18" FontWeight="SemiBold" Margin="0,5,0,0" />
+          <Grid ColumnDefinitions="*,100" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding BorderOptions}" SelectedItem="{Binding SelectedBorder}" AutomationProperties.Name="边界策略" />
+            <NumericUpDown Grid.Column="1" Minimum="-1024" Maximum="1024" Value="{Binding ConstantBorderValue}" AutomationProperties.Name="常量边界值" />
+          </Grid>
+          <Grid ColumnDefinitions="*,100,100" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding NormalizationOptions}" SelectedItem="{Binding SelectedNormalization}" AutomationProperties.Name="归一化策略" />
+            <NumericUpDown Grid.Column="1" Minimum="-1000000" Maximum="1000000" Value="{Binding ExplicitDivisor}" AutomationProperties.Name="显式除数" />
+            <NumericUpDown Grid.Column="2" Minimum="-4096" Maximum="4096" Value="{Binding Bias}" AutomationProperties.Name="输出偏置" />
+          </Grid>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" AutomationProperties.Name="处理通道" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding GradientOutputOptions}" SelectedItem="{Binding SelectedGradientOutput}" AutomationProperties.Name="梯度输出 X Y 或 Magnitude" />
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="10">
+          <TextBlock Text="空间结果与差异" FontSize="20" FontWeight="SemiBold" />
+          <Grid RowDefinitions="260,260" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="8">
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+              <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="分析代理原图" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding SourcePreview}" Stretch="Uniform" AutomationProperties.Name="代理原图" /></Grid>
+            </Border>
+            <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+              <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="真卷积结果" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding ResultPreview}" Stretch="Uniform" AutomationProperties.Name="代理卷积结果" /></Grid>
+            </Border>
+            <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+              <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="RGB 绝对差异 ×4" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding DifferencePreview}" Stretch="Uniform" AutomationProperties.Name="绝对差异图" /></Grid>
+            </Border>
+            <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+              <Grid RowDefinitions="Auto,*"><Grid ColumnDefinitions="*,Auto"><TextBlock Margin="6" Text="256² 核频率响应" FontWeight="SemiBold" /><CheckBox Grid.Column="1" Margin="6" Content="相位" IsChecked="{Binding ShowPhaseResponse}" /></Grid><Image Grid.Row="1" Source="{Binding ResponsePreview}" Stretch="Uniform" AutomationProperties.Name="核频率响应" /></Grid>
+            </Border>
+          </Grid>
+          <TextBlock Text="{Binding ResultSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="代理结果数值摘要" />
+          <TextBlock Text="{Binding ResponseSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="频率响应数值摘要" />
+          <TextBlock Text="像素探针与贡献" FontSize="18" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="Auto,90,Auto,90,Auto" ColumnSpacing="6">
+            <TextBlock Text="X" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="2047" Value="{Binding ProbeX}" />
+            <TextBlock Grid.Column="2" Text="Y" VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="3" Minimum="0" Maximum="2047" Value="{Binding ProbeY}" />
+            <Button Grid.Column="4" Command="{Binding InspectPixelCommand}" Content="复算贡献" IsEnabled="{Binding HasPreview}" />
+          </Grid>
+          <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" FontFamily="Consolas" AutomationProperties.Name="像素贡献等价数值" />
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="9">
+            <TextBlock Text="解释边界：锐化只增强局部变化，不恢复已丢失细节；Magnitude 是 sqrt(Gx²+Gy²) 的非线性组合；频响不包含偏置、边界、裁切；YCbCr 回写可能发生 RGB 色域裁切。" TextWrapping="Wrap" />
+          </Border>
+          <Expander Header="卷积、边界、DC 与代理帮助">
+            <TextBlock Margin="8" Text="{Binding HelpSummary}" TextWrapping="Wrap" AutomationProperties.Name="卷积实验帮助" />
+          </Expander>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.Name="卷积实验状态与结构化错误" />
+        <ProgressBar Grid.Column="1" Width="140" IsIndeterminate="True" IsVisible="{Binding IsOperationBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

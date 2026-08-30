@@ -24,6 +24,8 @@ using ImageLabPlugin.Domain.BitPlanes;
 using ImageLabPlugin.Application.LsbSteganography;
 using ImageLabPlugin.Domain.Steganography;
 using ImageLabPlugin.Infrastructure.Steganography;
+using ImageLabPlugin.Application.Convolution;
+using ImageLabPlugin.Domain.Convolution;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -147,6 +149,21 @@ public static class ImageLabPluginServices
         services.AddSingleton<IExportLsbReportUseCase, ExportLsbReportUseCase>();
         services.AddSingleton<ILoadLsbPayloadUseCase, LoadLsbPayloadUseCase>();
         services.AddSingleton<IInspectLsbPixelUseCase, InspectLsbPixelUseCase>();
+        // 卷积领域类均为无状态数学服务；Document/Session 才拥有每实例图片、结果和取消状态。
+        services.AddSingleton<ConvolutionKernelParser>();
+        services.AddSingleton<ConvolutionPresetFactory>();
+        services.AddSingleton<SpatialConvolver>();
+        services.AddSingleton<GradientCombiner>();
+        services.AddSingleton<ConvolutionImageProcessor>();
+        services.AddSingleton<KernelFrequencyResponseAnalyzer>();
+        services.AddSingleton<ConvolutionDifferenceProjector>();
+        services.AddSingleton<ConvolutionPixelInspector>();
+        services.AddSingleton<IPrepareConvolutionSessionUseCase, PrepareConvolutionSessionUseCase>();
+        services.AddSingleton<IRenderConvolutionPreviewUseCase, RenderConvolutionPreviewUseCase>();
+        services.AddSingleton<IInspectConvolutionPixelUseCase, InspectConvolutionPixelUseCase>();
+        services.AddSingleton<IRenderKernelResponseUseCase, RenderKernelResponseUseCase>();
+        services.AddSingleton<IRenderFullConvolutionUseCase, RenderFullConvolutionUseCase>();
+        services.AddSingleton<IExportConvolutionImageUseCase, ExportConvolutionImageUseCase>();
         return services;
     }
 }

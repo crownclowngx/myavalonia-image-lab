@@ -36,4 +36,8 @@ public static class PluginIds
     /// <summary>“LSB 隐写与统计实验”多实例教学工作上下文的持久身份。</summary>
     public static readonly DocumentTypeId LsbSteganographyLabDocument =
         new("myavalonia.plugin.image.lab.document.lsb-steganography-lab");
+
+    /// <summary>“卷积核实验台”多实例空间卷积教学工作上下文的持久身份。</summary>
+    public static readonly DocumentTypeId ConvolutionPlaygroundDocument =
+        new("myavalonia.plugin.image.lab.document.convolution-playground");
 }

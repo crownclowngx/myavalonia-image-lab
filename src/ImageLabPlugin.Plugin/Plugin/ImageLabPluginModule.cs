@@ -8,6 +8,7 @@ using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Features.LsbSteganographyLab;
+using ImageLabPlugin.Features.ConvolutionPlayground;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -66,5 +67,11 @@ public sealed class ImageLabPluginModule : IPluginModule
                 "LSB 隐写与统计实验",
                 "以像素低位写入、位置可视化、统计对比和受控扰动观察 LSB 隐写的可检测性与脆弱性",
                 "图像安全"));
+        registration.AddPersistableDocument<ConvolutionPlaygroundDocument, ConvolutionPlaygroundView>(
+            new DocumentDescriptor(
+                PluginIds.ConvolutionPlaygroundDocument,
+                "卷积核实验台",
+                "编辑空间卷积核，并联动观察边界、差异、像素贡献和频率响应",
+                "图像分析"));
     }
 }
