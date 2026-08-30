@@ -1,5 +1,7 @@
 # 频域隐式水印使用说明
 
+第一次接触隐式水印时，建议先阅读 [新手使用说明书](user-manual.md)；公式与纠错背景见 [数学原理](mathematical-principles.md)。
+
 ## 水印写入
 
 打开“水印写入”Document，选择 PNG/JPEG 源图片，输入文本或 JSON，也可以选择任意 Payload 文件。先执行“估算容量”，再选择隐蔽、均衡或鲁棒配置。容量不足时工具不会修改源图，也不会自动截断 Payload。

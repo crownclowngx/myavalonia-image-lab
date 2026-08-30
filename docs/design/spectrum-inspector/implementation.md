@@ -9,14 +9,14 @@
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 已完成 | 冻结产品范围、数学语义、资源预算、交互与依赖决策 | `docs/plan-history/spectrum-inspector/g0-product-and-numeric-baseline.md` |
-| G1 | 已完成 | 建立六通道、分析代理和图像重建基础 | `docs/plan-history/spectrum-inspector/g1-channel-and-analysis-proxy.md` |
-| G2 | 已完成 | 完成可取消、可验证的 FFT/IFFT 公共频域核心 | `docs/plan-history/spectrum-inspector/g2-fft-foundation.md` |
-| G3 | 已完成 | 完成全局频谱、分块 DCT、频点查询与径向能量分析 | `docs/plan-history/spectrum-inspector/g3-spectrum-analysis.md` |
-| G4 | 已完成 | 完成共轭对称频带遮罩和 IFFT 重建 | `docs/plan-history/spectrum-inspector/g4-band-reconstruction.md` |
-| G5 | 已完成 | 完成 Persistable Document、生命周期与快照 | `docs/plan-history/spectrum-inspector/g5-document-lifecycle.md` |
-| G6 | 已完成（自动门禁） | 完成联动界面、Standalone 和 PNG 导出闭环 | `docs/plan-history/spectrum-inspector/g6-ui-and-export.md` |
-| G7 | 部分完成 | 自动测试、本地双配置门禁与文档完成；真实窗口人工验收延期 | `docs/plan-history/spectrum-inspector/g7-local-sealing.md` |
+| G0 | 已完成 | 冻结产品范围、数学语义、资源预算、交互与依赖决策 | [实施记录](history/g0-product-and-numeric-baseline.md) |
+| G1 | 已完成 | 建立六通道、分析代理和图像重建基础 | [实施记录](history/g1-channel-and-analysis-proxy.md) |
+| G2 | 已完成 | 完成可取消、可验证的 FFT/IFFT 公共频域核心 | [实施记录](history/g2-fft-foundation.md) |
+| G3 | 已完成 | 完成全局频谱、分块 DCT、频点查询与径向能量分析 | [实施记录](history/g3-spectrum-analysis.md) |
+| G4 | 已完成 | 完成共轭对称频带遮罩和 IFFT 重建 | [实施记录](history/g4-band-reconstruction.md) |
+| G5 | 已完成 | 完成 Persistable Document、生命周期与快照 | [实施记录](history/g5-document-lifecycle.md) |
+| G6 | 已完成（自动门禁） | 完成联动界面、Standalone 和 PNG 导出闭环 | [实施记录](history/g6-ui-and-export.md) |
+| G7 | 部分完成 | 自动测试、本地双配置门禁与文档完成；真实窗口人工验收延期 | [实施记录](history/g7-local-sealing.md) |
 
 本文定义 ImageLab 在频域隐式水印之后的第二个产品能力。它不是普通图片编辑器，也不是把当前水印页面中的
 “DCT 对数幅度”简单放大，而是一个可以解释空间位置、颜色通道、8×8 DCT 块和全局频谱关系的独立实验
@@ -642,7 +642,7 @@ DCT 分类使用：
 交付：
 
 - 审阅并冻结本文；
-- 创建 `docs/plan-history/spectrum-inspector/README.md` 和 G0 记录；
+- 创建 `docs/design/spectrum-inspector/history/README.md` 和 G0 记录；
 - 冻结通道公式、补零、中心化、频率坐标、能量和频带定义；
 - 冻结 512/1024/2048 档位、缓冲上限和 PNG 代理导出语义；
 - 冻结 Persistable Document、稳定 ID、快照字段和显式重新分析策略；
@@ -814,13 +814,18 @@ Document 和 View 重新塞进同一个类。
 ```text
 docs/
 ├─ design/
-│  └─ spectrum-inspector-v1-implementation-plan.md
-├─ spectrum-inspector-user-guide.md
-├─ spectrum-inspector-testing.md
-└─ plan-history/
-   └─ spectrum-inspector/
-      ├─ README.md
-      └─ g0-... 至 g7-...
+│  └─ spectrum-inspector/
+│     ├─ README.md
+│     ├─ implementation.md
+│     ├─ testing.md
+│     ├─ guide.md
+│     ├─ user-manual.md
+│     ├─ mathematical-principles.md
+│     └─ history/
+│        ├─ README.md
+│        └─ g0-... 至 g7-...
+├─ README.md
+└─ future-capabilities.md
 ```
 
 ## 15. 自动测试与质量门禁

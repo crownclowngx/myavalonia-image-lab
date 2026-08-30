@@ -11,7 +11,7 @@ dotnet test tests/ImageLabPlugin.Tests/ImageLabPlugin.Tests.csproj -c Release --
 ```
 
 频域水印实施封板时的基线是 44 个自动测试；这些回归继续全部通过。加入频域分析器后，仓库当前总数为
-68 个，新增部分的证据和命令见 [频域分析器测试门禁](spectrum-inspector-testing.md)。水印测试仍分成五层：
+68 个，新增部分的证据和命令见 [频域分析器测试门禁](../spectrum-inspector/testing.md)。水印测试仍分成五层：
 纯数值与 RS、Frame 与安全、频域载体、正式 PNG/JPEG 字节回读、Document/组合根/原子持久化。
 
 ## 已冻结的开发门禁

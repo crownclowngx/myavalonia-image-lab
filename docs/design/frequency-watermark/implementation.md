@@ -9,16 +9,16 @@
 
 | V1 实施包 | 状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 完成 | 冻结产品、威胁模型、质量口径、协议边界与依赖决策 | [实施记录](../plan-history/frequency-watermark/g0-product-protocol-baseline.md) |
-| G1 | 完成 | 用两个真实 Document 替换模板示例并建立 Standalone 贡献浏览基线 | [实施记录](../plan-history/frequency-watermark/g1-two-document-shell.md) |
-| G2 | 完成 | 建立可供后续图像工具复用的 Imaging/Frequency Domain | [实施记录](../plan-history/frequency-watermark/g2-imaging-frequency-domain.md) |
-| G3 | 完成 | 冻结版本化二进制 Frame、压缩、加密和安全边界 | [实施记录](../plan-history/frequency-watermark/g3-frame-and-security.md) |
-| G4 | 完成 | 完成容量规划、DCT-QIM 嵌入和输出图生成 | [实施记录](../plan-history/frequency-watermark/g4-embedding-engine.md) |
-| G5 | 完成 | 完成检测、提取、ECC 恢复和验证报告 | [实施记录](../plan-history/frequency-watermark/g5-extraction-and-verification.md) |
-| G6 | 完成 | 完成“水印写入”Document 的真实交互闭环 | [实施记录](../plan-history/frequency-watermark/g6-embed-document.md) |
-| G7 | 完成 | 完成“提取与验证”Document 的真实交互闭环 | [实施记录](../plan-history/frequency-watermark/g7-inspect-document.md) |
-| G8 | 完成（开发门禁） | 建立质量、鲁棒性、错误检测、性能和安全门禁 | [实施记录](../plan-history/frequency-watermark/g8-quality-and-robustness.md) |
-| G9 | 本地集成完成；发布延期 | 完成 Standalone、本地构建测试与文档；真实 Host、ZIP、CI、发布封板未执行 | [实施记录](../plan-history/frequency-watermark/g9-integration-and-sealing.md) |
+| G0 | 完成 | 冻结产品、威胁模型、质量口径、协议边界与依赖决策 | [实施记录](history/g0-product-protocol-baseline.md) |
+| G1 | 完成 | 用两个真实 Document 替换模板示例并建立 Standalone 贡献浏览基线 | [实施记录](history/g1-two-document-shell.md) |
+| G2 | 完成 | 建立可供后续图像工具复用的 Imaging/Frequency Domain | [实施记录](history/g2-imaging-frequency-domain.md) |
+| G3 | 完成 | 冻结版本化二进制 Frame、压缩、加密和安全边界 | [实施记录](history/g3-frame-and-security.md) |
+| G4 | 完成 | 完成容量规划、DCT-QIM 嵌入和输出图生成 | [实施记录](history/g4-embedding-engine.md) |
+| G5 | 完成 | 完成检测、提取、ECC 恢复和验证报告 | [实施记录](history/g5-extraction-and-verification.md) |
+| G6 | 完成 | 完成“水印写入”Document 的真实交互闭环 | [实施记录](history/g6-embed-document.md) |
+| G7 | 完成 | 完成“提取与验证”Document 的真实交互闭环 | [实施记录](history/g7-inspect-document.md) |
+| G8 | 完成（开发门禁） | 建立质量、鲁棒性、错误检测、性能和安全门禁 | [实施记录](history/g8-quality-and-robustness.md) |
+| G9 | 本地集成完成；发布延期 | 完成 Standalone、本地构建测试与文档；真实 Host、ZIP、CI、发布封板未执行 | [实施记录](history/g9-integration-and-sealing.md) |
 
 本文是 ImageLabPlugin 的第一个产品能力总计划。V1 不把需求定义成“在 FFT 图上画字”，而是定义成：
 
@@ -29,7 +29,7 @@
 能够对抗掌握算法的主动移除者，也不把扰码或位置映射描述成密码学加密。
 
 每个 G 包完成后，必须把实际修改、测试结果、性能与质量数据、偏差、遗留风险和回滚方式写入对应的
-`docs/plan-history/frequency-watermark/` 记录。本文定义目标与门禁，不预填完成结论。
+`docs/design/frequency-watermark/history/` 记录。本文定义目标与门禁，不预填完成结论。
 
 ## 1. V1 目标与固定实施顺序
 
@@ -942,18 +942,20 @@ tests/ImageLabPlugin.Tests/
 
 ```text
 docs/
-  design/
-    frequency-watermark-v1-implementation-plan.md
-  frequency-watermark/
-    protocol-v1.md
-    quality-profiles-v1.md
-    security-and-threat-model.md
-    test-assets.md
-    troubleshooting.md
-  plan-history/frequency-watermark/
-    g0-*.md
-    ...
-    g9-*.md
+├─ design/
+│  └─ frequency-watermark/
+│     ├─ README.md
+│     ├─ implementation.md
+│     ├─ protocol.md
+│     ├─ testing.md
+│     ├─ guide.md
+│     ├─ user-manual.md
+│     ├─ mathematical-principles.md
+│     └─ history/
+│        ├─ README.md
+│        └─ g0-... 至 g9-...
+├─ README.md
+└─ future-capabilities.md
 ```
 
 ## 14. 自动测试与验收矩阵

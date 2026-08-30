@@ -71,7 +71,7 @@ V1 已实现能力：
 - 联动显示原图、频谱、遮罩和重建图。
 - 支持线性、对数和归一化等不同频谱显示方式。
 
-V1 实施证据见 `docs/plan-history/spectrum-inspector/`。后续扩展必须留在 Frequency Filter、Mask Editor、
+V1 实施证据见 `docs/design/spectrum-inspector/history/`。后续扩展必须留在 Frequency Filter、Mask Editor、
 Periodic Noise Removal 等独立设计中，不能静默扩大 V1。
 
 ### 2. Image Compare Lab／图像比较实验室（V1 已实现）
@@ -89,7 +89,7 @@ V1 已实现能力：
 - 尺寸不同图像的结构化可见阻断，不执行隐式变换。
 - 输出统一的比较摘要，供其他实验 Document 复用。
 
-V1 已按独立[实施计划](design/image-compare-lab-v1-implementation-plan.md)完成同尺寸双图的同步视觉比较、
+V1 已按独立[实施计划](design/image-compare-lab/implementation.md)完成同尺寸双图的同步视觉比较、
 像素检查、固定量纲差异/热力图、PSNR、全局 SSIM、六通道直方图和统一摘要。尺寸不同只给出可见阻断，
 不做隐式缩放或对齐。局部 SSIM、MS-SSIM、Delta E、边缘/纹理指标和对齐继续留在独立后续设计中确定
 精度、性能和数据集门禁，不属于当前 V1。
@@ -124,7 +124,7 @@ V1 已实现结果：
 JPEG 在这里表示图像传输信道中的有损扰动，不表示 ImageLab 要发展为通用格式转换器。
 
 实现采用一个扫描轴、最多 12 步、101 点、20 trial、300 案例和 1,200 分步观察的受控模型；随机噪声使用
-SHA-256/SplitMix64-v1 稳定派生，正式水印仍使用密码学随机源。完整实现证据见 `docs/plan-history/robustness-lab/`。
+SHA-256/SplitMix64-v1 稳定派生，正式水印仍使用密码学随机源。完整实现证据见 `docs/design/robustness-lab/history/`。
 多参数网格、自动攻击搜索、外部已有水印图观察模式、隐藏几何配准、并行批处理和运行时第三方算子继续属于 V2 候选，
 不得以通用工作流或 AIFLOW 偷渡进 V1。
 

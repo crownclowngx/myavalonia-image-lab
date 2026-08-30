@@ -1,5 +1,7 @@
 # 频域分析器用户指南
 
+第一次接触频域分析时，建议先阅读 [新手使用说明书](user-manual.md)；FFT、DCT 和频带背景见 [数学原理](mathematical-principles.md)。
+
 ## 能做什么
 
 “频域分析器”是 ImageLab 的第三个 Persistable Document。每个实例独立保存图片路径、通道、分析档位、

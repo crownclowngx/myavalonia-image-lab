@@ -12,7 +12,7 @@
 - 质量：写入返回 PSNR/全局 SSIM；PNG 用例要求 PSNR > 20 dB，JPEG 编解码要求 PSNR > 20 dB、SSIM > 0.70。
 - 资源：64 MiB 编码文件读取前拒绝、16M 像素、1024 最大边分析预览和 16 MiB Payload 上限、Document 取消与 Scope 隔离。
 
-复现命令见 [测试文档](../../frequency-watermark-testing.md)。当前完整 Debug 结果为 44/44。
+复现命令见 [测试文档](../testing.md)。当前完整 Debug 结果为 44/44。
 
 ## 结论边界
 

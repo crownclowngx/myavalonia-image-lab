@@ -10,16 +10,16 @@
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 完成 | 冻结产品范围、术语、指标、随机性、资源和失败语义 | `docs/plan-history/robustness-lab/g0-product-and-metric-baseline.md` |
-| G1 | 完成 | 建立实验配方、扫描计划、结果值对象和资源预算验证 | `docs/plan-history/robustness-lab/g1-experiment-domain.md` |
-| G2 | 完成 | 完成确定性像素、噪声和颜色扰动算子 | `docs/plan-history/robustness-lab/g2-pixel-and-color-operators.md` |
-| G3 | 完成 | 完成模糊、锐化和几何扰动算子 | `docs/plan-history/robustness-lab/g3-filter-and-geometry-operators.md` |
-| G4 | 完成 | 完成 JPEG 信道和显式扰动链执行器 | `docs/plan-history/robustness-lab/g4-jpeg-and-chain-execution.md` |
-| G5 | 完成 | 建立水印原始读数、BER、纠错和失败原因诊断 | `docs/plan-history/robustness-lab/g5-watermark-diagnostics.md` |
-| G6 | 完成 | 完成扫描编排、分步探针、Profile 矩阵、质量指标和 Session | `docs/plan-history/robustness-lab/g6-experiment-use-cases.md` |
-| G7 | 完成 | 完成 Persistable Document、取消、快照、导出和资源生命周期 | `docs/plan-history/robustness-lab/g7-document-lifecycle.md` |
-| G8 | 完成 | 完成曲线、矩阵、分步解释和可访问界面 | `docs/plan-history/robustness-lab/g8-ui-and-explanation.md` |
-| G9 | 完成（本地开发） | 完成本地双配置门禁、专用文档与开发阶段封板 | `docs/plan-history/robustness-lab/g9-local-sealing.md` |
+| G0 | 完成 | 冻结产品范围、术语、指标、随机性、资源和失败语义 | [实施记录](history/g0-product-and-metric-baseline.md) |
+| G1 | 完成 | 建立实验配方、扫描计划、结果值对象和资源预算验证 | [实施记录](history/g1-experiment-domain.md) |
+| G2 | 完成 | 完成确定性像素、噪声和颜色扰动算子 | [实施记录](history/g2-pixel-and-color-operators.md) |
+| G3 | 完成 | 完成模糊、锐化和几何扰动算子 | [实施记录](history/g3-filter-and-geometry-operators.md) |
+| G4 | 完成 | 完成 JPEG 信道和显式扰动链执行器 | [实施记录](history/g4-jpeg-and-chain-execution.md) |
+| G5 | 完成 | 建立水印原始读数、BER、纠错和失败原因诊断 | [实施记录](history/g5-watermark-diagnostics.md) |
+| G6 | 完成 | 完成扫描编排、分步探针、Profile 矩阵、质量指标和 Session | [实施记录](history/g6-experiment-use-cases.md) |
+| G7 | 完成 | 完成 Persistable Document、取消、快照、导出和资源生命周期 | [实施记录](history/g7-document-lifecycle.md) |
+| G8 | 完成 | 完成曲线、矩阵、分步解释和可访问界面 | [实施记录](history/g8-ui-and-explanation.md) |
+| G9 | 完成（本地开发） | 完成本地双配置门禁、专用文档与开发阶段封板 | [实施记录](history/g9-local-sealing.md) |
 
 本文定义 ImageLab 在频域水印、频域分析器和图像比较实验室之后的下一个产品能力。它不是一个只有
 “攻击图片”按钮的演示页，而是一个可以复现实验配方、解释第一次失败位置、比较三种 Profile 并导出原始结果的
@@ -869,7 +869,7 @@ CSV 不展开完整分步观察和局部网格；需要完整证据时使用 JSO
 - 冻结成功、两类 BER、RS、置信度、质量、局部网格和第一次失败定义；
 - 冻结算子参数、插值、边界、舍入、随机性和 Alpha 语义；
 - 冻结步骤/案例上限、串行执行和敏感数据边界；
-- 建立 `docs/plan-history/robustness-lab/README.md` 与 G0 记录；
+- 建立 `docs/design/robustness-lab/history/README.md` 与 G0 记录；
 - 复跑现有 97 项基线并记录实际证据。
 
 门禁：术语无二义性；不存在无法计算却写为 0 的指标；没有代码改动；97 项现有测试不回归。
@@ -1044,13 +1044,16 @@ tests/ImageLabPlugin.Tests/
 
 实现期间必须新增或同步：
 
-- `docs/robustness-lab-user-guide.md`：用户操作、指标、失败解释和限制；
-- `docs/robustness-lab-testing.md`：自动测试、本地命令、实际数量和未执行门禁；
-- `docs/design/robustness-lab-report-schema.md`：JSON/CSV schema、版本和隐私边界；
-- `docs/design/image-domain-boundaries.md`：补充扰动、诊断与比较职责；
+- `docs/design/robustness-lab/README.md`：能力入口与阅读顺序；
+- `docs/design/robustness-lab/guide.md`：用户操作、指标、失败解释和限制；
+- `docs/design/robustness-lab/user-manual.md`：从受控实验基础概念开始的新手说明；
+- `docs/design/robustness-lab/mathematical-principles.md`：扫描、概率、BER、纠错和质量指标背景；
+- `docs/design/robustness-lab/testing.md`：自动测试、本地命令、实际数量和未执行门禁；
+- `docs/design/robustness-lab/report-schema.md`：JSON/CSV schema、版本和隐私边界；
+- `docs/design/shared/image-domain-boundaries.md`：补充扰动、诊断与比较职责；
 - `docs/future-capabilities.md`：把本能力从候选更新为实际阶段，并保留 V2 边界；
 - `docs/README.md` 与根 `README.md`：新增第五个 Document 和文档入口；
-- `docs/plan-history/robustness-lab/README.md` 及 G0–G9 实施记录。
+- `docs/design/robustness-lab/history/README.md` 及 G0–G9 实施记录。
 
 “同步文档”是每个 G 包的完成条件，不允许到 G9 才补写所有说明。用户指南和测试文档必须写实际行为，不能复制本计划中的
 未来时描述。
@@ -1131,7 +1134,7 @@ dotnet test tests/ImageLabPlugin.Tests/ImageLabPlugin.Tests.csproj -c Release --
 ```
 
 本地 Release 只表示另一编译配置的开发回归，不代表发布。当前禁止把 Windows CI、ZIP、真实 Host 或安装测试加入
-G9 完成条件；准备发布时再按 `docs/deployment-and-release.md` 单独启用。
+G9 完成条件；准备发布时再按 `docs/design/shared/deployment-and-release.md` 单独启用。
 
 ## 19. 人工验收场景
 

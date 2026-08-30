@@ -19,21 +19,13 @@ dotnet run --project src/ImageLabPlugin.Standalone
 ```
 
 当前阶段不执行 Windows CI、ZIP 或发布门禁。准备发布时再按照
-[部署与发布文档](docs/deployment-and-release.md)执行真实 Host 和正式包验收。
+[部署与发布文档](docs/design/shared/deployment-and-release.md)执行真实 Host 和正式包验收。
 
-完整设计从 [V1 实施计划](docs/design/frequency-watermark-v1-implementation-plan.md) 开始；协议与安全细节见
-[V1 协议](docs/design/frequency-watermark-v1-protocol.md)，使用方式见
-[用户说明](docs/frequency-watermark-user-guide.md)。
+全部资料从 [文档中心](docs/README.md) 或 [设计文档总览](docs/design/README.md) 进入。四项能力各自拥有统一目录：
 
-频域分析器从 [V1 实施计划](docs/design/spectrum-inspector-v1-implementation-plan.md) 开始；使用方式和数值语义见
-[频域分析器用户指南](docs/spectrum-inspector-user-guide.md)，自动证据见
-[频域分析器测试门禁](docs/spectrum-inspector-testing.md)。
+- [频域隐式水印](docs/design/frequency-watermark/README.md)
+- [频域分析器](docs/design/spectrum-inspector/README.md)
+- [图像比较实验室](docs/design/image-compare-lab/README.md)
+- [鲁棒性实验室](docs/design/robustness-lab/README.md)
 
-图像比较实验室的设计见 [V1 实施计划](docs/design/image-compare-lab-v1-implementation-plan.md)，使用方式见
-[用户指南](docs/image-compare-lab-user-guide.md)，自动证据见
-[测试门禁](docs/image-compare-lab-testing.md)。当前实现完成本地开发自动门禁；真实 Host、ZIP、Windows CI 与发布封板仍未执行。
-
-鲁棒性实验室的设计见 [V1 实施计划](docs/design/robustness-lab-v1-implementation-plan.md)，使用方式见
-[专用用户指南](docs/robustness-lab-user-guide.md)，自动证据与本地命令见
-[专用测试门禁](docs/robustness-lab-testing.md)，报告兼容格式见
-[schema 1](docs/design/robustness-lab-report-schema.md)。该能力不使用 AIFLOW，当前也未加入 Windows CI 或发布门禁。
+每个目录都包含现有实施计划、测试门禁、详细指南、新手使用说明、数学原理和实施历史。当前实现完成本地开发自动门禁；真实 Host、ZIP、Windows CI 与发布封板仍未执行。

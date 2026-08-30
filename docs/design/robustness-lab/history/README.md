@@ -1,6 +1,6 @@
 # 鲁棒性实验室 G0–G9 实施记录
 
-本目录记录 `robustness-lab-v1-implementation-plan.md` 各实施包的实际落点。实现坚持 SOLID：Domain 纯数值、Application 编排、Infrastructure 适配 JPEG/诊断/报告、Feature 只管理 Document 状态与展示；设计模式只在扰动替换点使用一个显式 Strategy。
+本目录记录 [V1 实施计划](../implementation.md) 各实施包的实际落点。实现坚持 SOLID：Domain 纯数值、Application 编排、Infrastructure 适配 JPEG/诊断/报告、Feature 只管理 Document 状态与展示；设计模式只在扰动替换点使用一个显式 Strategy。
 
 1. [G0 产品与指标基线](g0-product-and-metric-baseline.md)
 2. [G1 实验领域](g1-experiment-domain.md)

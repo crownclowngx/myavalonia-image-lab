@@ -9,14 +9,14 @@
 
 | 实施包 | 当前状态 | 目标 | 完成后记录 |
 | --- | --- | --- | --- |
-| G0 | 已完成 | 冻结 V1 产品范围、术语、指标、资源、持久化和失败语义 | `docs/plan-history/image-compare-lab/g0-product-and-numeric-baseline.md` |
-| G1 | 已完成 | 建立双图比较值对象，并把现有质量计算改造成低内存、可取消的公共基础 | `docs/plan-history/image-compare-lab/g1-comparison-domain-foundation.md` |
-| G2 | 已完成 | 完成像素检查、差异投影、伪彩色热力图和六通道直方图 | `docs/plan-history/image-compare-lab/g2-difference-and-histogram.md` |
-| G3 | 已完成 | 完成比较 Session、应用用例、统一摘要和 JSON 输出 | `docs/plan-history/image-compare-lab/g3-use-cases-and-summary.md` |
-| G4 | 已完成 | 完成 Persistable Document、取消、快照、迟到结果和资源生命周期 | `docs/plan-history/image-compare-lab/g4-document-lifecycle.md` |
-| G5 | 已完成 | 完成并排、分割、叠加、闪烁、同步缩放和悬停联动界面 | `docs/plan-history/image-compare-lab/g5-ui-and-interaction.md` |
-| G6 | 已完成 | 接入 Module、Standalone、Headless UI 和跨 Document 复用入口 | `docs/plan-history/image-compare-lab/g6-integration.md` |
-| G7 | 自动门禁完成；人工验收延期 | 完成本地双配置门禁、专用文档、人工验收和开发阶段封板 | `docs/plan-history/image-compare-lab/g7-local-sealing.md` |
+| G0 | 已完成 | 冻结 V1 产品范围、术语、指标、资源、持久化和失败语义 | [实施记录](history/g0-product-and-numeric-baseline.md) |
+| G1 | 已完成 | 建立双图比较值对象，并把现有质量计算改造成低内存、可取消的公共基础 | [实施记录](history/g1-comparison-domain-foundation.md) |
+| G2 | 已完成 | 完成像素检查、差异投影、伪彩色热力图和六通道直方图 | [实施记录](history/g2-difference-and-histogram.md) |
+| G3 | 已完成 | 完成比较 Session、应用用例、统一摘要和 JSON 输出 | [实施记录](history/g3-use-cases-and-summary.md) |
+| G4 | 已完成 | 完成 Persistable Document、取消、快照、迟到结果和资源生命周期 | [实施记录](history/g4-document-lifecycle.md) |
+| G5 | 已完成 | 完成并排、分割、叠加、闪烁、同步缩放和悬停联动界面 | [实施记录](history/g5-ui-and-interaction.md) |
+| G6 | 已完成 | 接入 Module、Standalone、Headless UI 和跨 Document 复用入口 | [实施记录](history/g6-integration.md) |
+| G7 | 自动门禁完成；人工验收延期 | 完成本地双配置门禁、专用文档、人工验收和开发阶段封板 | [实施记录](history/g7-local-sealing.md) |
 
 本文定义 ImageLab 在“频域隐式水印”和“频域分析器”之后的第三个产品能力、第四个 Persistable Document。
 它不是图片编辑器，也不负责猜测两张不同尺寸图片应该怎样缩放或配准。V1 只对像素坐标一一对应的同尺寸图片
@@ -749,7 +749,7 @@ Document 在 generation 仍有效时一次性替换旧 Session 与 Bitmap
 交付：
 
 - 审阅并冻结本文；
-- 创建 `docs/plan-history/image-compare-lab/README.md` 和 G0 记录；
+- 创建 `docs/design/image-compare-lab/history/README.md` 和 G0 记录；
 - 冻结参考/待比较、尺寸阻断、颜色、Alpha、坐标和变化符号；
 - 冻结 PSNR-Y、PSNR-RGB、全局 SSIM-Y、误差、直方图和热力图公式；
 - 冻结 1024 显示代理、全图统计和最大长期缓冲预算；
@@ -928,22 +928,27 @@ Document 状态和 Avalonia 绘制重新塞进同一个类。
 ```text
 docs/
 ├─ design/
-│  └─ image-compare-lab-v1-implementation-plan.md
-├─ image-compare-lab-user-guide.md
-├─ image-compare-lab-testing.md
-└─ plan-history/
-   └─ image-compare-lab/
-      ├─ README.md
-      └─ g0-... 至 g7-...
+│  └─ image-compare-lab/
+│     ├─ README.md
+│     ├─ implementation.md
+│     ├─ testing.md
+│     ├─ guide.md
+│     ├─ user-manual.md
+│     ├─ mathematical-principles.md
+│     └─ history/
+│        ├─ README.md
+│        └─ g0-... 至 g7-...
+├─ README.md
+└─ future-capabilities.md
 ```
 
 实施时还必须同步：
 
 - `README.md`：当前产品能力和第四个 Document；
 - `docs/README.md`：文档索引和当前贡献数；
-- `docs/design/image-domain-boundaries.md`：公共比较领域和摘要边界；
+- `docs/design/shared/image-domain-boundaries.md`：公共比较领域和摘要边界；
 - `docs/future-capabilities.md`：基础 Image Compare Lab 从候选改为 V1 实施状态，后续高级指标仍保留候选；
-- `docs/deployment-and-release.md`：只在将来发布阶段更新真实 Host/ZIP 验收，不在本次开发阶段伪造结果。
+- `docs/design/shared/deployment-and-release.md`：只在将来发布阶段更新真实 Host/ZIP 验收，不在本次开发阶段伪造结果。
 
 ## 16. 自动测试与质量门禁
 
