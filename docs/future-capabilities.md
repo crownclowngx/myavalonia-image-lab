@@ -320,6 +320,10 @@ V1 已按[专用实现与证据入口](design/poisson-blending/README.md)完成�
 需要提供嵌入区域、强度、对称映射、空间域质量指标和可见性预览。该功能强调“频谱中肉眼可见”，与当前
 依赖机器解码 Payload 的 DCT-QIM 水印是两种不同产品语义，不应共用同一个协议名称。
 
+V1 已建立[专用设计与实施计划](design/spectral-art/implementation.md)，当前仍处于待实施状态。计划固定使用独立
+`spectral-art-fft-amplitude-v1` 配方语义、Y 通道全局 FFT、不可关闭的中心共轭映射、空间质量与频谱可见性联动；
+不使用 AIFLOW，不新增 Windows CI，也不执行发布门禁。
+
 ### 17. Hybrid Image／混合图像
 
 组合图像 A 的低频与图像 B 的高频，使观察距离或显示尺寸改变时看到不同主体：

@@ -34,7 +34,7 @@ ImageLab 当前提供十六项产品能力：频域隐式水印、频域分析�
 - `mathematical-principles.md`：涉及的数学原理背景；
 - `history/`：实施阶段记录。
 
-公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；Poisson Blending／梯度域融合已从[专用实现与证据入口](design/poisson-blending/README.md)进入。最近完成的分析能力还包括[调色板与颜色迁移](design/palette-and-color-transfer/README.md)和[内容感知缩放](design/seam-carving/README.md)。
+公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；下一项 Spectral Art／频谱文字、Logo 与二维码已建立[专用实施计划](design/spectral-art/implementation.md)，当前仍处于待实施状态。Poisson Blending／梯度域融合已从[专用实现与证据入口](design/poisson-blending/README.md)进入。最近完成的分析能力还包括[调色板与颜色迁移](design/palette-and-color-transfer/README.md)和[内容感知缩放](design/seam-carving/README.md)。
 
 ## 项目与最短开发流程
 
