@@ -106,6 +106,15 @@ internal interface ISeamCarvingFileDialog
     Task<string?> PickSeamReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>梯度域融合只暴露两种 PNG 与 JSON/CSV 报告保存意图。</summary>
+internal interface IPoissonBlendingFileDialog
+{
+    Task<string?> PickPoissonResultPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickPoissonAlphaPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickPoissonReportJsonAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickPoissonReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

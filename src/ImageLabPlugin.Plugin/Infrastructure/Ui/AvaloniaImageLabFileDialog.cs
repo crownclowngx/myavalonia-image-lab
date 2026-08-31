@@ -6,7 +6,7 @@ namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
 internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
-    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, ISvdFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, IColorTransferFileDialog, ISeamCarvingFileDialog, ITextClipboard
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, ISvdFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, IColorTransferFileDialog, ISeamCarvingFileDialog, IPoissonBlendingFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -200,6 +200,34 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
         interaction.PickSaveFileAsync(new FilePickerSaveOptions
         {
             Title = "导出内容感知缩放 CSV 步骤表", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }]
+        }, cancellationToken);
+
+    public Task<string?> PickPoissonResultPngAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出已收敛梯度域融合 PNG", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("PNG") { Patterns = ["*.png"] }]
+        }, cancellationToken);
+
+    public Task<string?> PickPoissonAlphaPngAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出直接 Alpha 对照 PNG", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("PNG") { Patterns = ["*.png"] }]
+        }, cancellationToken);
+
+    public Task<string?> PickPoissonReportJsonAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出梯度域融合 JSON 报告", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }]
+        }, cancellationToken);
+
+    public Task<string?> PickPoissonReportCsvAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出梯度域融合 CSV 残差表", SuggestedFileName = suggestedName,
             FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }]
         }, cancellationToken);
 

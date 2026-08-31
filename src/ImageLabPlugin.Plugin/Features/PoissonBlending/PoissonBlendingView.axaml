@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:ImageLabPlugin.Features.PoissonBlending"
+             x:Class="ImageLabPlugin.Features.PoissonBlending.PoissonBlendingView"
+             x:DataType="local:PoissonBlendingDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="8">
+    <Border Grid.Row="0" Classes="card" Padding="10">
+      <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6" ColumnSpacing="6">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
+          <TextBox Text="{Binding SourcePath}" Width="320" PlaceholderText="源图 PNG/JPEG 路径" AutomationProperties.Name="梯度域融合源图路径" />
+          <Button Content="选择源图" Command="{Binding SelectSourceCommand}" AutomationProperties.Name="选择梯度域融合源图" />
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+          <TextBox Text="{Binding TargetPath}" Width="320" PlaceholderText="目标图 PNG/JPEG 路径" AutomationProperties.Name="梯度域融合目标图路径" />
+          <Button Content="选择目标图" Command="{Binding SelectTargetCommand}" AutomationProperties.Name="选择梯度域融合目标图" />
+          <Button Content="载入两图" Command="{Binding LoadImagesCommand}" AutomationProperties.Name="载入源图与目标图" />
+          <Button Content="交换" Command="{Binding SwapImagesCommand}" AutomationProperties.Name="交换源图与目标图并清除旧问题" />
+          <Button Content="重置" Command="{Binding ResetCommand}" AutomationProperties.Name="清除梯度域融合选择和结果" />
+        </StackPanel>
+        <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" ItemHeight="34">
+          <TextBlock Text="矩形 L/T/W/H" VerticalAlignment="Center" Margin="0,0,4,0" />
+          <NumericUpDown Value="{Binding RectangleLeft}" Minimum="0" Maximum="16000000" Width="90" AutomationProperties.Name="遮罩矩形左坐标" />
+          <NumericUpDown Value="{Binding RectangleTop}" Minimum="0" Maximum="16000000" Width="90" AutomationProperties.Name="遮罩矩形上坐标" />
+          <NumericUpDown Value="{Binding RectangleWidth}" Minimum="0" Maximum="16000000" Width="90" AutomationProperties.Name="遮罩矩形宽度" />
+          <NumericUpDown Value="{Binding RectangleHeight}" Minimum="0" Maximum="16000000" Width="90" AutomationProperties.Name="遮罩矩形高度" />
+          <ComboBox ItemsSource="{Binding BrushOptions}" SelectedItem="{Binding SelectedBrush}" Width="90" Margin="8,0,0,0" AutomationProperties.Name="二值遮罩画笔" />
+          <NumericUpDown Value="{Binding BrushRadius}" Minimum="1" Maximum="256" Width="90" AutomationProperties.Name="遮罩画笔半径" />
+          <Button Content="应用遮罩" Command="{Binding ApplyMaskCommand}" Margin="8,0,0,0" AutomationProperties.Name="重放并应用二值遮罩" />
+          <Button Content="清空" Command="{Binding ClearMaskCommand}" Margin="4,0,0,0" AutomationProperties.Name="清空二值遮罩" />
+        </WrapPanel>
+        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" ItemHeight="34">
+          <TextBlock Text="偏移 dx/dy" VerticalAlignment="Center" />
+          <NumericUpDown Value="{Binding OffsetX}" Minimum="-16000000" Maximum="16000000" Width="100" AutomationProperties.Name="目标水平整数偏移" />
+          <NumericUpDown Value="{Binding OffsetY}" Minimum="-16000000" Maximum="16000000" Width="100" AutomationProperties.Name="目标垂直整数偏移" />
+          <Button Content="预检放置" Command="{Binding ValidatePlacementCommand}" Margin="6,0" AutomationProperties.Name="预检放置 halo 与透明度" />
+          <ComboBox ItemsSource="{Binding ModeOptions}" SelectedItem="{Binding SelectedMode}" Width="120" AutomationProperties.Name="Poisson guidance 模式" />
+          <Button Content="建立问题" Command="{Binding BuildProblemCommand}" Margin="6,0" AutomationProperties.Name="建立离散 Poisson 问题" />
+          <Button Content="单步" Command="{Binding StepCommand}" AutomationProperties.Name="执行一个红黑 sweep" />
+          <Button Content="运行" Command="{Binding RunCommand}" Margin="4,0" AutomationProperties.Name="运行 Poisson 求解" />
+          <Button Content="暂停" Command="{Binding PauseCommand}" AutomationProperties.Name="暂停 Poisson 求解" />
+          <Button Content="取消" Command="{Binding CancelCommand}" Margin="4,0" AutomationProperties.Name="取消 Poisson 求解" />
+        </WrapPanel>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="2*,*" ColumnSpacing="10" MinHeight="420">
+      <Grid Grid.Column="0" RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="6" ColumnSpacing="6">
+        <local:PoissonSourceMaskCanvas x:Name="SourceMaskCanvas" Image="{Binding SourcePreview}" Topology="{Binding Topology}" AutomationProperties.Name="源图与二值遮罩画布" />
+        <local:PoissonPlacementCanvas x:Name="PlacementCanvas" Grid.Column="1" Image="{Binding TargetPreview}" Topology="{Binding Topology}" OffsetX="{Binding OffsetX}" OffsetY="{Binding OffsetY}" AutomationProperties.Name="目标图与可拖动放置轮廓画布" />
+        <local:PoissonComparisonControl Grid.Row="1" Grid.ColumnSpan="2" AlphaImage="{Binding AlphaPreview}" PoissonImage="{Binding PoissonPreview}" AutomationProperties.Name="直接 Alpha 与 Poisson 并排比较" />
+      </Grid>
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="7">
+          <TextBlock Text="参数与数值协议" FontWeight="SemiBold" />
+          <WrapPanel><TextBlock Text="RMS" VerticalAlignment="Center"/><NumericUpDown Value="{Binding RmsTolerance}" Minimum="0.00000001" Maximum="0.001" Increment="0.000001" Width="140" AutomationProperties.Name="RMS 绝对容差" /></WrapPanel>
+          <WrapPanel><TextBlock Text="MaxAbs" VerticalAlignment="Center"/><NumericUpDown Value="{Binding MaxAbsTolerance}" Minimum="0.0000001" Maximum="0.01" Increment="0.00001" Width="140" AutomationProperties.Name="最大绝对残差容差" /></WrapPanel>
+          <WrapPanel><TextBlock Text="最大迭代" VerticalAlignment="Center"/><NumericUpDown Value="{Binding MaxIterations}" Minimum="1" Maximum="2000" Width="100" AutomationProperties.Name="最大迭代数" /></WrapPanel>
+          <ComboBox ItemsSource="{Binding PreviewIntervalOptions}" SelectedItem="{Binding PreviewInterval}" AutomationProperties.Name="预览提交间隔" />
+          <TextBlock Text="Guidance（蓝＝源，橙＝目标；颜色只用于显示）" FontWeight="SemiBold" />
+          <local:PoissonFieldView Image="{Binding GuidancePreview}" Height="90" AutomationProperties.Name="Poisson guidance 强度与来源图" />
+          <TextBlock Text="RHS（红＝正，蓝＝负）" FontWeight="SemiBold" />
+          <local:PoissonFieldView Image="{Binding RhsPreview}" Height="90" AutomationProperties.Name="Poisson RHS 对称零中心图" />
+          <TextBlock Text="残差热图（归一化不反馈数值）" FontWeight="SemiBold" />
+          <local:PoissonFieldView Image="{Binding ResidualPreview}" Height="100" AutomationProperties.Name="Poisson 残差热图" />
+          <TextBlock Text="收敛曲线 log10 RMS" FontWeight="SemiBold" />
+          <local:PoissonConvergenceChart Residuals="{Binding Residuals}" Height="110" AutomationProperties.Name="Poisson 收敛曲线" />
+          <TextBlock Text="{Binding TopologySummary}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ResourceSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ConvergenceSummary}" TextWrapping="Wrap" />
+          <WrapPanel>
+            <Button Content="导出 Poisson PNG" Command="{Binding ExportPoissonCommand}" Margin="0,0,5,0" AutomationProperties.Name="导出已收敛 Poisson PNG" />
+            <Button Content="导出 Alpha PNG" Command="{Binding ExportAlphaCommand}" AutomationProperties.Name="导出直接 Alpha 对照 PNG" />
+          </WrapPanel>
+          <WrapPanel>
+            <Button Content="导出 JSON" Command="{Binding ExportJsonCommand}" Margin="0,0,5,0" AutomationProperties.Name="导出梯度域融合 JSON 报告" />
+            <Button Content="导出 CSV" Command="{Binding ExportCsvCommand}" AutomationProperties.Name="导出梯度域融合 CSV 报告" />
+          </WrapPanel>
+          <TextBlock Text="限制：V1 只支持不透明 halo、二值遮罩和整数平移，半透明像素不支持。残差达标只表示离散方程收敛，不证明视觉质量更好。" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+    <Border Grid.Row="2" Background="#18000000" Padding="8"><TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></Border>
+  </Grid>
+</UserControl>

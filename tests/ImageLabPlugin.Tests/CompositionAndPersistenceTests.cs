@@ -18,6 +18,8 @@ using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Domain.SeamCarving;
+using ImageLabPlugin.Features.PoissonBlending;
+using ImageLabPlugin.Domain.PoissonBlending;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
@@ -33,14 +35,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十六个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十七个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument, PluginIds.PoissonBlendingDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -88,6 +90,8 @@ public sealed class CompositionAndPersistenceTests
         var secondPaletteColor = secondScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
         var seamCarving = firstScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
         var secondSeamCarving = secondScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
+        var poisson = firstScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
+        var secondPoisson = secondScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -106,6 +110,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(svd, secondSvd);
         Assert.NotSame(paletteColor, secondPaletteColor);
         Assert.NotSame(seamCarving, secondSeamCarving);
+        Assert.NotSame(poisson, secondPoisson);
+        poisson.SourcePath = "scope-poisson-one";
+        Assert.Empty(secondPoisson.SourcePath);
         seamCarving.SourcePath = "scope-seam-one";
         Assert.Empty(secondSeamCarving.SourcePath);
         paletteColor.TargetPath = "scope-palette-one";
@@ -147,6 +154,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.Same(
             firstScope.ServiceProvider.GetRequiredService<SobelEnergyCalculator>(),
             secondScope.ServiceProvider.GetRequiredService<SobelEnergyCalculator>());
+        Assert.Same(
+            firstScope.ServiceProvider.GetRequiredService<PoissonRelaxationSolver>(),
+            secondScope.ServiceProvider.GetRequiredService<PoissonRelaxationSolver>());
         first.PayloadText = "scope-one";
         Assert.Empty(second.PayloadText);
     }
@@ -303,6 +313,31 @@ public sealed class CompositionAndPersistenceTests
         Assert.Equal("优先删除", restored.SelectedBrush); Assert.Equal(21, restored.BrushRadius);
         Assert.Equal(250, restored.PlaybackDelayMilliseconds); Assert.False(restored.HasSession);
         Assert.False(restored.HasPlan); Assert.False(restored.HasCompletedResult); Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public async Task Poisson快照不保存绝对路径大数组且恢复不自动读取构建或求解()
+    {
+        var registration = new RecordingRegistration();
+        registration.Services.AddSingleton<IPluginWindowInteraction, NullWindowInteraction>();
+        registration.Services.AddScoped<IDocumentLifetime, TestLifetime>();
+        new ImageLabPluginModule().Configure(registration);
+        using var provider = registration.Services.BuildServiceProvider(validateScopes: true);
+        using var firstScope = provider.CreateScope();
+        var document = firstScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
+        await document.InitializeAsync(new NewDocumentActivation("梯度域融合"), default);
+        document.SourcePath = @"C:\private\source.png"; document.TargetPath = @"D:\secret\target.png";
+        document.RectangleLeft = 2; document.RectangleTop = 3; document.RectangleWidth = 10; document.RectangleHeight = 8;
+        document.OffsetX = -4; document.OffsetY = 7; document.SelectedMode = "混合梯度"; document.MaxIterations = 321;
+        var snapshot = await document.CaptureSaveSnapshotAsync(default); var json = snapshot.Content.Payload.GetRawText();
+        Assert.Contains("source.png", json, StringComparison.Ordinal); Assert.Contains(PoissonProtocols.SnapshotSchema, json, StringComparison.Ordinal);
+        Assert.DoesNotContain(@"C:\private", json, StringComparison.OrdinalIgnoreCase); Assert.DoesNotContain(@"D:\secret", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase); Assert.DoesNotContain("rhs", json, StringComparison.OrdinalIgnoreCase);
+        using var secondScope = provider.CreateScope(); var restored = secondScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
+        await restored.InitializeAsync(new RestoreDocumentActivation("恢复梯度域融合", snapshot.Content), default);
+        Assert.Empty(restored.SourcePath); Assert.Empty(restored.TargetPath); Assert.Equal("混合梯度", restored.SelectedMode);
+        Assert.Equal(-4, restored.OffsetX); Assert.Equal(7, restored.OffsetY); Assert.Equal(321, restored.MaxIterations);
+        Assert.Null(restored.Topology); Assert.False(restored.IsDirty);
     }
 
     [Fact]

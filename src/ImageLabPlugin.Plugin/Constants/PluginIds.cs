@@ -68,4 +68,8 @@ public static class PluginIds
     /// <summary>“内容感知缩放”多实例 Seam Carving 实验的持久身份。</summary>
     public static readonly DocumentTypeId SeamCarvingDocument =
         new("myavalonia.plugin.image.lab.document.seam-carving");
+
+    /// <summary>“Poisson Blending／梯度域融合”双图实验的多实例持久身份。</summary>
+    public static readonly DocumentTypeId PoissonBlendingDocument =
+        new("myavalonia.plugin.image.lab.document.poisson-blending");
 }

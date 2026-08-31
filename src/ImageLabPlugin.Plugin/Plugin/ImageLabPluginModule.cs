@@ -16,6 +16,7 @@ using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
+using ImageLabPlugin.Features.PoissonBlending;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -121,6 +122,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.SeamCarvingDocument,
                 "内容感知缩放",
                 "以 Sobel 能量、显式区域偏置和逐缝播放观察 Seam Carving，并与普通缩放比较",
+                "图像分析"));
+        registration.AddPersistableDocument<PoissonBlendingDocument, PoissonBlendingView>(
+            new DocumentDescriptor(
+                PluginIds.PoissonBlendingDocument,
+                "梯度域融合",
+                "以二值遮罩、整数平移和确定性 Poisson 迭代比较梯度域融合与直接 Alpha 合成",
                 "图像分析"));
     }
 }

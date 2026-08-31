@@ -43,6 +43,9 @@ using ImageLabPlugin.Infrastructure.ColorTransfer;
 using ImageLabPlugin.Application.SeamCarving;
 using ImageLabPlugin.Domain.SeamCarving;
 using ImageLabPlugin.Infrastructure.SeamCarving;
+using ImageLabPlugin.Application.PoissonBlending;
+using ImageLabPlugin.Domain.PoissonBlending;
+using ImageLabPlugin.Infrastructure.PoissonBlending;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -70,6 +73,7 @@ public static class ImageLabPluginServices
         AddSvdDecompositionServices(services);
         AddColorTransferServices(services);
         AddSeamCarvingServices(services);
+        AddPoissonBlendingServices(services);
         return services;
     }
 
@@ -106,6 +110,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IPeriodicNoiseFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IColorTransferFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ISeamCarvingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IPoissonBlendingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -427,5 +432,39 @@ public static class ImageLabPluginServices
         services.AddSingleton<IExportSeamResultUseCase, ExportSeamResultUseCase>();
         services.AddSingleton<IExportSeamReportUseCase, ExportSeamReportUseCase>();
         services.AddScoped<SeamCarvingSession>();
+    }
+
+    /// <summary>登记 Poisson 无状态数学服务、唯一 guidance Strategy 变化点、窄用例和 scoped Session。</summary>
+    private static void AddPoissonBlendingServices(IServiceCollection services)
+    {
+        // 图片、遮罩、问题和解只属于 PoissonBlendingSession；singleton 服务不保存任何 Document 状态。
+        services.AddSingleton<NormalCloneGuidanceStrategy>();
+        services.AddSingleton<MixedGradientGuidanceStrategy>();
+        services.AddSingleton<MonochromeGuidanceStrategy>();
+        services.AddSingleton<IPoissonGuidanceStrategy>(static provider => provider.GetRequiredService<NormalCloneGuidanceStrategy>());
+        services.AddSingleton<IPoissonGuidanceStrategy>(static provider => provider.GetRequiredService<MixedGradientGuidanceStrategy>());
+        services.AddSingleton<IPoissonGuidanceStrategy>(static provider => provider.GetRequiredService<MonochromeGuidanceStrategy>());
+        services.AddSingleton<PoissonGuidanceCatalog>();
+        services.AddSingleton<PoissonMaskRasterizer>();
+        services.AddSingleton<PoissonMaskTopologyAnalyzer>();
+        services.AddSingleton<PoissonPlacementValidator>();
+        services.AddSingleton<PoissonResourceEstimator>();
+        services.AddSingleton<PoissonProblemBuilder>();
+        services.AddSingleton<PoissonRelaxationSolver>();
+        services.AddSingleton<PoissonBlendComposer>();
+        services.AddSingleton<DirectAlphaCompositor>();
+        services.AddSingleton<PoissonResidualProjector>();
+        services.AddSingleton<PoissonFieldProjector>();
+        services.AddSingleton<PoissonBlendDiagnosticsAnalyzer>();
+        services.AddSingleton<IPoissonBlendingReportSerializer, PoissonBlendingReportSerializer>();
+        services.AddSingleton<IPreparePoissonSessionUseCase, PreparePoissonSessionUseCase>();
+        services.AddSingleton<IEditPoissonMaskUseCase, EditPoissonMaskUseCase>();
+        services.AddSingleton<IPlacePoissonRegionUseCase, PlacePoissonRegionUseCase>();
+        services.AddSingleton<IBuildPoissonProblemUseCase, BuildPoissonProblemUseCase>();
+        services.AddSingleton<IStepPoissonSolverUseCase, StepPoissonSolverUseCase>();
+        services.AddSingleton<IRunPoissonSolverUseCase, RunPoissonSolverUseCase>();
+        services.AddSingleton<IExportPoissonImageUseCase, ExportPoissonImageUseCase>();
+        services.AddSingleton<IExportPoissonReportUseCase, ExportPoissonReportUseCase>();
+        services.AddScoped<PoissonBlendingSession>();
     }
 }

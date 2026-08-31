@@ -54,5 +54,8 @@
     <TabItem Header="内容感知缩放">
       <ContentControl x:Name="SeamCarvingPreview" />
     </TabItem>
+    <TabItem Header="梯度域融合">
+      <ContentControl x:Name="PoissonBlendingPreview" />
+    </TabItem>
   </TabControl>
 </Window>
