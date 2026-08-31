@@ -35,6 +35,8 @@ using ImageLabPlugin.Application.FrequencyMaskEditing;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
 using ImageLabPlugin.Application.PeriodicNoiseRemoval;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
+using ImageLabPlugin.Application.SvdDecomposition;
+using ImageLabPlugin.Domain.SvdDecomposition;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -59,6 +61,7 @@ public static class ImageLabPluginServices
         AddFrequencyFilterServices(services);
         AddFrequencyMaskEditorServices(services);
         AddPeriodicNoiseRemovalServices(services);
+        AddSvdDecompositionServices(services);
         return services;
     }
 
@@ -68,6 +71,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<Dct8x8Transform>();
         services.AddSingleton<LowFrequencyDctTransform>();
         services.AddSingleton<ImageChannelConverter>();
+        services.AddSingleton<ImageAreaResampler>();
         services.AddSingleton<ImageAnalysisProxyProjector>();
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
@@ -89,6 +93,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IFingerprintReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ILsbReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IWaveletReportFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ISvdFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IFrequencyMaskRecipeFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPeriodicNoiseFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
@@ -332,5 +337,25 @@ public static class ImageLabPluginServices
         services.AddSingleton<IExportPeriodicNoiseRecipeUseCase, ExportPeriodicNoiseRecipeUseCase>();
         services.AddSingleton<IExportPeriodicNoiseCandidateSummaryUseCase, ExportPeriodicNoiseCandidateSummaryUseCase>();
         services.AddSingleton<IExportPeriodicNoiseArtifactUseCase, ExportPeriodicNoiseArtifactUseCase>();
+    }
+
+    /// <summary>登记无状态 SVD 数值服务和七个窄应用用例；因子缓存只存在于每个 SvdSession。</summary>
+    private static void AddSvdDecompositionServices(IServiceCollection services)
+    {
+        services.AddSingleton<JacobiSvdDecomposer>();
+        services.AddSingleton<SingularValueEnergyAnalyzer>();
+        services.AddSingleton<LowRankReconstructor>();
+        services.AddSingleton<SvdComponentProjector>();
+        services.AddSingleton<SvdColorStrategyExecutor>();
+        services.AddSingleton<SvdImageReconstructor>();
+        services.AddSingleton<SvdReconstructionAnalyzer>();
+        services.AddSingleton<ISvdReportSerializer, SvdReportSerializer>();
+        services.AddSingleton<IPrepareSvdSessionUseCase, PrepareSvdSessionUseCase>();
+        services.AddSingleton<IDecomposeSvdUseCase, DecomposeSvdUseCase>();
+        services.AddSingleton<IReconstructSvdRankUseCase, ReconstructSvdRankUseCase>();
+        services.AddSingleton<IProjectSvdComponentUseCase, ProjectSvdComponentUseCase>();
+        services.AddSingleton<ICompareSvdStrategiesUseCase, CompareSvdStrategiesUseCase>();
+        services.AddSingleton<IExportSvdImageUseCase, ExportSvdImageUseCase>();
+        services.AddSingleton<IExportSvdReportUseCase, ExportSvdReportUseCase>();
     }
 }

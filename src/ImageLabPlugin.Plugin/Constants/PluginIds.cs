@@ -56,4 +56,8 @@ public static class PluginIds
     /// <summary>“周期噪声与陷波器”多实例候选复核与共轭安全重建的持久身份。</summary>
     public static readonly DocumentTypeId PeriodicNoiseRemovalDocument =
         new("myavalonia.plugin.image.lab.document.periodic-noise-removal");
+
+    /// <summary>“奇异值分解重建”低秩分析与策略比较的多实例持久身份。</summary>
+    public static readonly DocumentTypeId SvdDecompositionDocument =
+        new("myavalonia.plugin.image.lab.document.svd-decomposition");
 }

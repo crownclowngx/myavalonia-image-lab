@@ -14,6 +14,7 @@ using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
+using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
@@ -29,14 +30,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十三个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十四个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -78,6 +79,8 @@ public sealed class CompositionAndPersistenceTests
         var secondFrequencyMask = secondScope.ServiceProvider.GetRequiredService<FrequencyMaskEditorDocument>();
         var periodicNoise = firstScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalDocument>();
         var secondPeriodicNoise = secondScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalDocument>();
+        var svd = firstScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
+        var secondSvd = secondScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -93,6 +96,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(frequencyFilter, secondFrequencyFilter);
         Assert.NotSame(frequencyMask, secondFrequencyMask);
         Assert.NotSame(periodicNoise, secondPeriodicNoise);
+        Assert.NotSame(svd, secondSvd);
+        svd.SourcePath = "scope-svd-one";
+        Assert.Empty(secondSvd.SourcePath);
         periodicNoise.SourcePath = "scope-periodic-one";
         Assert.Empty(secondPeriodicNoise.SourcePath);
         frequencyMask.SourcePath = "scope-frequency-mask-one";
@@ -181,6 +187,44 @@ public sealed class CompositionAndPersistenceTests
         Assert.True(restored.CanUndo);
         Assert.False(restored.HasSession);
         Assert.False(restored.HasResult);
+        Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public async Task Svd快照只保存轻量参数且恢复不自动读取或分解()
+    {
+        var registration = new RecordingRegistration();
+        registration.Services.AddSingleton<IPluginWindowInteraction, NullWindowInteraction>();
+        registration.Services.AddScoped<IDocumentLifetime, TestLifetime>();
+        new ImageLabPluginModule().Configure(registration);
+        using var provider = registration.Services.BuildServiceProvider(validateScopes: true);
+        using var firstScope = provider.CreateScope();
+        var document = firstScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
+        await document.InitializeAsync(new NewDocumentActivation("奇异值分解重建"), default);
+        document.SourcePath = "missing.png";
+        document.AnalysisMaximumEdge = 256;
+        document.SelectedStrategy = "YCbCr 独立";
+        document.SelectedChannel = "Cr";
+        document.RankMaximum = 10;
+        document.ComponentMaximum = 9;
+        document.Rank = 7;
+        document.ComponentIndex = 3;
+        var snapshot = await document.CaptureSaveSnapshotAsync(default);
+        var json = snapshot.Content.Payload.GetRawText();
+        Assert.Contains("one-sided-jacobi-v1", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"SingularValues\":", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+
+        using var secondScope = provider.CreateScope();
+        var restored = secondScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
+        await restored.InitializeAsync(new RestoreDocumentActivation("恢复 SVD", snapshot.Content), default);
+        Assert.Equal(256, restored.AnalysisMaximumEdge);
+        Assert.Equal("YCbCr 独立", restored.SelectedStrategy);
+        Assert.Equal("Cr", restored.SelectedChannel);
+        Assert.Equal(7, restored.Rank);
+        Assert.Equal(3, restored.ComponentIndex);
+        Assert.False(restored.HasSession);
+        Assert.False(restored.HasDecomposition);
         Assert.False(restored.IsDirty);
     }
 

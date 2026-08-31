@@ -51,4 +51,7 @@ internal sealed class ImageChannelPlane
 }
 
 /// <summary>选定通道合成回 RGBA 后的裁切报告。</summary>
-internal sealed record ChannelReconstructionResult(PixelImage Image, int ClippedPixelCount);
+internal sealed record ChannelReconstructionResult(
+    PixelImage Image,
+    int ClippedPixelCount,
+    int ClippedComponentCount);

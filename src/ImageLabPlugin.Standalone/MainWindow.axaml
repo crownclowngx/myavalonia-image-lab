@@ -45,5 +45,8 @@
     <TabItem Header="周期噪声与陷波器">
       <ContentControl x:Name="PeriodicNoisePreview" />
     </TabItem>
+    <TabItem Header="奇异值分解重建">
+      <ContentControl x:Name="SvdPreview" />
+    </TabItem>
   </TabControl>
 </Window>

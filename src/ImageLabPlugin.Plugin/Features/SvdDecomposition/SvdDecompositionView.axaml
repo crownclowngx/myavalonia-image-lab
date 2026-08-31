@@ -1,0 +1,90 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.SvdDecomposition.SvdDecompositionView"
+    x:DataType="vm:SvdDecompositionDocument"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.SvdDecomposition">
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+    <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10">
+      <Grid ColumnDefinitions="2*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+        <TextBox Text="{Binding SourcePath}" PlaceholderText="PNG / JPEG 源图" />
+        <Button Grid.Column="1" Content="选择源图" Command="{Binding SelectSourceCommand}" />
+        <ComboBox Grid.Column="2" Width="90" ItemsSource="{Binding AnalysisEdgeOptions}" SelectedItem="{Binding AnalysisMaximumEdge}" />
+        <Button Grid.Column="3" Content="建立代理" Command="{Binding LoadCommand}" />
+        <Button Grid.Column="4" Content="开始分解" Command="{Binding DecomposeCommand}" />
+        <Button Grid.Column="5" Content="取消" Command="{Binding CancelCommand}" />
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="280,*,310" ColumnSpacing="10">
+      <ScrollViewer>
+        <StackPanel Spacing="9">
+          <TextBlock Text="策略与观察" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Text="颜色策略" />
+          <ComboBox ItemsSource="{Binding StrategyOptions}" SelectedItem="{Binding SelectedStrategy}" />
+          <TextBlock Text="单通道（RGB/YCbCr 策略忽略此项）" TextWrapping="Wrap" />
+          <ComboBox ItemsSource="{Binding ChannelOptions}" SelectedItem="{Binding SelectedChannel}" />
+          <TextBlock Text="共同 Rank k（允许 k=0）" />
+          <NumericUpDown MinWidth="120" Minimum="0" Maximum="{Binding RankMaximum}" Value="{Binding Rank}" />
+          <TextBlock Text="观察矩阵" />
+          <ComboBox ItemsSource="{Binding FactorChannelOptions}" SelectedIndex="{Binding SelectedFactorChannelIndex}" />
+          <TextBlock Text="秩一分量（界面显示为第 i+1 项）" TextWrapping="Wrap" />
+          <NumericUpDown MinWidth="120" Minimum="0" Maximum="{Binding ComponentMaximum}" Value="{Binding ComponentIndex}" />
+          <CheckBox Content="奇异值使用对数显示" IsChecked="{Binding ShowLogSingularValues}" />
+          <Button Content="运行 Y / RGB / YCbCr 有限比较" Command="{Binding CompareCommand}" />
+          <Separator />
+          <Button Content="导出分析代理 PNG" Command="{Binding ExportImageCommand}" />
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Content="导出 JSON" Command="{Binding ExportJsonCommand}" />
+            <Button Content="导出 CSV" Command="{Binding ExportCsvCommand}" />
+          </StackPanel>
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+            <TextBlock Text="本工具解释当前代理尺度的低秩近似，不是图片文件压缩器；不报告文件压缩率。" TextWrapping="Wrap" />
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+
+      <Grid Grid.Column="1" RowDefinitions="*,160,*" RowSpacing="8">
+        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+          <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+            <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="分析代理源图" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding SourcePreview}" Stretch="Uniform" /></Grid>
+          </Border>
+          <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+            <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="Rank-k 分析代理重建" FontWeight="SemiBold" /><Image Grid.Row="1" Source="{Binding ResultPreview}" Stretch="Uniform" /></Grid>
+          </Border>
+          <Border Grid.Column="2" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1">
+            <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="当前秩一分量（蓝负/灰零/橙正）" FontWeight="SemiBold" TextWrapping="Wrap" /><Image Grid.Row="1" Source="{Binding ComponentPreview}" Stretch="Uniform" /></Grid>
+          </Border>
+        </Grid>
+        <Border Grid.Row="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" Padding="4">
+          <Grid RowDefinitions="Auto,*"><TextBlock Text="橙虚线：相对奇异值；蓝实线：累计能量；黑线：当前分量" />
+            <vm:SingularValueCurveControl x:Name="Curve" Grid.Row="1" SingularValues="{Binding SingularValues}"
+              CumulativeEnergy="{Binding CumulativeEnergy}" SelectedIndex="{Binding ComponentIndex}"
+              UseLogScale="{Binding ShowLogSingularValues}" />
+          </Grid>
+        </Border>
+        <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+          <ScrollViewer><StackPanel Spacing="5"><TextBlock Text="固定三策略比较（不自动排名）" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding ComparisonRows}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" FontFamily="Consolas" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+          </StackPanel></ScrollViewer>
+        </Border>
+      </Grid>
+
+      <ScrollViewer Grid.Column="2">
+        <StackPanel Spacing="9">
+          <TextBlock Text="结果与数值边界" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Text="会话" FontWeight="SemiBold" /><TextBlock Text="{Binding SessionSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="分解诊断" FontWeight="SemiBold" /><TextBlock Text="{Binding DecompositionSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="Rank-k 指标" FontWeight="SemiBold" /><TextBlock Text="{Binding RankSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="当前分量" FontWeight="SemiBold" /><TextBlock Text="{Binding ComponentSummary}" TextWrapping="Wrap" />
+          <Separator />
+          <TextBlock Text="• 矩阵能量、raw 残差与量化后图片质量是三类不同事实。&#10;• Cb/Cr 在分解前以 128 为中性中心，重建时只加回一次。&#10;• 重复奇异值子空间内的单个向量方向不唯一。&#10;• PSNR/SSIM 只比较当前分析代理，不代表原尺寸图片。" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="8">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" /><ProgressBar Grid.Column="1" Width="140" IsIndeterminate="True" IsVisible="{Binding IsBusy}" /></Grid>
+    </Border>
+  </Grid>
+</UserControl>

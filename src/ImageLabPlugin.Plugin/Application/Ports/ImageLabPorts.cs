@@ -67,6 +67,14 @@ internal interface IWaveletReportFileDialog
     Task<string?> PickWaveletCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>SVD 只暴露分析代理 PNG 与 JSON/CSV 报告三个保存意图。</summary>
+internal interface ISvdFileDialog
+{
+    Task<string?> PickProxyPngOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSvdJsonOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSvdCsvOutputAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>频谱遮罩配方只暴露 JSON 导入与导出意图，不扩大图片文件对话框。</summary>
 internal interface IFrequencyMaskRecipeFileDialog
 {

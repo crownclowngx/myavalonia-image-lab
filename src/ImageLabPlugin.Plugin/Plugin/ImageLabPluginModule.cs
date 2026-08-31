@@ -13,6 +13,7 @@ using ImageLabPlugin.Features.WaveletLab;
 using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
+using ImageLabPlugin.Features.SvdDecomposition;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -100,6 +101,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.PeriodicNoiseRemovalDocument,
                 "周期噪声与陷波器",
                 "复核周期频率候选，以必须人工采用的共轭安全陷波草案观察频谱、重建、差异与不可逆损失",
+                "图像分析"));
+        registration.AddPersistableDocument<SvdDecompositionDocument, SvdDecompositionView>(
+            new DocumentDescriptor(
+                PluginIds.SvdDecompositionDocument,
+                "奇异值分解重建",
+                "以有界分析代理观察奇异值、Rank-k 重建、秩一分量和固定颜色策略差异",
                 "图像分析"));
     }
 }

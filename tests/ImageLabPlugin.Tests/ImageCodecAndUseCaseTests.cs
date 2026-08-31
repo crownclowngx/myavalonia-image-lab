@@ -42,6 +42,7 @@ using ImageLabPlugin.Domain.FrequencyMaskEditing;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Application.PeriodicNoiseRemoval;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
+using ImageLabPlugin.Features.SvdDecomposition;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -83,7 +84,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十三个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十四个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -109,6 +110,8 @@ public sealed class ImageCodecAndUseCaseTests
         var frequencyMaskCanvas = new FrequencyMaskCanvasControl();
         var periodicNoiseView = new PeriodicNoiseRemovalView();
         var periodicSpectrum = new PeriodicSpectrumControl();
+        var svdView = new SvdDecompositionView();
+        var svdCurve = new SingularValueCurveControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -138,6 +141,8 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(frequencyMaskCanvas);
         Assert.NotNull(periodicNoiseView.Content);
         Assert.NotNull(periodicSpectrum);
+        Assert.NotNull(svdView.Content);
+        Assert.NotNull(svdCurve);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -155,7 +160,8 @@ public sealed class ImageCodecAndUseCaseTests
             new ConvolutionPlaygroundView(),
             new FrequencyFilterView(),
             new FrequencyMaskEditorView(),
-            new PeriodicNoiseRemovalView()
+            new PeriodicNoiseRemovalView(),
+            new SvdDecompositionView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -173,7 +179,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(51, numericInputs.Count);
+        Assert.Equal(53, numericInputs.Count);
     }
 
     [Fact]

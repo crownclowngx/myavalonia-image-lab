@@ -47,6 +47,7 @@ internal sealed class ImageChannelConverter
 
         var result = source.Clone();
         var clippedPixels = 0;
+        var clippedComponents = 0;
         for (var y = 0; y < source.Size.Height; y++)
         {
             for (var x = 0; x < source.Size.Width; x++)
@@ -57,6 +58,7 @@ internal sealed class ImageChannelConverter
                 {
                     var channelByte = Clamp(value, midpointRounding, out var clipped);
                     clippedPixels += clipped ? 1 : 0;
+                    clippedComponents += clipped ? 1 : 0;
                     result.SetRgb(
                         x,
                         y,
@@ -75,11 +77,12 @@ internal sealed class ImageChannelConverter
                 var g = Clamp(restored.Green, midpointRounding, out var greenClipped);
                 var b = Clamp(restored.Blue, midpointRounding, out var blueClipped);
                 clippedPixels += redClipped || greenClipped || blueClipped ? 1 : 0;
+                clippedComponents += (redClipped ? 1 : 0) + (greenClipped ? 1 : 0) + (blueClipped ? 1 : 0);
                 result.SetRgb(x, y, r, g, b);
             }
         }
 
-        return new ChannelReconstructionResult(result, clippedPixels);
+        return new ChannelReconstructionResult(result, clippedPixels, clippedComponents);
     }
 
     public static double NeutralValue(ImageChannel channel) =>

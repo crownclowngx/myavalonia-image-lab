@@ -20,7 +20,7 @@
 4. 把 Model 与 View 的对应关系交给 Host。
 
 `ImageLabPluginServices.AddImageLabPluginServices` 是唯一业务服务入口，但内部按公共基础、平台端口、水印、频域、
-图像比较、鲁棒性、感知指纹、位平面、LSB、卷积、小波和频域滤波等边界拆分登记函数。该拆分只改善组合根可读性，
+图像比较、鲁棒性、感知指纹、位平面、LSB、卷积、小波、频域滤波、频谱遮罩、周期噪声和 SVD 等边界拆分登记函数。该拆分只改善组合根可读性，
 不能把领域服务改成 Service Locator，也不能改变 singleton 算法与 scoped Document 的既有生命周期。
 
 Host 读取构建生成的 `plugin.manifest.json`，检查 Plugin SDK 兼容区间，加载唯一的 `IPluginModule`，再按
@@ -36,7 +36,7 @@ Standalone 的 `MainWindow` 是开发工作台，不是插件对 Host 暴露的�
 - 为插件确实需要的 Host Port 提供显式、可识别的开发 Stub；
 - 在插件贡献增多时，扩展成简单的 Document/Tool 浏览工作台，但继续复用 Module 的登记事实。
 
-当前 Standalone 用十二个独立 Scope 承载十二个真实 Document；卷积核实验台、小波实验室、频域滤波和频谱遮罩编辑器与其他实例一样复用 Module/DI，窗口关闭时显式 Dispose Document 后再释放 Scope。
+当前 Standalone 用十四个独立 Scope 承载十四个真实 Document；卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与奇异值分解重建和其他实例一样复用 Module/DI，窗口关闭时显式 Dispose Document 后再释放 Scope。
 
 它不负责证明以下行为：
 
