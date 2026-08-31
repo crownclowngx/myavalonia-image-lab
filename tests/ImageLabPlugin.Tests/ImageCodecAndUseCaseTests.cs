@@ -45,6 +45,7 @@ using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Application.ColorTransfer;
+using ImageLabPlugin.Features.SeamCarving;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -86,7 +87,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十五个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十六个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -119,6 +120,10 @@ public sealed class ImageCodecAndUseCaseTests
         var colorHistogram = new ColorHistogramControl();
         var colorPlane = new ColorDistributionPlaneControl();
         var differenceHistogram = new PerceptualDifferenceControl();
+        var seamView = new SeamCarvingView();
+        var seamOverlay = new SeamOverlayCanvas();
+        var energyMap = new EnergyMapControl();
+        var seamComparison = new SeamComparisonControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -152,6 +157,7 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(svdCurve);
         Assert.NotNull(paletteColorView.Content);
         Assert.NotNull(paletteStrip); Assert.NotNull(colorHistogram); Assert.NotNull(colorPlane); Assert.NotNull(differenceHistogram);
+        Assert.NotNull(seamView.Content); Assert.NotNull(seamOverlay); Assert.NotNull(energyMap); Assert.NotNull(seamComparison);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -171,7 +177,8 @@ public sealed class ImageCodecAndUseCaseTests
             new FrequencyMaskEditorView(),
             new PeriodicNoiseRemovalView(),
             new SvdDecompositionView(),
-            new PaletteColorTransferView()
+            new PaletteColorTransferView(),
+            new SeamCarvingView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -189,7 +196,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(58, numericInputs.Count);
+        Assert.Equal(61, numericInputs.Count);
     }
 
     [Fact]

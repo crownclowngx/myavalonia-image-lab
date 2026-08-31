@@ -1,6 +1,6 @@
 # ImageLab 文档中心
 
-ImageLab 当前提供十四项产品能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建和调色板与颜色迁移。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
+ImageLab 当前提供十五项产品能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移和内容感知缩放。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
 
 ## 我是第一次使用
 
@@ -20,6 +20,7 @@ ImageLab 当前提供十四项产品能力：频域隐式水印、频域分析�
 12. [周期噪声与陷波器新手说明书](design/periodic-noise-removal/user-manual.md)：复核候选频率峰，以必须人工采用的共轭陷波草案观察损失。
 13. [奇异值分解重建新手说明书](design/svd-decomposition/user-manual.md)：观察奇异值、Rank-k、秩一分量与颜色策略差异。
 14. [调色板与颜色迁移新手说明书](design/palette-and-color-transfer/user-manual.md)：观察颜色分布、主色、统计迁移与固定调色板量化。
+15. [内容感知缩放新手说明书](design/seam-carving/user-manual.md)：绘制区域、观察 Sobel 能量和最小缝并逐步缩放。
 
 ## 我需要开发或维护
 
@@ -32,7 +33,7 @@ ImageLab 当前提供十四项产品能力：频域隐式水印、频域分析�
 - `mathematical-principles.md`：涉及的数学原理背景；
 - `history/`：实施阶段记录。
 
-公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)。最近完成的分析能力从[频域滤波](design/frequency-filter/README.md)、[频谱遮罩编辑器](design/frequency-mask-editor/README.md)、[周期噪声与陷波器](design/periodic-noise-removal/README.md)、[奇异值分解重建](design/svd-decomposition/README.md)和[调色板与颜色迁移](design/palette-and-color-transfer/README.md)专用入口进入。
+公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)。最近完成的分析能力从[频域滤波](design/frequency-filter/README.md)、[频谱遮罩编辑器](design/frequency-mask-editor/README.md)、[周期噪声与陷波器](design/periodic-noise-removal/README.md)、[奇异值分解重建](design/svd-decomposition/README.md)、[调色板与颜色迁移](design/palette-and-color-transfer/README.md)和[内容感知缩放](design/seam-carving/README.md)专用入口进入。
 
 ## 项目与最短开发流程
 
@@ -61,6 +62,6 @@ Standalone 适合检查 AXAML、编译绑定、命令和插件对象图，不能
 - `myavalonia.plugin.image.lab` 是持久身份，不能随显示名或目录名改变。
 - manifest 由构建生成，不手工长期维护。
 - 插件只通过公开 Plugin SDK 接入 Host，不引用 Host 内部项目。
-- 当前实现登记十五个 Persistable Document，分别是水印写入、提取与验证、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建和调色板与颜色迁移。
+- 当前实现登记十六个 Persistable Document，分别是水印写入、提取与验证、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移和内容感知缩放。
 - 当前不登记 Tool、Workflow Action 或 Workbench Command，也不使用 AIFLOW。
 - 当前没有执行 Windows CI、真实 Host、ZIP 和发布封板，不能用 Standalone 结果冒充这些结论。

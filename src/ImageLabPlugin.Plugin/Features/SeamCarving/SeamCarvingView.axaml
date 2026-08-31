@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:ImageLabPlugin.Features.SeamCarving"
+             x:Class="ImageLabPlugin.Features.SeamCarving.SeamCarvingView"
+             x:DataType="local:SeamCarvingDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
+    <Border Grid.Row="0" Classes="card" Padding="10">
+      <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SourcePath}" PlaceholderText="PNG/JPEG 路径"
+                 AutomationProperties.Name="内容感知缩放源图片路径" />
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+          <Button Content="选择…" Command="{Binding SelectImageCommand}" AutomationProperties.Name="选择源图片" />
+          <Button Content="载入" Command="{Binding LoadImageCommand}" AutomationProperties.Name="载入源图片" />
+        </StackPanel>
+        <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" ItemHeight="34">
+          <TextBlock Text="目标宽" VerticalAlignment="Center" Margin="0,0,4,0" />
+          <NumericUpDown Value="{Binding TargetWidth}" Minimum="1" Maximum="16000000" Width="120" MinWidth="120" Margin="0,0,10,0" AutomationProperties.Name="目标宽度" />
+          <TextBlock Text="目标高" VerticalAlignment="Center" Margin="0,0,4,0" />
+          <NumericUpDown Value="{Binding TargetHeight}" Minimum="1" Maximum="16000000" Width="120" MinWidth="120" Margin="0,0,10,0" AutomationProperties.Name="目标高度" />
+          <ComboBox ItemsSource="{Binding AxisOrderOptions}" SelectedItem="{Binding SelectedAxisOrder}" Width="110" Margin="0,0,10,0" AutomationProperties.Name="双轴顺序" />
+          <ComboBox ItemsSource="{Binding ReferenceAlgorithmOptions}" SelectedItem="{Binding SelectedReferenceAlgorithm}" Width="190" AutomationProperties.Name="普通缩放算法" />
+        </WrapPanel>
+        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" ItemHeight="34">
+          <Button Content="建立计划" Command="{Binding PlanResizeCommand}" Margin="0,0,6,0" AutomationProperties.Name="建立内容感知缩放计划" />
+          <Button Content="预览下一缝" Command="{Binding PreviewNextCommand}" Margin="0,0,6,0" AutomationProperties.Name="预览下一条缝" />
+          <Button Content="单步" Command="{Binding StepCommand}" Margin="0,0,6,0" AutomationProperties.Name="应用单条缝" />
+          <Button Content="播放" Command="{Binding PlayCommand}" Margin="0,0,6,0" AutomationProperties.Name="播放内容感知缩放" />
+          <Button Content="暂停" Command="{Binding PauseCommand}" Margin="0,0,6,0" AutomationProperties.Name="暂停播放" />
+          <Button Content="取消" Command="{Binding CancelCommand}" Margin="0,0,6,0" AutomationProperties.Name="取消当前操作" />
+          <Button Content="重置" Command="{Binding ResetCommand}" Margin="0,0,6,0" AutomationProperties.Name="重置到输入图片" />
+          <ComboBox ItemsSource="{Binding PlaybackDelayOptions}" SelectedItem="{Binding PlaybackDelayMilliseconds}" Width="90" AutomationProperties.Name="播放间隔毫秒" />
+        </WrapPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="2*,*" ColumnSpacing="10" MinHeight="360">
+      <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto" RowSpacing="6">
+        <WrapPanel>
+          <TextBlock Text="画笔：" VerticalAlignment="Center" />
+          <ComboBox ItemsSource="{Binding BrushOptions}" SelectedItem="{Binding SelectedBrush}" Width="110" AutomationProperties.Name="区域画笔" />
+          <TextBlock Text="半径" VerticalAlignment="Center" Margin="10,0,4,0" />
+          <NumericUpDown Value="{Binding BrushRadius}" Minimum="1" Maximum="256" Width="120" MinWidth="120" AutomationProperties.Name="画笔半径" />
+          <Button Content="清空笔划" Command="{Binding ClearStrokesCommand}" Margin="10,0,0,0" AutomationProperties.Name="清空区域笔划" />
+          <CheckBox Content="显示区域纹理" IsChecked="{Binding ShowMaskOverlay}" Margin="10,0,0,0" AutomationProperties.Name="显示区域蒙版纹理" />
+          <TextBlock Text="{Binding StrokeCount, StringFormat=' 笔划 {0}/512'}" VerticalAlignment="Center" Margin="8,0,0,0" />
+        </WrapPanel>
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
+          <local:SeamOverlayCanvas x:Name="Overlay" Image="{Binding CurrentPreview}"
+                                   Coordinates="{Binding SeamCoordinates}"
+                                   Orientation="{Binding SeamOrientation}" Operation="{Binding SeamOperation}"
+                                   AutomationProperties.Name="图片、区域与下一缝画布" />
+        </Border>
+        <TextBlock Grid.Row="2" Text="图例：红色实线＝删除；青色虚线＝插入。保护/优先删除是有限能量偏置，不是语义分割或硬约束。"
+                   TextWrapping="Wrap" />
+      </Grid>
+
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="8">
+          <TextBlock Text="能量图" FontWeight="SemiBold" />
+          <WrapPanel>
+            <ComboBox ItemsSource="{Binding EnergyDisplayOptions}" SelectedItem="{Binding SelectedEnergyDisplay}" Width="100" AutomationProperties.Name="能量显示映射" />
+            <CheckBox Content="显示偏置后能量" IsChecked="{Binding ShowEffectiveEnergy}" Margin="10,0,0,0" AutomationProperties.Name="显示有效能量" />
+          </WrapPanel>
+          <local:EnergyMapControl Image="{Binding EnergyPreview}" Height="180" AutomationProperties.Name="Sobel 能量图" />
+          <TextBlock Text="{Binding ResourceSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding StepSummary}" TextWrapping="Wrap" />
+          <Button Content="生成普通缩放对照" Command="{Binding CompareCommand}" AutomationProperties.Name="比较规则网格缩放" />
+          <local:SeamComparisonControl SeamImage="{Binding CurrentPreview}" ReferenceImage="{Binding ReferencePreview}"
+                                       Height="150" AutomationProperties.Name="Seam 与普通缩放并排比较" />
+          <TextBlock Text="差异图" FontWeight="SemiBold" />
+          <Image Source="{Binding DifferencePreview}" Height="120" Stretch="Uniform" AutomationProperties.Name="算法间差异图" />
+          <TextBlock Text="{Binding ComparisonSummary}" TextWrapping="Wrap" />
+          <WrapPanel>
+            <Button Content="导出 PNG" Command="{Binding ExportPngCommand}" Margin="0,0,6,0" AutomationProperties.Name="导出完整结果 PNG" />
+            <Button Content="导出 JSON" Command="{Binding ExportJsonCommand}" Margin="0,0,6,0" AutomationProperties.Name="导出 JSON 报告" />
+            <Button Content="导出 CSV" Command="{Binding ExportCsvCommand}" AutomationProperties.Name="导出 CSV 报告" />
+          </WrapPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <Border Grid.Row="2" Background="#18000000" Padding="8">
+      <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+    </Border>
+  </Grid>
+</UserControl>

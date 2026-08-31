@@ -18,6 +18,7 @@
 | [周期噪声与陷波器](periodic-noise-removal/README.md) | 检测或手选周期频率峰并复核陷波损失 | 稳健峰检测、共轭 Notch、草案采用、误判防护与损失诊断 |
 | [奇异值分解重建](svd-decomposition/README.md) | 观察奇异值、Rank-k 和单分量 | 单边 Jacobi、能量、颜色策略、缓存与严格报告 |
 | [调色板与颜色迁移](palette-and-color-transfer/README.md) | 观察颜色分布、主色、迁移与量化 | sRGB D65、Lab 聚类、统计迁移、ΔE00 与严格报告 |
+| [内容感知缩放](seam-carving/README.md) | 绘制区域并逐缝改变尺寸 | Sobel、确定性 DP、影子插入规划、预算与参考缩放 |
 
 跨能力的架构、领域边界、工作台命令、工作流和发布资料见 [公共设计资料](shared/README.md)。
 
@@ -31,6 +32,7 @@
 | Periodic Noise Removal／周期噪声与陷波器 | V1 本地开发封板 | [专用实现与证据入口](periodic-noise-removal/README.md) |
 | SVD Decomposition／奇异值分解重建 | V1 本地开发封板 | [专用实现与证据入口](svd-decomposition/README.md) |
 | Palette And Color Transfer／调色板与颜色迁移 | V1 本地开发封板 | [专用实现与证据入口](palette-and-color-transfer/README.md) |
+| Seam Carving／内容感知缩放 | V1 本地开发封板 | [专用实现与证据入口](seam-carving/README.md) |
 
 ## 每个能力目录的约定
 
@@ -42,4 +44,5 @@
 - `testing.md`：自动测试、本地命令、已证明与未证明的结论。
 - `history/`：各阶段实际实施记录，不作为当前入口文档。
 
-十四项产品能力均已完成开发实现与本地自动门禁，Module 当前登记十五个 Persistable Document。上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。
+十五项产品能力均已完成开发实现与本地自动门禁，Module 当前登记十六个 Persistable Document。
+上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。

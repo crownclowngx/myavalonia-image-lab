@@ -15,6 +15,7 @@ using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
+using ImageLabPlugin.Features.SeamCarving;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -114,6 +115,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.PaletteColorTransferDocument,
                 "调色板与颜色迁移",
                 "观察 Alpha 加权颜色分布、确定性主色、CIELAB 统计迁移和固定调色板量化误差",
+                "图像分析"));
+        registration.AddPersistableDocument<SeamCarvingDocument, SeamCarvingView>(
+            new DocumentDescriptor(
+                PluginIds.SeamCarvingDocument,
+                "内容感知缩放",
+                "以 Sobel 能量、显式区域偏置和逐缝播放观察 Seam Carving，并与普通缩放比较",
                 "图像分析"));
     }
 }

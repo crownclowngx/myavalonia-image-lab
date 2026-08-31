@@ -40,6 +40,9 @@ using ImageLabPlugin.Domain.SvdDecomposition;
 using ImageLabPlugin.Application.ColorTransfer;
 using ImageLabPlugin.Domain.ColorTransfer;
 using ImageLabPlugin.Infrastructure.ColorTransfer;
+using ImageLabPlugin.Application.SeamCarving;
+using ImageLabPlugin.Domain.SeamCarving;
+using ImageLabPlugin.Infrastructure.SeamCarving;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -66,6 +69,7 @@ public static class ImageLabPluginServices
         AddPeriodicNoiseRemovalServices(services);
         AddSvdDecompositionServices(services);
         AddColorTransferServices(services);
+        AddSeamCarvingServices(services);
         return services;
     }
 
@@ -101,6 +105,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IFrequencyMaskRecipeFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPeriodicNoiseFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IColorTransferFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ISeamCarvingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -390,5 +395,37 @@ public static class ImageLabPluginServices
         services.AddSingleton<IExportColorResultUseCase, ExportColorResultUseCase>();
         services.AddSingleton<IExportColorReportUseCase, ExportColorReportUseCase>();
         services.AddScoped<ColorTransferSession>();
+    }
+
+    /// <summary>登记 Seam Carving 无状态数值服务、两个参考缩放 Strategy、窄用例和 scoped Session。</summary>
+    private static void AddSeamCarvingServices(IServiceCollection services)
+    {
+        // Sobel、DP、路径变形和预算服务没有实例状态，可安全跨 Document 复用；图片与计划只在 Session 中。
+        services.AddSingleton<SeamLumaProjector>();
+        services.AddSingleton<SobelEnergyCalculator>();
+        services.AddSingleton<SeamEnergyPreviewProjector>();
+        services.AddSingleton<SeamMaskPreviewProjector>();
+        services.AddSingleton<MinimumEnergySeamFinder>();
+        services.AddSingleton<SeamRemover>();
+        services.AddSingleton<SeamInsertionPlanner>();
+        services.AddSingleton<SeamInserter>();
+        services.AddSingleton<SeamMaskRasterizer>();
+        services.AddSingleton<SeamResourceEstimator>();
+        services.AddSingleton<SeamResizePlanner>();
+        services.AddSingleton<BilinearReferenceResampler>();
+        services.AddSingleton<BicubicReferenceResampler>();
+        services.AddSingleton<IReferenceImageResampler>(static provider => provider.GetRequiredService<BilinearReferenceResampler>());
+        services.AddSingleton<IReferenceImageResampler>(static provider => provider.GetRequiredService<BicubicReferenceResampler>());
+        services.AddSingleton<ISeamCarvingReportSerializer, SeamCarvingReportSerializer>();
+        services.AddSingleton<IPrepareSeamCarvingSessionUseCase, PrepareSeamCarvingSessionUseCase>();
+        services.AddSingleton<IEditSeamMaskUseCase, EditSeamMaskUseCase>();
+        services.AddSingleton<IPlanSeamResizeUseCase, PlanSeamResizeUseCase>();
+        services.AddSingleton<IPreviewNextSeamUseCase, PreviewNextSeamUseCase>();
+        services.AddSingleton<IApplySeamStepUseCase, ApplySeamStepUseCase>();
+        services.AddSingleton<IRunSeamPlaybackUseCase, RunSeamPlaybackUseCase>();
+        services.AddSingleton<ICompareSeamResizeUseCase, CompareSeamResizeUseCase>();
+        services.AddSingleton<IExportSeamResultUseCase, ExportSeamResultUseCase>();
+        services.AddSingleton<IExportSeamReportUseCase, ExportSeamReportUseCase>();
+        services.AddScoped<SeamCarvingSession>();
     }
 }

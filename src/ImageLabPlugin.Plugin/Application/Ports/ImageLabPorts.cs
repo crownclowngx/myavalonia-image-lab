@@ -98,6 +98,14 @@ internal interface IColorTransferFileDialog
     Task<string?> PickColorReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>内容感知缩放只暴露完整 PNG 与 JSON/CSV 实验报告三个保存意图。</summary>
+internal interface ISeamCarvingFileDialog
+{
+    Task<string?> PickSeamResultPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSeamReportJsonAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSeamReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

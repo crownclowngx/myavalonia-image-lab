@@ -51,5 +51,8 @@
     <TabItem Header="调色板与颜色迁移">
       <ContentControl x:Name="PaletteColorTransferPreview" />
     </TabItem>
+    <TabItem Header="内容感知缩放">
+      <ContentControl x:Name="SeamCarvingPreview" />
+    </TabItem>
   </TabControl>
 </Window>

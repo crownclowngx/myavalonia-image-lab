@@ -16,6 +16,8 @@ using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
+using ImageLabPlugin.Features.SeamCarving;
+using ImageLabPlugin.Domain.SeamCarving;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
@@ -31,14 +33,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十五个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十六个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -84,6 +86,8 @@ public sealed class CompositionAndPersistenceTests
         var secondSvd = secondScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
         var paletteColor = firstScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
         var secondPaletteColor = secondScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
+        var seamCarving = firstScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
+        var secondSeamCarving = secondScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -101,6 +105,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(periodicNoise, secondPeriodicNoise);
         Assert.NotSame(svd, secondSvd);
         Assert.NotSame(paletteColor, secondPaletteColor);
+        Assert.NotSame(seamCarving, secondSeamCarving);
+        seamCarving.SourcePath = "scope-seam-one";
+        Assert.Empty(secondSeamCarving.SourcePath);
         paletteColor.TargetPath = "scope-palette-one";
         Assert.Empty(secondPaletteColor.TargetPath);
         svd.SourcePath = "scope-svd-one";
@@ -137,6 +144,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.Same(
             firstScope.ServiceProvider.GetRequiredService<RadialFilterResponse>(),
             secondScope.ServiceProvider.GetRequiredService<RadialFilterResponse>());
+        Assert.Same(
+            firstScope.ServiceProvider.GetRequiredService<SobelEnergyCalculator>(),
+            secondScope.ServiceProvider.GetRequiredService<SobelEnergyCalculator>());
         first.PayloadText = "scope-one";
         Assert.Empty(second.PayloadText);
     }
@@ -261,6 +271,38 @@ public sealed class CompositionAndPersistenceTests
         Assert.Equal("HSV 色相", restored.SelectedPaletteSort); Assert.Equal("保留目标 L*", restored.SelectedTransferMode);
         Assert.Equal(0.45, restored.Strength); Assert.False(restored.HasTarget); Assert.False(restored.HasFrozenPalette);
         Assert.False(restored.HasCurrentResult); Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public async Task 内容感知缩放快照只恢复参数且不自动读取栅格化或执行()
+    {
+        var registration = new RecordingRegistration();
+        registration.Services.AddSingleton<IPluginWindowInteraction, NullWindowInteraction>();
+        registration.Services.AddScoped<IDocumentLifetime, TestLifetime>();
+        new ImageLabPluginModule().Configure(registration);
+        using var provider = registration.Services.BuildServiceProvider(validateScopes: true);
+        using var firstScope = provider.CreateScope();
+        var document = firstScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
+        await document.InitializeAsync(new NewDocumentActivation("内容感知缩放"), default);
+        document.SourcePath = "missing-private-path.png"; document.TargetWidth = 320; document.TargetHeight = 240;
+        document.SelectedAxisOrder = "高优先"; document.SelectedReferenceAlgorithm = "Catmull–Rom 双三次";
+        document.SelectedBrush = "优先删除"; document.BrushRadius = 21; document.PlaybackDelayMilliseconds = 250;
+        var snapshot = await document.CaptureSaveSnapshotAsync(default);
+        var json = snapshot.Content.Payload.GetRawText();
+        Assert.Contains(SeamCarvingProtocols.SnapshotSchema, json, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("baseEnergy", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("\"EffectiveEnergy\":[", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("maskRaster", json, StringComparison.OrdinalIgnoreCase);
+
+        using var secondScope = provider.CreateScope();
+        var restored = secondScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
+        await restored.InitializeAsync(new RestoreDocumentActivation("恢复内容感知缩放", snapshot.Content), default);
+        Assert.Equal(320, restored.TargetWidth); Assert.Equal(240, restored.TargetHeight);
+        Assert.Equal("高优先", restored.SelectedAxisOrder); Assert.Equal("Catmull–Rom 双三次", restored.SelectedReferenceAlgorithm);
+        Assert.Equal("优先删除", restored.SelectedBrush); Assert.Equal(21, restored.BrushRadius);
+        Assert.Equal(250, restored.PlaybackDelayMilliseconds); Assert.False(restored.HasSession);
+        Assert.False(restored.HasPlan); Assert.False(restored.HasCompletedResult); Assert.False(restored.IsDirty);
     }
 
     [Fact]
