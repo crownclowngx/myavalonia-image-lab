@@ -1,0 +1,92 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.PaletteColorTransfer.PaletteColorTransferView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.PaletteColorTransfer"
+    xmlns:local="using:ImageLabPlugin.Features.PaletteColorTransfer"
+    x:DataType="vm:PaletteColorTransferDocument">
+  <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="12" MinWidth="1040">
+      <TextBlock Grid.Row="0" FontSize="22" FontWeight="SemiBold" Text="调色板与颜色迁移" />
+      <Border Grid.Row="1" Padding="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto,Auto" RowSpacing="8" ColumnSpacing="8">
+          <TextBlock VerticalAlignment="Center" Text="目标图" />
+          <TextBox Grid.Column="1" Text="{Binding TargetPath}" PlaceholderText="PNG/JPEG 路径" />
+          <Button Grid.Column="2" Command="{Binding SelectTargetCommand}" Content="选择…" />
+          <Button Grid.Column="3" Command="{Binding LoadTargetCommand}" Content="载入目标" />
+          <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="参考图" />
+          <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ReferencePath}" PlaceholderText="迁移时需要；尺寸可与目标不同" />
+          <Button Grid.Row="1" Grid.Column="2" Command="{Binding SelectReferenceCommand}" Content="选择…" />
+          <Button Grid.Row="1" Grid.Column="3" Command="{Binding LoadReferenceCommand}" Content="载入参考" />
+          <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="8">
+            <TextBlock VerticalAlignment="Center" Text="K" />
+            <ComboBox Width="80" ItemsSource="{Binding ColorCountOptions}" SelectedItem="{Binding ColorCount}" />
+            <Button Command="{Binding AnalyzeCommand}" Content="分析颜色" />
+            <TextBlock VerticalAlignment="Center" Text="{Binding StatusMessage}" TextWrapping="Wrap" MaxWidth="650" />
+          </StackPanel>
+        </Grid>
+      </Border>
+      <Grid Grid.Row="2" ColumnDefinitions="320,*,320" ColumnSpacing="12">
+        <Border Padding="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+          <StackPanel Spacing="8">
+            <TextBlock FontWeight="SemiBold" Text="操作配方" />
+            <TextBlock Text="调色板来源" /><ComboBox ItemsSource="{Binding PaletteSourceOptions}" SelectedItem="{Binding SelectedPaletteSource}" />
+            <TextBlock Text="显示排序（不改变 cluster identity）" /><ComboBox ItemsSource="{Binding PaletteSortOptions}" SelectedItem="{Binding SelectedPaletteSort}" />
+            <Button Command="{Binding FreezePaletteCommand}" Content="冻结当前提取调色板" />
+            <TextBlock Text="迁移模式" /><ComboBox ItemsSource="{Binding TransferModeOptions}" SelectedItem="{Binding SelectedTransferMode}" />
+            <TextBlock Text="迁移强度 [0,1]" /><NumericUpDown MinWidth="120" Minimum="0" Maximum="1" Increment="0.05" Value="{Binding Strength}" />
+            <Button Command="{Binding RunTransferCommand}" Content="运行颜色统计迁移" />
+            <Button Command="{Binding RemapPaletteCommand}" Content="按冻结调色板重映射" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Padding="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+          <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+            <TextBlock Grid.ColumnSpan="3" FontWeight="SemiBold" Text="目标 / 参考 / 当前结果（不对齐不同尺寸图片）" />
+            <StackPanel Grid.Row="1"><Image Height="240" Stretch="Uniform" Source="{Binding TargetPreview}" /><TextBlock Text="{Binding TargetSummary}" TextWrapping="Wrap" /></StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1"><Image Height="240" Stretch="Uniform" Source="{Binding ReferencePreview}" /><TextBlock Text="{Binding ReferenceSummary}" TextWrapping="Wrap" /></StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="2"><Image Height="240" Stretch="Uniform" Source="{Binding ResultPreview}" /><TextBlock Text="{Binding ResultSummary}" TextWrapping="Wrap" /></StackPanel>
+          </Grid>
+        </Border>
+        <Border Grid.Column="2" Padding="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+          <StackPanel Spacing="6"><TextBlock FontWeight="SemiBold" Text="统计与诊断等价表格" />
+            <ItemsControl ItemsSource="{Binding StatisticsRows}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+          </StackPanel>
+        </Border>
+      </Grid>
+      <Border Grid.Row="3" Padding="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+        <StackPanel Spacing="6"><TextBlock FontWeight="SemiBold" Text="调色板：序号 / Hex / Lab / 占比 / 簇内误差" />
+          <local:PaletteStripControl Height="36" Entries="{Binding PaletteEntries}" />
+          <ItemsControl ItemsSource="{Binding PaletteRows}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" FontFamily="Consolas" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        </StackPanel>
+      </Border>
+      <Border Grid.Row="4" Padding="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+        <StackPanel Spacing="8">
+          <TextBlock FontWeight="SemiBold" Text="分布与解释" />
+          <TextBlock Text="RGB 256-bin；HSV H=180、S/V=100；Lab L*=100、a*/b*=256；H-S=180×100；a*-b*=128×128。灰阶 Hue 为 N/A，不归入 H=0。" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+            <StackPanel><TextBlock Text="目标 R 直方图" /><local:ColorHistogramControl Height="100" Bins="{Binding RedHistogram}" /></StackPanel>
+            <StackPanel Grid.Column="1"><TextBlock Text="目标 Lab a*-b* 密度" /><local:ColorDistributionPlaneControl Height="100" Density="{Binding LabAbDensity}" /></StackPanel>
+            <StackPanel Grid.Column="2"><TextBlock Text="目标—结果 ΔE00 分布" /><local:PerceptualDifferenceControl Height="100" Bins="{Binding DifferenceHistogram}" /></StackPanel>
+          </Grid>
+          <TextBlock Text="{Binding ProtocolSummary}" TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock VerticalAlignment="Center" Text="目标探针 x/y" />
+            <NumericUpDown MinWidth="120" Minimum="0" Maximum="16000000" Value="{Binding TargetProbeX}" />
+            <NumericUpDown MinWidth="120" Minimum="0" Maximum="16000000" Value="{Binding TargetProbeY}" />
+            <TextBlock VerticalAlignment="Center" Text="参考 x/y" />
+            <NumericUpDown MinWidth="120" Minimum="0" Maximum="16000000" Value="{Binding ReferenceProbeX}" />
+            <NumericUpDown MinWidth="120" Minimum="0" Maximum="16000000" Value="{Binding ReferenceProbeY}" />
+            <Button Command="{Binding InspectPixelCommand}" Content="读取探针" />
+          </StackPanel>
+          <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Command="{Binding ExportPngCommand}" Content="导出 PNG" />
+            <Button Command="{Binding ExportJsonCommand}" Content="导出 JSON" />
+            <Button Command="{Binding ExportCsvCommand}" Content="导出 CSV" />
+            <ProgressBar Width="150" IsIndeterminate="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

@@ -2,7 +2,7 @@
 
 ## 结论
 
-ImageLab 的公共领域只包含已被水印、频域分析器、比较实验室、鲁棒性实验室或感知指纹证明可复用的图像事实：像素尺寸、RGBA 像素、六通道平面、颜色变换、抗混叠代理、流式全参考质量、双直方图、有界差异场、8×8 DCT/IDCT、低频 DCT、FFT/IFFT、频率坐标与径向能量。文件路径、PNG/JPEG、Avalonia `Bitmap`、窗口、JSON、密码和 Frame 都不属于公共图像领域；水印 Profile 属于 Watermarking 领域，只可作为实验比较维度引用。
+ImageLab 的公共领域只包含已被真实产品证明稳定的图像事实：像素尺寸、RGBA 像素、六通道平面、sRGB/XYZ D65/CIELAB/HSV 数值转换、抗混叠代理、流式全参考质量、双直方图、有界差异场、8×8 DCT/IDCT、低频 DCT、FFT/IFFT、频率坐标与径向能量。文件路径、PNG/JPEG、Avalonia `Bitmap`、窗口、JSON、密码和 Frame 都不属于公共图像领域；水印 Profile 属于 Watermarking 领域，只可作为实验比较维度引用。
 
 ```text
 Domain/Imaging
@@ -10,6 +10,10 @@ Domain/Imaging
   PixelImage             自有 RGBA8888 缓冲区
   LumaPlane              连续 double 亮度平面
   ColorSpaceConverter    RGB ↔ YCbCr 的 Y-only 投影/重建
+  SrgbColorSpace         sRGB 编码、线性 RGB 与 XYZ D65
+  CieLabColorSpace       XYZ D65 与 CIELAB，固定 δ=6/29
+  HsvColorSpace          标准 HSV 与灰阶 Hue N/A
+  CieDeltaE              ΔE76 与 CIEDE2000
   ImageChannelConverter 六通道抽取与选定通道重建
   ImageAnalysisProxyProjector 面积平均分析代理
   ImageQualityCalculator 既有水印兼容入口；内部复用 O(1) 额外内存分析器
@@ -80,11 +84,21 @@ Domain/Convolution
   GradientCombiner               Gx/Gy 的非线性 Magnitude 组合
   KernelFrequencyResponseAnalyzer 256² 归一化核响应与双核摘要
   ConvolutionDifference/Inspector 同尺寸差异和逐项贡献
+
+Domain/ColorTransfer
+  ColorDistributionAnalyzer Alpha 加权在线统计、固定直方图/密度与 JSD
+  RgbColorAggregator         固定 32³ 的 5-bit RGB 实际均值聚合
+  DominantColorClusterer     确定性加权 Lab k-means 与 fingerprint
+  SrgbGamutMapper            保持 L*/hue 的 chroma 二分映射
+  LabStatisticsTransfer      CIELAB 独立通道均值/标准差迁移
+  FixedPaletteRemapper       精确 ΔE76 最近色与稳定 cluster tie-break
+  PerceptualDifferenceAnalyzer 固定数组 ΔE00 汇总
+  ColorPixelInspector        分图片坐标的 sRGB/HSV/Lab/palette 事实
 ```
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。十二个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。十五个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -107,6 +121,9 @@ Domain/Convolution
 - LSB Session 由单个 scoped Document 独占，释放时清零 Frame；位置图和 bit 图最大边 1024，受控扰动每次从同一 stego 基线开始。
 - 卷积 Session 由单个 scoped Document 独占完整源图和 512/1024/2048 代理；Alpha 不参与，完整结果绑定 recipe fingerprint，参数变化后禁止导出。
 - 核响应固定 256²，只包含归一化线性核；偏置、边界、字节裁切和 Magnitude 非线性不进入 H(u,v)。
+- 颜色 Session 由单个 scoped Document 独占目标、参考和一个当前结果；预览最大边 512，完整扫描不缓存逐像素 Lab。
+- 颜色统计中 A=0 完全排除，0<A<255 以 A/255 加权；处理结果 Alpha 原字节保持，全透明 RGBA 四字节不变。
+- 颜色迁移不要求目标/参考同尺寸，也不缩放或建立像素对应；固定调色板排序只改显示，不改变 cluster identity。
 
 ## 扩展规则
 

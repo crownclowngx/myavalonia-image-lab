@@ -14,6 +14,7 @@ using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
+using ImageLabPlugin.Features.PaletteColorTransfer;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -107,6 +108,12 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.SvdDecompositionDocument,
                 "奇异值分解重建",
                 "以有界分析代理观察奇异值、Rank-k 重建、秩一分量和固定颜色策略差异",
+                "图像分析"));
+        registration.AddPersistableDocument<PaletteColorTransferDocument, PaletteColorTransferView>(
+            new DocumentDescriptor(
+                PluginIds.PaletteColorTransferDocument,
+                "调色板与颜色迁移",
+                "观察 Alpha 加权颜色分布、确定性主色、CIELAB 统计迁移和固定调色板量化误差",
                 "图像分析"));
     }
 }

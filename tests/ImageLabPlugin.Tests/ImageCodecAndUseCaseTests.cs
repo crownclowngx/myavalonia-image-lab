@@ -43,6 +43,8 @@ using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Application.PeriodicNoiseRemoval;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
+using ImageLabPlugin.Features.PaletteColorTransfer;
+using ImageLabPlugin.Application.ColorTransfer;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -84,7 +86,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十四个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十五个真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -112,6 +114,11 @@ public sealed class ImageCodecAndUseCaseTests
         var periodicSpectrum = new PeriodicSpectrumControl();
         var svdView = new SvdDecompositionView();
         var svdCurve = new SingularValueCurveControl();
+        var paletteColorView = new PaletteColorTransferView();
+        var paletteStrip = new PaletteStripControl();
+        var colorHistogram = new ColorHistogramControl();
+        var colorPlane = new ColorDistributionPlaneControl();
+        var differenceHistogram = new PerceptualDifferenceControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -143,6 +150,8 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(periodicSpectrum);
         Assert.NotNull(svdView.Content);
         Assert.NotNull(svdCurve);
+        Assert.NotNull(paletteColorView.Content);
+        Assert.NotNull(paletteStrip); Assert.NotNull(colorHistogram); Assert.NotNull(colorPlane); Assert.NotNull(differenceHistogram);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -161,7 +170,8 @@ public sealed class ImageCodecAndUseCaseTests
             new FrequencyFilterView(),
             new FrequencyMaskEditorView(),
             new PeriodicNoiseRemovalView(),
-            new SvdDecompositionView()
+            new SvdDecompositionView(),
+            new PaletteColorTransferView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -179,7 +189,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(53, numericInputs.Count);
+        Assert.Equal(58, numericInputs.Count);
     }
 
     [Fact]
@@ -330,6 +340,25 @@ public sealed class ImageCodecAndUseCaseTests
             Assert.InRange(Math.Abs(expected[i + 2] - actual[i + 2]), 0, 3);
             Assert.Equal(expected[i + 3], actual[i + 3]);
         }
+    }
+
+    [Fact]
+    public async Task 颜色结果Png执行真实回读原子发布并阻止覆盖输入()
+    {
+        var codec = new AvaloniaImageCodec(); var writer = new AtomicFileWriter();
+        var useCase = new ExportColorResultUseCase(codec, writer);
+        var source = CreateTexturedImage(16, 12, includeAlpha: true);
+        var directory = Path.Combine(Path.GetTempPath(), $"palette-color-export-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory); var input = Path.Combine(directory, "input.png");
+        var output = Path.Combine(directory, "result.png");
+        try
+        {
+            await useCase.ExecuteAsync(source, output, input, default);
+            var decoded = await codec.DecodeAsync(output, default); Assert.Equal(source.Size, decoded.Size);
+            for (var i = 3; i < source.Rgba.Length; i += 4) Assert.Equal(source.Rgba.Span[i], decoded.Rgba.Span[i]);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => useCase.ExecuteAsync(source, input, input, default));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
     }
 
     [Fact]

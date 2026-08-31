@@ -60,4 +60,8 @@ public static class PluginIds
     /// <summary>“奇异值分解重建”低秩分析与策略比较的多实例持久身份。</summary>
     public static readonly DocumentTypeId SvdDecompositionDocument =
         new("myavalonia.plugin.image.lab.document.svd-decomposition");
+
+    /// <summary>“调色板与颜色迁移”多实例颜色统计实验的持久身份。</summary>
+    public static readonly DocumentTypeId PaletteColorTransferDocument =
+        new("myavalonia.plugin.image.lab.document.palette-color-transfer");
 }

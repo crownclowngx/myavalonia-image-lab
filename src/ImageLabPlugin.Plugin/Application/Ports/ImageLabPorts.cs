@@ -90,6 +90,14 @@ internal interface IPeriodicNoiseFileDialog
     Task<string?> PickCandidateSummaryOutputAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>调色板与颜色迁移只暴露 PNG、JSON、CSV 三个输出意图。</summary>
+internal interface IColorTransferFileDialog
+{
+    Task<string?> PickColorResultPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickColorReportJsonAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickColorReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

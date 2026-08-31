@@ -13,6 +13,7 @@ using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
+using ImageLabPlugin.Features.PaletteColorTransfer;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -34,6 +35,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _frequencyMaskScope;
     private IServiceScope? _periodicNoiseScope;
     private IServiceScope? _svdScope;
+    private IServiceScope? _paletteColorTransferScope;
 
     public MainWindow()
     {
@@ -56,6 +58,7 @@ public sealed partial class MainWindow : Window
         _frequencyMaskScope = services.CreateScope();
         _periodicNoiseScope = services.CreateScope();
         _svdScope = services.CreateScope();
+        _paletteColorTransferScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -84,6 +87,8 @@ public sealed partial class MainWindow : Window
         var periodicNoiseView = _periodicNoiseScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalView>();
         var svdDocument = _svdScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
         var svdView = _svdScope.ServiceProvider.GetRequiredService<SvdDecompositionView>();
+        var paletteColorTransferDocument = _paletteColorTransferScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
+        var paletteColorTransferView = _paletteColorTransferScope.ServiceProvider.GetRequiredService<PaletteColorTransferView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -111,6 +116,8 @@ public sealed partial class MainWindow : Window
         periodicNoiseDocument.InitializeAsync(new NewDocumentActivation("周期噪声与陷波器"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         svdDocument.InitializeAsync(new NewDocumentActivation("奇异值分解重建"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        paletteColorTransferDocument.InitializeAsync(new NewDocumentActivation("调色板与颜色迁移"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -140,6 +147,8 @@ public sealed partial class MainWindow : Window
         PeriodicNoisePreview.Content = periodicNoiseView;
         svdView.DataContext = svdDocument;
         SvdPreview.Content = svdView;
+        paletteColorTransferView.DataContext = paletteColorTransferDocument;
+        PaletteColorTransferPreview.Content = paletteColorTransferView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -156,6 +165,7 @@ public sealed partial class MainWindow : Window
             frequencyMaskDocument.Dispose();
             periodicNoiseDocument.Dispose();
             svdDocument.Dispose();
+            paletteColorTransferDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -170,6 +180,7 @@ public sealed partial class MainWindow : Window
             _frequencyMaskScope?.Dispose();
             _periodicNoiseScope?.Dispose();
             _svdScope?.Dispose();
+            _paletteColorTransferScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -184,6 +195,7 @@ public sealed partial class MainWindow : Window
             _frequencyMaskScope = null;
             _periodicNoiseScope = null;
             _svdScope = null;
+            _paletteColorTransferScope = null;
         };
     }
 }

@@ -37,6 +37,9 @@ using ImageLabPlugin.Application.PeriodicNoiseRemoval;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 using ImageLabPlugin.Application.SvdDecomposition;
 using ImageLabPlugin.Domain.SvdDecomposition;
+using ImageLabPlugin.Application.ColorTransfer;
+using ImageLabPlugin.Domain.ColorTransfer;
+using ImageLabPlugin.Infrastructure.ColorTransfer;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -62,6 +65,7 @@ public static class ImageLabPluginServices
         AddFrequencyMaskEditorServices(services);
         AddPeriodicNoiseRemovalServices(services);
         AddSvdDecompositionServices(services);
+        AddColorTransferServices(services);
         return services;
     }
 
@@ -96,6 +100,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<ISvdFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IFrequencyMaskRecipeFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPeriodicNoiseFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IColorTransferFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -357,5 +362,33 @@ public static class ImageLabPluginServices
         services.AddSingleton<ICompareSvdStrategiesUseCase, CompareSvdStrategiesUseCase>();
         services.AddSingleton<IExportSvdImageUseCase, ExportSvdImageUseCase>();
         services.AddSingleton<IExportSvdReportUseCase, ExportSvdReportUseCase>();
+    }
+
+    /// <summary>登记颜色数学、窄用例和每 Document Scope 独占的 Session。</summary>
+    private static void AddColorTransferServices(IServiceCollection services)
+    {
+        // 颜色服务均无状态；只有 Session 保存目标、参考、冻结调色板和当前结果。
+        services.AddSingleton<SrgbColorSpace>();
+        services.AddSingleton<CieLabColorSpace>();
+        services.AddSingleton<HsvColorSpace>();
+        services.AddSingleton<CieDeltaE>();
+        services.AddSingleton<SrgbGamutMapper>();
+        services.AddSingleton<ColorDistributionAnalyzer>();
+        services.AddSingleton<RgbColorAggregator>();
+        services.AddSingleton<DominantColorClusterer>();
+        services.AddSingleton<PaletteSorter>();
+        services.AddSingleton<PerceptualDifferenceAnalyzer>();
+        services.AddSingleton<ColorPixelInspector>();
+        services.AddSingleton<LabStatisticsTransfer>();
+        services.AddSingleton<FixedPaletteRemapper>();
+        services.AddSingleton<IColorTransferReportSerializer, ColorTransferReportSerializer>();
+        services.AddSingleton<IPrepareColorTransferSessionUseCase, PrepareColorTransferSessionUseCase>();
+        services.AddSingleton<IAnalyzeColorDistributionsUseCase, AnalyzeColorDistributionsUseCase>();
+        services.AddSingleton<IFreezePaletteUseCase, FreezePaletteUseCase>();
+        services.AddSingleton<IRunColorTransferUseCase, RunColorTransferUseCase>();
+        services.AddSingleton<IRemapToPaletteUseCase, RemapToPaletteUseCase>();
+        services.AddSingleton<IExportColorResultUseCase, ExportColorResultUseCase>();
+        services.AddSingleton<IExportColorReportUseCase, ExportColorReportUseCase>();
+        services.AddScoped<ColorTransferSession>();
     }
 }

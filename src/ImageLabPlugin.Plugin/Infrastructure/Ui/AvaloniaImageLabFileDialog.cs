@@ -6,7 +6,7 @@ namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
 internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
-    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, ISvdFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, ITextClipboard
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, ISvdFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, IColorTransferFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -160,6 +160,27 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
                 SuggestedFileName = suggestedName,
                 FileTypeChoices = [new FilePickerFileType("JSON 摘要") { Patterns = ["*.json"] }]
             }, cancellationToken);
+
+    public Task<string?> PickColorResultPngAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出颜色实验完整尺寸 PNG", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("PNG") { Patterns = ["*.png"] }]
+        }, cancellationToken);
+
+    public Task<string?> PickColorReportJsonAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出颜色实验 JSON 报告", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }]
+        }, cancellationToken);
+
+    public Task<string?> PickColorReportCsvAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions
+        {
+            Title = "导出颜色实验 CSV 报告", SuggestedFileName = suggestedName,
+            FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }]
+        }, cancellationToken);
 
     public Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken) =>
         interaction.TrySetClipboardTextAsync(text, cancellationToken);

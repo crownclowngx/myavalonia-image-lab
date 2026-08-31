@@ -15,6 +15,7 @@ using ImageLabPlugin.Features.FrequencyFilter;
 using ImageLabPlugin.Features.FrequencyMaskEditor;
 using ImageLabPlugin.Features.PeriodicNoiseRemoval;
 using ImageLabPlugin.Features.SvdDecomposition;
+using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
@@ -30,14 +31,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十四个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十五个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -81,6 +82,8 @@ public sealed class CompositionAndPersistenceTests
         var secondPeriodicNoise = secondScope.ServiceProvider.GetRequiredService<PeriodicNoiseRemovalDocument>();
         var svd = firstScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
         var secondSvd = secondScope.ServiceProvider.GetRequiredService<SvdDecompositionDocument>();
+        var paletteColor = firstScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
+        var secondPaletteColor = secondScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -97,6 +100,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(frequencyMask, secondFrequencyMask);
         Assert.NotSame(periodicNoise, secondPeriodicNoise);
         Assert.NotSame(svd, secondSvd);
+        Assert.NotSame(paletteColor, secondPaletteColor);
+        paletteColor.TargetPath = "scope-palette-one";
+        Assert.Empty(secondPaletteColor.TargetPath);
         svd.SourcePath = "scope-svd-one";
         Assert.Empty(secondSvd.SourcePath);
         periodicNoise.SourcePath = "scope-periodic-one";
@@ -226,6 +232,35 @@ public sealed class CompositionAndPersistenceTests
         Assert.False(restored.HasSession);
         Assert.False(restored.HasDecomposition);
         Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public async Task 颜色迁移快照只保存轻量意图且恢复不自动读取分析或冻结调色板()
+    {
+        var registration = new RecordingRegistration();
+        registration.Services.AddSingleton<IPluginWindowInteraction, NullWindowInteraction>();
+        registration.Services.AddScoped<IDocumentLifetime, TestLifetime>();
+        new ImageLabPluginModule().Configure(registration);
+        using var provider = registration.Services.BuildServiceProvider(validateScopes: true);
+        using var firstScope = provider.CreateScope();
+        var document = firstScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
+        await document.InitializeAsync(new NewDocumentActivation("调色板与颜色迁移"), default);
+        document.TargetPath = "target.png"; document.ReferencePath = "reference.png";
+        document.ColorCount = 9; document.SelectedPaletteSource = "参考图";
+        document.SelectedPaletteSort = "HSV 色相"; document.SelectedTransferMode = "保留目标 L*"; document.Strength = 0.45;
+        var snapshot = await document.CaptureSaveSnapshotAsync(default);
+        var json = snapshot.Content.Payload.GetRawText();
+        Assert.Contains("srgb-d65-cielab-v1", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("paletteEntries", json, StringComparison.OrdinalIgnoreCase);
+
+        using var secondScope = provider.CreateScope();
+        var restored = secondScope.ServiceProvider.GetRequiredService<PaletteColorTransferDocument>();
+        await restored.InitializeAsync(new RestoreDocumentActivation("恢复颜色实验", snapshot.Content), default);
+        Assert.Equal(9, restored.ColorCount); Assert.Equal("参考图", restored.SelectedPaletteSource);
+        Assert.Equal("HSV 色相", restored.SelectedPaletteSort); Assert.Equal("保留目标 L*", restored.SelectedTransferMode);
+        Assert.Equal(0.45, restored.Strength); Assert.False(restored.HasTarget); Assert.False(restored.HasFrozenPalette);
+        Assert.False(restored.HasCurrentResult); Assert.False(restored.IsDirty);
     }
 
     [Fact]

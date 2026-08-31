@@ -48,5 +48,8 @@
     <TabItem Header="奇异值分解重建">
       <ContentControl x:Name="SvdPreview" />
     </TabItem>
+    <TabItem Header="调色板与颜色迁移">
+      <ContentControl x:Name="PaletteColorTransferPreview" />
+    </TabItem>
   </TabControl>
 </Window>

@@ -34,7 +34,7 @@ ImageLab 的长期边界是：
 
 ## 当前能力基线
 
-当前 V1 已经提供十四个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”“卷积核实验台”“小波实验室”“频域滤波”“频谱遮罩编辑器”“周期噪声与陷波器”和“奇异值分解重建”。底层已经具备：
+当前 V1 已经提供十五个 Persistable Document：“水印写入”“提取与验证”“频域分析器”“图像比较实验室”“鲁棒性实验室”“感知指纹”“位平面观察器”“LSB 隐写与统计实验”“卷积核实验台”“小波实验室”“频域滤波”“频谱遮罩编辑器”“周期噪声与陷波器”“奇异值分解重建”和“调色板与颜色迁移”。底层已经具备：
 
 - 自有 RGBA8888 `PixelImage` 与受限图像尺寸模型。
 - RGB 与 YCbCr 亮度投影和重建。
@@ -248,7 +248,7 @@ V1 已按[专用实现与证据入口](design/frequency-mask-editor/README.md)�
 V1 已按[专用实现与证据入口](design/periodic-noise-removal/README.md)完成并登记为第十三个多实例 Persistable Document：
 复用有界 FFT、共轭安全 `FrequencyGainMask`、`FrequencyMaskApplier`、六通道重建和质量诊断；完成径向稳健背景、
 局部峰、风险事实、三类 Notch、草案/采用状态、严格配方与候选摘要。自动检测只生成待人工确认的候选与草案，
-不会把频谱峰直接宣称为噪声或静默导出结果。Debug/Release 为 442/442、零跳过，构建零警告/零错误；
+不会把频谱峰直接宣称为噪声或静默导出结果。当前 Debug/Release 为 520/520、零跳过，构建零警告/零错误；
 不使用 AIFLOW，未新增 Windows CI，也未执行发布门禁。
 
 ### 12. SVD Decomposition／奇异值分解重建（V1 已实现）
@@ -263,9 +263,9 @@ V1 已按[专用实现与证据入口](design/svd-decomposition/README.md)完成
 
 该功能只解释当前分析代理的低秩近似，不是图片文件压缩器，不提供文件压缩率或自动最佳 k。
 
-### 13. Palette And Color Transfer／调色板与颜色迁移
+### 13. Palette And Color Transfer／调色板与颜色迁移（V1 已实现）
 
-候选能力：
+V1 已按[专用实现与证据入口](design/palette-and-color-transfer/README.md)完成并登记为第十五个多实例 Persistable Document：
 
 - 主色提取、颜色聚类和调色板排序。
 - RGB、HSV、Lab 等颜色空间中的分布查看。
@@ -273,7 +273,9 @@ V1 已按[专用实现与证据入口](design/svd-decomposition/README.md)完成
 - 显示迁移前后直方图、色域和感知色差。
 - 使用固定调色板重映射图像并观察量化误差。
 
-重点应是颜色统计、颜色空间和迁移算法，而不是通用调色面板。
+V1 采用固定 sRGB D65/CIELAB 协议、确定性 Alpha 加权 Lab 聚类、CIELAB 独立通道均值/标准差迁移、
+CIEDE2000 诊断和无抖动最近色重映射。重点仍是颜色统计、颜色空间和迁移算法，不是通用调色面板。
+Debug/Release 本地门禁均为 520/520、0 跳过、0 警告/错误；不包含 AIFLOW、Windows CI、真实 Host 或发布门禁。
 
 ### 14. Seam Carving／内容感知缩放
 
