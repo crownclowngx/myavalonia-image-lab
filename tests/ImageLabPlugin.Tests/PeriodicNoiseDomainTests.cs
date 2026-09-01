@@ -143,7 +143,7 @@ public sealed class PeriodicNoiseDomainTests
     private static PeriodicNoiseRecipe Recipe(IEnumerable<PeriodicNotch> notches) => new(ImageChannel.Luma,
         PeriodicNotchTransition.Ideal, 0.001, 1, 1, notches);
 
-    private static PeriodicPeakDetector Detector() => new(new RadialSpectrumBaseline(),
+    private static PeriodicPeakDetector Detector() => new(new RadialLogPowerBaseline(),
         new PeriodicPeakRiskAssessor());
 
     internal static Fft2DTransform Fft() => new(new Fft1DTransform());

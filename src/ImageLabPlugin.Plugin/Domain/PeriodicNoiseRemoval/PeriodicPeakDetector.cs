@@ -7,7 +7,7 @@ namespace ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 /// 检测顺序固定为：对数功率、径向中位数/MAD 背景、3×3 严格局部最大值、局部突出度、共轭归并、稳定排序与
 /// 环面非极大值抑制。候选只是值得复核的峰，不是噪声结论；取消会抛出且不会返回部分列表。
 /// </remarks>
-internal sealed class PeriodicPeakDetector(RadialSpectrumBaseline baseline, PeriodicPeakRiskAssessor riskAssessor)
+internal sealed class PeriodicPeakDetector(RadialLogPowerBaseline baseline, PeriodicPeakRiskAssessor riskAssessor)
 {
     private readonly record struct Peak(int X, int Y, int CanonicalIndex, PeriodicFrequency Frequency,
         double Score, double Prominence, double Compactness);
@@ -32,9 +32,9 @@ internal sealed class PeriodicPeakDetector(RadialSpectrumBaseline baseline, Peri
                 var frequency = PeriodicFrequency.FromInternal(x, y, width, height);
                 if (frequency.Radius < settings.DcExclusionRadius || !IsStrictLocalMaximum(logs, x, y, width, height))
                     continue;
-                var radialBin = RadialSpectrumBaseline.RadialBin(x, y, width, height);
-                var scale = Math.Max(RadialSpectrumBaseline.Epsilon,
-                    RadialSpectrumBaseline.RobustScale * radial.MedianAbsoluteDeviations[radialBin]);
+                var radialBin = RadialLogPowerBaseline.RadialBin(x, y, width, height);
+                var scale = Math.Max(RadialLogPowerBaseline.Epsilon,
+                    RadialLogPowerBaseline.RobustScale * radial.MedianAbsoluteDeviations[radialBin]);
                 var score = (logs[index] - radial.Medians[radialBin]) / scale;
                 var prominence = LocalProminence(logs, x, y, width, height);
                 if (score < settings.RobustScoreThreshold || prominence < settings.ProminenceThreshold) continue;

@@ -20,6 +20,7 @@
 | [调色板与颜色迁移](palette-and-color-transfer/README.md) | 观察颜色分布、主色、迁移与量化 | sRGB D65、Lab 聚类、统计迁移、ΔE00 与严格报告 |
 | [内容感知缩放](seam-carving/README.md) | 绘制区域并逐缝改变尺寸 | Sobel、确定性 DP、影子插入规划、预算与参考缩放 |
 | [Poisson Blending／梯度域融合](poisson-blending/README.md) | 选择源区域并比较直接 Alpha 与梯度域结果 | 线性 sRGB、三种 guidance、离散 Poisson、红黑迭代与预算 |
+| [Spectral Art／频谱艺术](spectral-art/README.md) | 把文字或图片变成频谱可见图案 | Pattern、径向稳健尺度、共轭幅度、IFFT 与诊断 |
 
 跨能力的架构、领域边界、工作台命令、工作流和发布资料见 [公共设计资料](shared/README.md)。
 
@@ -27,7 +28,7 @@
 
 | 能力 | 当前状态 | 计划入口 |
 | --- | --- | --- |
-| Spectral Art／频谱文字、Logo 与二维码 | V1 设计与实施计划已建立，尚未进入生产实现 | [专用实施计划](spectral-art/implementation.md) |
+| Hybrid Image／混合图像 | 候选能力，尚未进入生产实现 | [未来能力](../future-capabilities.md) |
 
 ## 最近完成能力
 
@@ -41,6 +42,7 @@
 | Palette And Color Transfer／调色板与颜色迁移 | V1 本地开发封板 | [专用实现与证据入口](palette-and-color-transfer/README.md) |
 | Seam Carving／内容感知缩放 | V1 本地开发封板 | [专用实现与证据入口](seam-carving/README.md) |
 | Poisson Blending／梯度域融合 | V1 本地开发封板 | [专用实现与证据入口](poisson-blending/README.md) |
+| Spectral Art／频谱艺术 | V1 本地开发封板 | [专用实现与证据入口](spectral-art/README.md) |
 
 ## 每个能力目录的约定
 
@@ -52,5 +54,5 @@
 - `testing.md`：自动测试、本地命令、已证明与未证明的结论。
 - `history/`：各阶段实际实施记录，不作为当前入口文档。
 
-十六项产品能力均已完成开发实现与本地自动门禁，Module 当前登记十七个 Persistable Document。
+十七项产品能力均已完成开发实现与本地自动门禁，Module 当前登记十八个 Persistable Document。
 上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。

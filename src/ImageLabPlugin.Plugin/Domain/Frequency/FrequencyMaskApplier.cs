@@ -55,8 +55,13 @@ internal sealed class PaddedFrequencyMaskApplicationResult
 /// 该服务无状态，可由 Frequency Filter 与频谱遮罩编辑器共享。工作频谱始终是 Session 缓存的副本；
 /// 虚部残差超过 1E-8 说明共轭不变量或数值实现已经失效，因此必须失败，不能静默只取实部。
 /// </remarks>
-internal sealed class FrequencyMaskApplier(Fft2DTransform fft)
+internal sealed class FrequencyMaskApplier(FrequencyInverseTransformer inverseTransformer)
 {
+    /// <summary>保留既有手工组合入口；实际 IFFT 仍统一委托共享逆变换器。</summary>
+    internal FrequencyMaskApplier(Fft2DTransform fft) : this(new FrequencyInverseTransformer(fft))
+    {
+    }
+
     public FrequencyMaskApplicationResult Apply(FrequencySpectrum spectrum, FrequencyGainMask mask,
         CancellationToken cancellationToken = default)
     {
@@ -66,13 +71,8 @@ internal sealed class FrequencyMaskApplier(Fft2DTransform fft)
             throw new ArgumentException("遮罩与频谱尺寸不一致。", nameof(mask));
 
         var padded = ApplyPadded(spectrum, mask, cancellationToken);
-        var cropped = new double[checked((int)spectrum.SourceSize.PixelCount)];
-        for (var y = 0; y < spectrum.SourceSize.Height; y++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            padded.ValueSpan.Slice(y * spectrum.PaddedWidth, spectrum.SourceSize.Width)
-                .CopyTo(cropped.AsSpan(y * spectrum.SourceSize.Width, spectrum.SourceSize.Width));
-        }
+        var cropped = inverseTransformer.Crop(padded.ValueSpan, padded.Width, padded.Height,
+            spectrum.SourceSize, cancellationToken);
         return new FrequencyMaskApplicationResult(spectrum.SourceSize, cropped, padded.MaximumImaginaryResidual,
             mask.Fingerprint);
     }
@@ -91,25 +91,16 @@ internal sealed class FrequencyMaskApplier(Fft2DTransform fft)
             if ((i & 16383) == 0) cancellationToken.ThrowIfCancellationRequested();
             working[i] *= gains[i];
         }
-        fft.Inverse(working, spectrum.PaddedWidth, spectrum.PaddedHeight, cancellationToken);
-
-        var raw = new double[working.Length];
-        double maximumImaginary = 0d;
-        for (var y = 0; y < spectrum.PaddedHeight; y++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            for (var x = 0; x < spectrum.PaddedWidth; x++)
-            {
-                var value = working[(y * spectrum.PaddedWidth) + x];
-                if (!double.IsFinite(value.Real) || !double.IsFinite(value.Imaginary))
-                    throw new InvalidDataException("IFFT 产生了非有限结果，未提交半成品。");
-                maximumImaginary = Math.Max(maximumImaginary, Math.Abs(value.Imaginary));
-                raw[(y * spectrum.PaddedWidth) + x] = value.Real;
-            }
-        }
-        if (maximumImaginary > 1e-8)
-            throw new InvalidDataException($"IFFT 虚部残差 {maximumImaginary:E3} 超出 1E-8 数值门禁。");
-        return new PaddedFrequencyMaskApplicationResult(spectrum.PaddedWidth, spectrum.PaddedHeight, raw,
-            maximumImaginary, mask.Fingerprint);
+        var inverse = inverseTransformer.InverseOwned(
+            working,
+            spectrum.PaddedWidth,
+            spectrum.PaddedHeight,
+            cancellationToken);
+        return new PaddedFrequencyMaskApplicationResult(
+            inverse.Width,
+            inverse.Height,
+            inverse.ValueSpan,
+            inverse.MaximumImaginaryResidual,
+            mask.Fingerprint);
     }
 }

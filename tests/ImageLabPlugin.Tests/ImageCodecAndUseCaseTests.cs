@@ -46,6 +46,7 @@ using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Application.ColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
+using ImageLabPlugin.Features.SpectralArt;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -87,7 +88,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十六个真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 十七项能力的真实Document视图与轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -124,6 +125,8 @@ public sealed class ImageCodecAndUseCaseTests
         var seamOverlay = new SeamOverlayCanvas();
         var energyMap = new EnergyMapControl();
         var seamComparison = new SeamComparisonControl();
+        var spectralArtView = new SpectralArtView();
+        var spectralRegion = new SpectralArtRegionCanvas();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -158,6 +161,7 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(paletteColorView.Content);
         Assert.NotNull(paletteStrip); Assert.NotNull(colorHistogram); Assert.NotNull(colorPlane); Assert.NotNull(differenceHistogram);
         Assert.NotNull(seamView.Content); Assert.NotNull(seamOverlay); Assert.NotNull(energyMap); Assert.NotNull(seamComparison);
+        Assert.NotNull(spectralArtView.Content); Assert.NotNull(spectralRegion);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -178,7 +182,8 @@ public sealed class ImageCodecAndUseCaseTests
             new PeriodicNoiseRemovalView(),
             new SvdDecompositionView(),
             new PaletteColorTransferView(),
-            new SeamCarvingView()
+            new SeamCarvingView(),
+            new SpectralArtView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -196,7 +201,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(61, numericInputs.Count);
+        Assert.Equal(72, numericInputs.Count);
     }
 
     [Fact]
@@ -705,7 +710,7 @@ public sealed class ImageCodecAndUseCaseTests
         return new PeriodicNoiseRemovalDocument(
             new PreparePeriodicNoiseSessionUseCase(codec, new ImageAnalysisProxyProjector(), converter, builder,
                 new SpectrumProjector()),
-            new DetectPeriodicNoiseCandidatesUseCase(new PeriodicPeakDetector(new RadialSpectrumBaseline(),
+            new DetectPeriodicNoiseCandidatesUseCase(new PeriodicPeakDetector(new RadialLogPowerBaseline(),
                 new PeriodicPeakRiskAssessor())), new MapPeriodicSpectrumSelectionUseCase(), render,
             new RenderFullPeriodicNoiseResultUseCase(converter, builder, render),
             new ImportPeriodicNoiseRecipeUseCase(new BoundedTextFileReader(), serializer),

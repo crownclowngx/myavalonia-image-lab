@@ -27,7 +27,23 @@ internal sealed class ImageAreaResampler
         var scale = maximumEdge / (double)Math.Max(source.Size.Width, source.Size.Height);
         var width = Math.Max(1, (int)Math.Round(source.Size.Width * scale));
         var height = Math.Max(1, (int)Math.Round(source.Size.Height * scale));
-        var targetSize = new ImageSize(width, height);
+        return Resize(source, new ImageSize(width, height), cancellationToken);
+    }
+
+    /// <summary>按显式目标尺寸执行面积覆盖采样，供需要精确栅格尺寸的图案归一化复用。</summary>
+    /// <remarks>
+    /// 该重载只定义缩放数值，不决定 Contain、Stretch、背景颜色或二值阈值。调用方必须先完成自己的产品语义，
+    /// 再把确定的 RGBA 图片和目标尺寸交给这里；这样面积抗混叠可以共享，而 Pattern 规则不会污染通用图像服务。
+    /// </remarks>
+    public PixelImage Resize(
+        PixelImage source,
+        ImageSize targetSize,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        if (source.Size == targetSize) return source.Clone();
+        var width = targetSize.Width;
+        var height = targetSize.Height;
         var rgba = new byte[checked((int)(targetSize.PixelCount * 4))];
         var scaleX = source.Size.Width / (double)width;
         var scaleY = source.Size.Height / (double)height;

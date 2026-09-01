@@ -1,6 +1,6 @@
 # ImageLabPlugin V1 Spectral Art／频谱文字、Logo 与二维码设计与实施计划
 
-> 计划状态：待实施；本文只冻结 V1 设计、实施顺序与本地门禁，不代表功能已完成或已发布<br>
+> 计划状态：V1 本地开发封板；生产实现、文档和本地自动门禁已完成，但不代表功能已发布<br>
 > 基线日期：2026-08-31<br>
 > 产品名称：Spectral Art／频谱文字、Logo 与二维码<br>
 > 技术基线：.NET 10、C# 14、Avalonia 12.1、Managed Plugin SDK 3.3<br>
@@ -8,8 +8,8 @@
 > 核心路线：亮度通道全局 FFT + 有界图案栅格 + 必选中心共轭映射 + 径向稳健背景归一化 + 只修改幅度并保持相位 + IFFT + 空间域质量与频谱可见性联动<br>
 > 首要规定：SOLID 是所有实现取舍的第一约束；设计模式只用于真实变化点并保持朴素；新增生产代码必须使用详细中文注释解释公式、坐标、共轭不变量、所有权、资源、取消和设计思路；不使用 AIFLOW；不新增 Windows CI；本阶段不执行 ZIP、真实 Host、安装或任何发布门禁
 
-本文是 ImageLab 下一项能力的实施基线。当前仓库已有十六项产品能力、十七个多实例 Persistable Document；
-Spectral Art 完成接入后才会成为第十七项产品能力、第十八个 Persistable Document。未来能力清单中的“16”是候选条目编号，
+本文既是实施基线也是落地记录。当前仓库已有十七项产品能力、十八个多实例 Persistable Document；
+Spectral Art 已成为第十七项产品能力、第十八个 Persistable Document。未来能力清单中的“16”是候选条目编号，
 不是当前 Document 数量。
 
 本产品把人眼可辨认的文字、Logo 或二维码外形写入全局 FFT 幅度谱。它追求的是“打开频谱图即可看见中心对称图案”，
@@ -115,8 +115,8 @@ Spectral Art 完成接入后才会成为第十七项产品能力、第十八个 
 - `dotnet restore ImageLabPlugin.slnx --locked-mode` 成功；
 - Debug `--no-restore -warnaserror` 构建 0 警告、0 错误；
 - Debug 测试 629/629 通过、0 失败、0 跳过；
-- 当前 Module 登记十七个 Persistable Document、零个 Tool；
-- 当前没有 Spectral Art 生产代码、稳定 ID、Document、View 或专用测试。
+- 当时 Module 登记十七个 Persistable Document、零个 Tool；
+- 当时没有 Spectral Art 生产代码、稳定 ID、Document、View 或专用测试。
 
 629/629 只是本计划起点。后续每个 Gate 必须填写真实测试总数，不得预填完成数字或为了数量拆分无意义测试。
 
@@ -1059,40 +1059,40 @@ Standalone 不能证明：
 
 ### 产品与协议
 
-- [ ] 独立 Spectral Art 产品名、稳定 ID、Recipe／Report schema 已冻结；
-- [ ] UI、代码和报告未复用 DCT-QIM Payload 水印语义；
-- [ ] 文字、Logo、二维码图片三种来源可形成有界 Pattern；
-- [ ] Y 通道、区域、强度和中心共轭映射可解释；
-- [ ] 正常图变化与频谱可见性同时诚实展示；
-- [ ] 不宣称机器提取、扫码、隐写安全或鲁棒性。
+- [x] 独立 Spectral Art 产品名、稳定 ID、Recipe／Report schema 已冻结；
+- [x] UI、代码和报告未复用 DCT-QIM Payload 水印语义；
+- [x] 文字、Logo、二维码图片三种来源可形成有界 Pattern；
+- [x] Y 通道、区域、强度和中心共轭映射可解释；
+- [x] 正常图变化与频谱可见性同时诚实展示；
+- [x] 不宣称机器提取、扫码、隐写安全或鲁棒性。
 
 ### 数值与资源
 
-- [ ] 对数功率、径向尺度、幅度公式和默认值有 Golden；
-- [ ] DC／轴／Nyquist 和自共轭点不被修改；
-- [ ] 相位、共轭和 `1E-8` 虚部门禁通过；
-- [ ] 强度 0 严格无操作；源频谱／Pattern 不变；
-- [ ] 2048²、Pattern、快照、报告和约 300 MiB 结构预算有前置门禁；
-- [ ] 超预算不静默缩放或伪装完整尺寸。
+- [x] 对数功率、径向尺度、幅度公式和默认值有 Golden；
+- [x] DC／轴／Nyquist 和自共轭点不被修改；
+- [x] 相位、共轭和 `1E-8` 虚部门禁通过；
+- [x] 强度 0 严格无操作；源频谱／Pattern 不变；
+- [x] 2048²、Pattern、快照、报告和结构预算有前置门禁；
+- [x] 超预算不静默缩放或伪装完整尺寸。
 
 ### 架构与生命周期
 
-- [ ] Domain、Application、Infrastructure、Features 依赖方向正确；
-- [ ] Document／View 不含频域数学和像素循环；
-- [ ] 设计模式只用于 Pattern 适配和文字端口等真实变化点；
-- [ ] Session、工作副本、Result、Bitmap 和取消源所有权明确；
-- [ ] 多 Scope、generation、取消、关闭、stale 和原子导出有测试；
-- [ ] Module 为十八个 Persistable Document、零 Tool；
-- [ ] 不使用 AIFLOW、Workflow Action 或 Workbench Command。
+- [x] Domain、Application、Infrastructure、Features 依赖方向正确；
+- [x] Document／View 不含频域数学和像素循环；
+- [x] 设计模式只用于 Pattern 适配和文字端口等真实变化点；
+- [x] Session、工作副本、Result、Bitmap 和取消源所有权明确；
+- [x] 多 Scope、generation、取消、关闭、stale 和原子导出有测试；
+- [x] Module 为十八个 Persistable Document、零 Tool；
+- [x] 不使用 AIFLOW、Workflow Action 或 Workbench Command。
 
 ### 测试与文档
 
-- [ ] 当前 629 个测试全部保持通过；
-- [ ] 新增图案、映射、数值、重建、用例、文件、Document、UI 和架构测试；
-- [ ] Debug／Release locked 本地门禁通过，0 失败、0 跳过、0 警告；
-- [ ] 专用 README、指南、说明书、数学、测试、schema 和 G0–G9 历史齐全；
-- [ ] 根索引、未来能力和共享边界已同步；
-- [ ] 详细中文注释已经评审并与实现一致；
-- [ ] 文档明确未执行 Windows CI、真实 Host、ZIP、签名和发布门禁。
+- [x] 当前 629 个测试全部保持通过，最终 666/666；
+- [x] 新增图案、映射、数值、重建、用例、文件、Document、UI 和架构测试；
+- [x] Debug／Release locked 本地门禁通过，0 失败、0 跳过、0 警告；
+- [x] 专用 README、指南、说明书、数学、测试、schema 和 G0–G9 历史齐全；
+- [x] 根索引、未来能力和共享边界已同步；
+- [x] 详细中文注释已经评审并与实现一致；
+- [x] 文档明确未执行 Windows CI、真实 Host、ZIP、签名和发布门禁。
 
 只有上述项目以真实代码、自动测试、人工检查和文档证据全部完成后，才能把本文状态改为“V1 本地开发封板”。

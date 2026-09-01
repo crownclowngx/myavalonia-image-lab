@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:ImageLabPlugin.Features.SpectralArt"
+             x:Class="ImageLabPlugin.Features.SpectralArt.SpectralArtView" x:DataType="local:SpectralArtDocument">
+  <UserControl.Styles>
+    <!-- 数值字段沿用工作台可读宽度门禁，避免窄列把符号位或小数截断。 -->
+    <Style Selector="NumericUpDown"><Setter Property="MinWidth" Value="120" /></Style>
+  </UserControl.Styles>
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="8">
+    <Border Grid.Row="0" Classes="card" Padding="10">
+      <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6" ColumnSpacing="8">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <TextBox Text="{Binding SourcePath}" Width="350" PlaceholderText="载体 PNG/JPEG 路径" AutomationProperties.Name="Spectral Art 载体路径" />
+          <Button Content="选择载体" Command="{Binding SelectCarrierCommand}" AutomationProperties.Name="选择 Spectral Art 载体" />
+          <Button Content="准备载体" Command="{Binding PrepareCarrierCommand}" AutomationProperties.Name="解码载体并建立只读频谱" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+          <Button Content="渲染" Command="{Binding RenderCommand}" AutomationProperties.Name="渲染 Spectral Art" />
+          <Button Content="取消" Command="{Binding CancelCommand}" AutomationProperties.Name="取消当前 Spectral Art 操作" />
+          <Button Content="导出 PNG" Command="{Binding ExportResultCommand}" AutomationProperties.Name="导出 Spectral Art PNG" />
+        </StackPanel>
+        <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" ItemHeight="34">
+          <ComboBox ItemsSource="{Binding SourceKindOptions}" SelectedItem="{Binding SelectedSourceKind}" Width="110" AutomationProperties.Name="Pattern 来源" />
+          <TextBox Text="{Binding PatternText}" Width="180" PlaceholderText="文字 Pattern" AutomationProperties.Name="Pattern 原始文字" />
+          <TextBox Text="{Binding PatternImagePath}" Width="260" PlaceholderText="Logo 或二维码图片路径" AutomationProperties.Name="Pattern 图片路径" />
+          <Button Content="选择图片" Command="{Binding SelectPatternImageCommand}" AutomationProperties.Name="选择 Pattern 图片" />
+          <Button Content="创建 Pattern" Command="{Binding CreatePatternCommand}" Margin="6,0" AutomationProperties.Name="规范化 Spectral Pattern" />
+          <Button Content="导入配方" Command="{Binding ImportRecipeCommand}" />
+          <Button Content="导出配方" Command="{Binding ExportRecipeCommand}" />
+        </WrapPanel>
+        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" ItemHeight="34">
+          <ComboBox ItemsSource="{Binding SamplingOptions}" SelectedItem="{Binding SelectedSampling}" Width="115" AutomationProperties.Name="Pattern 采样" />
+          <ComboBox ItemsSource="{Binding FitOptions}" SelectedItem="{Binding SelectedFit}" Width="90" AutomationProperties.Name="Pattern 适配" />
+          <ComboBox ItemsSource="{Binding BackgroundOptions}" SelectedItem="{Binding SelectedBackground}" Width="85" AutomationProperties.Name="Alpha 合成背景" />
+          <TextBlock Text="尺寸" VerticalAlignment="Center" Margin="5,0" />
+          <NumericUpDown Value="{Binding PatternWidth}" Minimum="1" Maximum="512" Width="75" AutomationProperties.Name="Pattern 宽度" />
+          <NumericUpDown Value="{Binding PatternHeight}" Minimum="1" Maximum="512" Width="75" AutomationProperties.Name="Pattern 高度" />
+          <TextBlock Text="阈值" VerticalAlignment="Center" Margin="5,0" />
+          <NumericUpDown Value="{Binding BinaryThreshold}" Minimum="0" Maximum="1" Increment="0.05" Width="85" AutomationProperties.Name="二值阈值" />
+          <CheckBox IsChecked="{Binding InvertPattern}" Content="反相" />
+          <TextBlock Text="强度" VerticalAlignment="Center" Margin="8,0,3,0" />
+          <NumericUpDown Value="{Binding Strength}" Minimum="0" Maximum="8" Increment="0.1" Width="85" AutomationProperties.Name="Spectral Art 强度" />
+        </WrapPanel>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="2*,*" ColumnSpacing="10" MinHeight="430">
+      <Grid RowDefinitions="2*,*" RowSpacing="7">
+        <local:SpectralArtRegionCanvas x:Name="RegionCanvas" Spectrum="{Binding SourceSpectrumPreview}" Mapping="{Binding MappingPreview}"
+          LeftFrequency="{Binding RegionLeft}" TopFrequency="{Binding RegionTop}" RightFrequency="{Binding RegionRight}" BottomFrequency="{Binding RegionBottom}"
+          AutomationProperties.Name="频谱区域编辑器，可拖动矩形或四角手柄，方向键移动" />
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="6">
+          <Image Source="{Binding SourcePreview}" Stretch="Uniform" AutomationProperties.Name="载体预览" />
+          <Image Grid.Column="1" Source="{Binding ResultPreview}" Stretch="Uniform" AutomationProperties.Name="Spectral Art 结果预览" />
+          <Image Grid.Column="2" Source="{Binding SpatialDifferencePreview}" Stretch="Uniform" AutomationProperties.Name="四倍空间差异" />
+        </Grid>
+      </Grid>
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="7">
+          <TextBlock Text="映射区域（归一化频率，右/下为闭开终点）" FontWeight="SemiBold" />
+          <WrapPanel><NumericUpDown Value="{Binding RegionLeft}" Minimum="-0.5" Maximum="0.5" Increment="0.005" Width="90"/><NumericUpDown Value="{Binding RegionTop}" Minimum="-0.5" Maximum="0.5" Increment="0.005" Width="90"/><NumericUpDown Value="{Binding RegionRight}" Minimum="-0.5" Maximum="0.5" Increment="0.005" Width="90"/><NumericUpDown Value="{Binding RegionBottom}" Minimum="-0.5" Maximum="0.5" Increment="0.005" Width="90"/></WrapPanel>
+          <TextBlock Text="文字栅格参数" FontWeight="SemiBold" />
+          <WrapPanel><TextBox Text="{Binding FontFamily}" Width="120"/><NumericUpDown Value="{Binding FontSize}" Minimum="8" Maximum="512" Width="90"/><NumericUpDown Value="{Binding FontWeight}" Minimum="100" Maximum="900" Width="85"/><NumericUpDown Value="{Binding Padding}" Minimum="0" Maximum="128" Width="75"/></WrapPanel>
+          <TextBlock Text="Pattern" FontWeight="SemiBold"/><Image Source="{Binding PatternPreview}" Height="75" Stretch="Uniform" />
+          <TextBlock Text="结果频谱（与原频谱共用固定量程）" FontWeight="SemiBold"/><Image Source="{Binding ResultSpectrumPreview}" Height="105" Stretch="Uniform" />
+          <TextBlock Text="真实频谱差异" FontWeight="SemiBold"/><Image Source="{Binding SpectrumDifferencePreview}" Height="95" Stretch="Uniform" />
+          <TextBlock Text="质量" FontWeight="SemiBold"/><TextBlock Text="{Binding QualitySummary}" TextWrapping="Wrap" />
+          <TextBlock Text="频域诊断" FontWeight="SemiBold"/><TextBlock Text="{Binding FrequencySummary}" TextWrapping="Wrap" />
+          <WrapPanel><Button Content="报告 JSON" Command="{Binding ExportReportJsonCommand}" Margin="0,0,5,0"/><Button Content="报告 CSV" Command="{Binding ExportReportCsvCommand}"/></WrapPanel>
+          <TextBlock Text="说明：绿色为主区域，青色为共轭区域，橙红为 DC/轴禁止区。Logo/二维码只作为图片使用；本功能不生成、解析或验证二维码。" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+    <Border Grid.Row="2" Background="#18000000" Padding="8"><TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></Border>
+  </Grid>
+</UserControl>

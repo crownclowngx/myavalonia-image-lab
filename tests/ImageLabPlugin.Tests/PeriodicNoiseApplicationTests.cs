@@ -21,7 +21,7 @@ public sealed class PeriodicNoiseApplicationTests
         using var session = await Prepare(codec).ExecuteAsync(new("source.png", ImageChannel.Luma, 512), default);
         var before = session.Spectrum.Values.ToArray();
         var result = await new DetectPeriodicNoiseCandidatesUseCase(new PeriodicPeakDetector(
-            new RadialSpectrumBaseline(), new PeriodicPeakRiskAssessor())).ExecuteAsync(session, new(), default);
+            new RadialLogPowerBaseline(), new PeriodicPeakRiskAssessor())).ExecuteAsync(session, new(), default);
         Assert.Equal(1, codec.DecodeCount);
         Assert.Equal(before, session.Spectrum.Values.ToArray());
         Assert.InRange(result.Candidates.Count, 0, 64);

@@ -46,6 +46,8 @@ using ImageLabPlugin.Infrastructure.SeamCarving;
 using ImageLabPlugin.Application.PoissonBlending;
 using ImageLabPlugin.Domain.PoissonBlending;
 using ImageLabPlugin.Infrastructure.PoissonBlending;
+using ImageLabPlugin.Application.SpectralArt;
+using ImageLabPlugin.Domain.SpectralArt;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -74,6 +76,7 @@ public static class ImageLabPluginServices
         AddColorTransferServices(services);
         AddSeamCarvingServices(services);
         AddPoissonBlendingServices(services);
+        AddSpectralArtServices(services);
         return services;
     }
 
@@ -87,6 +90,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<ImageAnalysisProxyProjector>();
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
+        services.AddSingleton<FrequencyInverseTransformer>();
         services.AddSingleton<FrequencyMaskApplier>();
         services.AddSingleton<FrequencyGainSpectrumProjector>();
     }
@@ -111,6 +115,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IColorTransferFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ISeamCarvingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPoissonBlendingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<ISpectralArtFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -333,7 +338,7 @@ public static class ImageLabPluginServices
     /// <summary>登记周期峰检测、共轭陷波、损失诊断和独立导入导出窄用例。</summary>
     private static void AddPeriodicNoiseRemovalServices(IServiceCollection services)
     {
-        services.AddSingleton<RadialSpectrumBaseline>();
+        services.AddSingleton<RadialLogPowerBaseline>();
         services.AddSingleton<PeriodicPeakRiskAssessor>();
         services.AddSingleton<PeriodicPeakDetector>();
         services.AddSingleton<NotchResponse>();
@@ -466,5 +471,29 @@ public static class ImageLabPluginServices
         services.AddSingleton<IExportPoissonImageUseCase, ExportPoissonImageUseCase>();
         services.AddSingleton<IExportPoissonReportUseCase, ExportPoissonReportUseCase>();
         services.AddScoped<PoissonBlendingSession>();
+    }
+
+    /// <summary>登记 Spectral Art 无状态数值服务、平台适配器和窄用例；大频谱只由用例创建的 Session 独占。</summary>
+    private static void AddSpectralArtServices(IServiceCollection services)
+    {
+        services.AddSingleton<RadialLogPowerBaseline>();
+        services.AddSingleton<SpectralPatternNormalizer>();
+        services.AddSingleton<SpectralPatternMapper>();
+        services.AddSingleton<SpectralPatternPreviewProjector>();
+        services.AddSingleton<SpectralAmplitudeWriter>();
+        services.AddSingleton<SpectralArtReconstructor>();
+        services.AddSingleton<SpectralArtDiagnostics>();
+        services.AddSingleton<SpectralExportFactVerifier>();
+        services.AddSingleton<ISpectralTextRasterizer, AvaloniaSpectralTextRasterizer>();
+        services.AddSingleton<ISpectralArtRecipeSerializer, SpectralArtRecipeSerializer>();
+        services.AddSingleton<ISpectralArtReportSerializer, SpectralArtReportSerializer>();
+        services.AddSingleton<ISpectralArtSnapshotSerializer, SpectralArtSnapshotSerializer>();
+        services.AddSingleton<IPrepareSpectralArtCarrierUseCase, PrepareSpectralArtCarrierUseCase>();
+        services.AddSingleton<ICreateSpectralPatternUseCase, CreateSpectralPatternUseCase>();
+        services.AddSingleton<IRenderSpectralArtUseCase, RenderSpectralArtUseCase>();
+        services.AddSingleton<IExportSpectralArtImageUseCase, ExportSpectralArtImageUseCase>();
+        services.AddSingleton<IImportSpectralArtRecipeUseCase, ImportSpectralArtRecipeUseCase>();
+        services.AddSingleton<IExportSpectralArtRecipeUseCase, ExportSpectralArtRecipeUseCase>();
+        services.AddSingleton<IExportSpectralArtReportUseCase, ExportSpectralArtReportUseCase>();
     }
 }

@@ -72,4 +72,8 @@ public static class PluginIds
     /// <summary>“Poisson Blending／梯度域融合”双图实验的多实例持久身份。</summary>
     public static readonly DocumentTypeId PoissonBlendingDocument =
         new("myavalonia.plugin.image.lab.document.poisson-blending");
+
+    /// <summary>“Spectral Art／频谱艺术”幅度图案实验的多实例持久身份。</summary>
+    public static readonly DocumentTypeId SpectralArtDocument =
+        new("myavalonia.plugin.image.lab.document.spectral-art");
 }

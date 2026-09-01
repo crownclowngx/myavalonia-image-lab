@@ -17,6 +17,7 @@ using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
+using ImageLabPlugin.Features.SpectralArt;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -128,6 +129,13 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.PoissonBlendingDocument,
                 "梯度域融合",
                 "以二值遮罩、整数平移和确定性 Poisson 迭代比较梯度域融合与直接 Alpha 合成",
+                "图像分析"));
+        // 只在既有十七个稳定身份之后追加；不得改变旧 ID、顺序或 Tool 数量。
+        registration.AddPersistableDocument<SpectralArtDocument, SpectralArtView>(
+            new DocumentDescriptor(
+                PluginIds.SpectralArtDocument,
+                "频谱艺术",
+                "把文字、Logo 或二维码图片映射为共轭安全的 FFT 幅度图案，并观察空间质量与频域诊断",
                 "图像分析"));
     }
 }

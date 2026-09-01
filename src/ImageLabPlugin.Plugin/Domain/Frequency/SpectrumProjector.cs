@@ -6,6 +6,22 @@ namespace ImageLabPlugin.Domain.Frequency;
 internal enum SpectrumMagnitudeMode { Linear, Logarithmic, Percentile }
 internal enum SpectrumViewMode { Magnitude, Phase, Dct }
 
+/// <summary>显式冻结一组频谱预览共用的幅度量程，避免各自拉伸制造虚假的视觉差异。</summary>
+internal readonly record struct SpectrumDisplayScale
+{
+    public SpectrumDisplayScale(SpectrumMagnitudeMode mode, double magnitudeLimit)
+    {
+        if (!Enum.IsDefined(mode)) throw new ArgumentOutOfRangeException(nameof(mode));
+        if (!double.IsFinite(magnitudeLimit) || magnitudeLimit < 0d)
+            throw new ArgumentOutOfRangeException(nameof(magnitudeLimit));
+        Mode = mode;
+        MagnitudeLimit = magnitudeLimit;
+    }
+
+    public SpectrumMagnitudeMode Mode { get; }
+    public double MagnitudeLimit { get; }
+}
+
 internal sealed record FrequencyPointInfo(
     FrequencyPoint Coordinates,
     double Magnitude,
@@ -19,7 +35,47 @@ internal sealed class SpectrumProjector
     public PixelImage CreateMagnitude(FrequencySpectrum spectrum, SpectrumMagnitudeMode mode, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(spectrum);
-        var limit = ResolveMagnitudeLimit(spectrum.Values.Span, mode);
+        return CreateMagnitude(spectrum, new SpectrumDisplayScale(mode,
+            ResolveMagnitudeLimit(spectrum.Values.Span, mode)), cancellationToken);
+    }
+
+    /// <summary>为两张待比较频谱建立一个共同量程；旧的单图投影入口保持原有自动量程语义。</summary>
+    public SpectrumDisplayScale CreateSharedScale(
+        FrequencySpectrum first,
+        FrequencySpectrum second,
+        SpectrumMagnitudeMode mode)
+    {
+        ArgumentNullException.ThrowIfNull(first);
+        ArgumentNullException.ThrowIfNull(second);
+        var firstLimit = ResolveMagnitudeLimit(first.Values.Span, mode);
+        var secondLimit = ResolveMagnitudeLimit(second.Values.Span, mode);
+        return new SpectrumDisplayScale(mode, Math.Max(firstLimit, secondLimit));
+    }
+
+    /// <summary>为只读 Session 频谱与调用方拥有的工作数组建立共同量程，不复制第二份完整频谱。</summary>
+    internal SpectrumDisplayScale CreateSharedScale(
+        FrequencySpectrum first,
+        Complex[] secondValues,
+        SpectrumMagnitudeMode mode)
+    {
+        ArgumentNullException.ThrowIfNull(first);
+        ArgumentNullException.ThrowIfNull(secondValues);
+        if (secondValues.Length != first.ValueCount)
+            throw new ArgumentException("工作频谱长度与源频谱不一致。", nameof(secondValues));
+        return new SpectrumDisplayScale(mode, Math.Max(
+            ResolveMagnitudeLimit(first.Values.Span, mode),
+            ResolveMagnitudeLimit(secondValues, mode)));
+    }
+
+    /// <summary>使用调用方冻结的量程投影频谱，使写入前后灰度具有可比较含义。</summary>
+    public PixelImage CreateMagnitude(
+        FrequencySpectrum spectrum,
+        SpectrumDisplayScale scale,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(spectrum);
+        var mode = scale.Mode;
+        var limit = scale.MagnitudeLimit;
         var logarithmicLimit = Math.Log(1d + limit);
         return Project(spectrum, (value, _) =>
         {
@@ -32,6 +88,44 @@ internal sealed class SpectrumProjector
             var level = ToByte(normalized * 255d);
             return (level, level, level);
         }, cancellationToken);
+    }
+
+    /// <summary>直接投影调用方拥有的工作频谱；用于 IFFT 消费工作数组之前生成结果预览。</summary>
+    internal PixelImage CreateMagnitude(
+        FrequencySpectrum shape,
+        Complex[] values,
+        SpectrumDisplayScale scale,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(shape);
+        ArgumentNullException.ThrowIfNull(values);
+        if (values.Length != shape.ValueCount)
+            throw new ArgumentException("工作频谱长度与频谱形状不一致。", nameof(values));
+        var rgba = new byte[checked(values.Length * 4)];
+        var limit = scale.MagnitudeLimit;
+        var logarithmicLimit = Math.Log(1d + limit);
+        for (var displayY = 0; displayY < shape.PaddedHeight; displayY++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            for (var displayX = 0; displayX < shape.PaddedWidth; displayX++)
+            {
+                var point = FrequencyCoordinates.FromDisplay(displayX, displayY,
+                    shape.PaddedWidth, shape.PaddedHeight);
+                var magnitude = values[(point.InternalY * shape.PaddedWidth) + point.InternalX].Magnitude;
+                var normalized = scale.Mode switch
+                {
+                    SpectrumMagnitudeMode.Logarithmic => logarithmicLimit <= 0d
+                        ? 0d
+                        : Math.Log(1d + Math.Min(magnitude, limit)) / logarithmicLimit,
+                    _ => limit <= 0d ? 0d : Math.Min(magnitude, limit) / limit
+                };
+                var level = ToByte(normalized * 255d);
+                var offset = ((displayY * shape.PaddedWidth) + displayX) * 4;
+                rgba[offset] = rgba[offset + 1] = rgba[offset + 2] = level;
+                rgba[offset + 3] = 255;
+            }
+        }
+        return new PixelImage(new ImageSize(shape.PaddedWidth, shape.PaddedHeight), rgba);
     }
 
     public PixelImage CreatePhase(FrequencySpectrum spectrum, CancellationToken cancellationToken = default)

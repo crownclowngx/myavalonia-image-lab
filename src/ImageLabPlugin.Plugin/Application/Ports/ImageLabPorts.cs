@@ -115,6 +115,16 @@ internal interface IPoissonBlendingFileDialog
     Task<string?> PickPoissonReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>Spectral Art 只暴露成品 PNG、独立配方与脱敏报告，不复用其他产品的文件语义。</summary>
+internal interface ISpectralArtFileDialog
+{
+    Task<string?> PickSpectralResultPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSpectralRecipeInputAsync(CancellationToken cancellationToken);
+    Task<string?> PickSpectralRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSpectralReportJsonAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickSpectralReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

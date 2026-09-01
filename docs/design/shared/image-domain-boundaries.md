@@ -2,7 +2,7 @@
 
 ## 结论
 
-ImageLab 的公共领域只包含已被真实产品证明稳定的图像事实：像素尺寸、RGBA 像素、六通道平面、sRGB/XYZ D65/CIELAB/HSV 数值转换、抗混叠代理、流式全参考质量、双直方图、有界差异场、8×8 DCT/IDCT、低频 DCT、FFT/IFFT、频率坐标与径向能量。文件路径、PNG/JPEG、Avalonia `Bitmap`、窗口、JSON、密码和 Frame 都不属于公共图像领域；水印 Profile 属于 Watermarking 领域，只可作为实验比较维度引用。
+ImageLab 的公共领域只包含已被真实产品证明稳定的图像事实：像素尺寸、RGBA 像素、六通道平面、sRGB/XYZ D65/CIELAB/HSV 数值转换、目标尺寸面积缩放、抗混叠代理、流式全参考质量、双直方图、有界差异场、8×8 DCT/IDCT、低频 DCT、FFT/IFFT、频率坐标、径向能量/稳健对数功率背景与固定频谱显示量程。文件路径、PNG/JPEG、Avalonia `Bitmap`、窗口、JSON、密码和 Frame 都不属于公共图像领域；水印 Profile 属于 Watermarking 领域，只可作为实验比较维度引用。
 
 ```text
 Domain/Imaging
@@ -18,6 +18,7 @@ Domain/Imaging
   ImageAnalysisProxyProjector 面积平均分析代理
   ImageQualityCalculator 既有水印兼容入口；内部复用 O(1) 额外内存分析器
   ImagePreviewProjector 有界分析预览
+  ImageAreaResampler    最大边与明确目标尺寸的面积平均
 
 Domain/Frequency
   Dct8x8Transform        纯 8×8 DCT-II / IDCT
@@ -25,10 +26,13 @@ Domain/Frequency
   FrequencySpectrum      只读复数频谱与补零语义
   FrequencyCoordinates   中心化、半径与共轭索引
   SpectrumProjector      幅度、相位与频点 DTO
+  SpectrumDisplayScale   多张频谱共用的显式显示上限
   RadialEnergyAnalyzer   256-bin 与频带占比
+  RadialLogPowerBaseline 128 桶稳健中位数/MAD 背景
   FrequencyBandMaskFactory 共轭对称径向遮罩
   FrequencyGainMask      不可变 `[0,1]` 共轭对称实数增益
-  FrequencyMaskApplier   共享频谱复制、增益乘法、IFFT 与 `1E-8` 门禁
+  FrequencyInverseTransformer 原地 IFFT、有限值、`1E-8` 与 crop
+  FrequencyMaskApplier   只负责增益乘法并委托共享逆变换
   DctBlockAnalyzer       完整 8×8 单块报告
 
 Domain/Watermarking
@@ -94,11 +98,18 @@ Domain/ColorTransfer
   FixedPaletteRemapper       精确 ΔE76 最近色与稳定 cluster tie-break
   PerceptualDifferenceAnalyzer 固定数组 ΔE00 汇总
   ColorPixelInspector        分图片坐标的 sRGB/HSV/Lab/palette 事实
+
+Domain/SpectralArt
+  SpectralPattern            不可变有界权重、来源、采样与指纹
+  SpectralPatternMapper      闭开区域、保护带、Contain/Stretch 映射
+  SpectralAmplitudeWriter    径向稳健尺度、相位保持与精确共轭写入
+  SpectralArtReconstructor   消费唯一工作频谱并复用 Y 回写
+  SpectralArtDiagnostics     能量、可见性、共轭、质量和差异事实
 ```
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码、平台密码学、Host 文件交互、JSON 与磁盘发布。十五个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、文字栅格、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码/字体、平台密码学、Host 文件交互、JSON 与磁盘发布。十八个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -110,6 +121,7 @@ Domain/ColorTransfer
 - 宽高不能整除 8 时，只处理完整块；右边和下边余量逐字节不改。
 - 所有输出保持原始尺寸和 Alpha；源 `PixelImage` 不被原地修改。
 - 频谱 Session 只缓存一份只读复数频谱；重建使用一份短生命周期工作副本，不建立滤镜注册中心、万能图像服务或全局可变缓存。
+- Spectral Art Session 独占源图、Y 平面和只读频谱；一次 Render 只创建一个完整工作 `Complex[]`，全部频域诊断后由 IFFT 原地消费。Pattern、recipe、serializer 和成功语义保持产品专用。
 - 频谱遮罩历史保存最多 128 条操作描述而非完整 `double[]`；导入只接受严格 Recipe 并重新光栅化，不信任外部增益数组。
 - 比较 Session 由单个 scoped Document 独占，两张全图长期保留；两张显示代理、基础差异场和当前投影最大边均为 1024。
 - 质量统计按行确定性扫描，仅保留常量个累加器，不再为两张图创建全尺寸 `double[]` 亮度平面。

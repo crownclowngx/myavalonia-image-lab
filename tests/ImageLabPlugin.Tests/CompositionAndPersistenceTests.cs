@@ -19,6 +19,8 @@ using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Domain.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
+using ImageLabPlugin.Features.SpectralArt;
+using ImageLabPlugin.Domain.SpectralArt;
 using ImageLabPlugin.Domain.PoissonBlending;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
@@ -35,14 +37,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献十七个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献十八个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument, PluginIds.PoissonBlendingDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument, PluginIds.PoissonBlendingDocument, PluginIds.SpectralArtDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -92,6 +94,8 @@ public sealed class CompositionAndPersistenceTests
         var secondSeamCarving = secondScope.ServiceProvider.GetRequiredService<SeamCarvingDocument>();
         var poisson = firstScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
         var secondPoisson = secondScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
+        var spectralArt = firstScope.ServiceProvider.GetRequiredService<SpectralArtDocument>();
+        var secondSpectralArt = secondScope.ServiceProvider.GetRequiredService<SpectralArtDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -111,6 +115,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(paletteColor, secondPaletteColor);
         Assert.NotSame(seamCarving, secondSeamCarving);
         Assert.NotSame(poisson, secondPoisson);
+        Assert.NotSame(spectralArt, secondSpectralArt);
+        spectralArt.SourcePath = "scope-spectral-one";
+        Assert.Empty(secondSpectralArt.SourcePath);
         poisson.SourcePath = "scope-poisson-one";
         Assert.Empty(secondPoisson.SourcePath);
         seamCarving.SourcePath = "scope-seam-one";
@@ -157,6 +164,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.Same(
             firstScope.ServiceProvider.GetRequiredService<PoissonRelaxationSolver>(),
             secondScope.ServiceProvider.GetRequiredService<PoissonRelaxationSolver>());
+        Assert.Same(
+            firstScope.ServiceProvider.GetRequiredService<SpectralPatternMapper>(),
+            secondScope.ServiceProvider.GetRequiredService<SpectralPatternMapper>());
         first.PayloadText = "scope-one";
         Assert.Empty(second.PayloadText);
     }
@@ -338,6 +348,32 @@ public sealed class CompositionAndPersistenceTests
         Assert.Empty(restored.SourcePath); Assert.Empty(restored.TargetPath); Assert.Equal("混合梯度", restored.SelectedMode);
         Assert.Equal(-4, restored.OffsetX); Assert.Equal(7, restored.OffsetY); Assert.Equal(321, restored.MaxIterations);
         Assert.Null(restored.Topology); Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public async Task SpectralArt快照脱敏且恢复不自动读取栅格化或FFT()
+    {
+        var registration = new RecordingRegistration();
+        registration.Services.AddSingleton<IPluginWindowInteraction, NullWindowInteraction>();
+        registration.Services.AddScoped<IDocumentLifetime, TestLifetime>();
+        new ImageLabPluginModule().Configure(registration);
+        using var provider = registration.Services.BuildServiceProvider(validateScopes: true);
+        using var firstScope = provider.CreateScope();
+        var document = firstScope.ServiceProvider.GetRequiredService<SpectralArtDocument>();
+        await document.InitializeAsync(new NewDocumentActivation("频谱艺术"), default);
+        document.SourcePath = @"C:\private\carrier.png"; document.PatternImagePath = @"D:\secret\logo.png";
+        document.PatternText = "private original text"; document.SelectedSampling = "灰度面积";
+        document.SelectedFit = "Stretch"; document.Strength = 3.25; document.RegionLeft = 0.15; document.RegionRight = 0.35;
+        var snapshot = await document.CaptureSaveSnapshotAsync(default); var json = snapshot.Content.Payload.GetRawText();
+        Assert.Contains("carrier.png", json, StringComparison.Ordinal); Assert.Contains("logo.png", json, StringComparison.Ordinal);
+        Assert.DoesNotContain(@"C:\private", json, StringComparison.OrdinalIgnoreCase); Assert.DoesNotContain(@"D:\secret", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("private original text", json, StringComparison.Ordinal); Assert.DoesNotContain("rgba", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("complex", json, StringComparison.OrdinalIgnoreCase);
+        using var secondScope = provider.CreateScope(); var restored = secondScope.ServiceProvider.GetRequiredService<SpectralArtDocument>();
+        await restored.InitializeAsync(new RestoreDocumentActivation("恢复频谱艺术", snapshot.Content), default);
+        Assert.Empty(restored.SourcePath); Assert.Empty(restored.PatternImagePath); Assert.Equal("SPECTRAL", restored.PatternText);
+        Assert.Equal("灰度面积", restored.SelectedSampling); Assert.Equal("Stretch", restored.SelectedFit); Assert.Equal(3.25, restored.Strength);
+        Assert.False(restored.HasCarrier); Assert.False(restored.HasPattern); Assert.False(restored.HasResult); Assert.False(restored.IsDirty);
     }
 
     [Fact]

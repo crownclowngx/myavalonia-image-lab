@@ -16,6 +16,7 @@ using ImageLabPlugin.Features.SvdDecomposition;
 using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
+using ImageLabPlugin.Features.SpectralArt;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -40,6 +41,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _paletteColorTransferScope;
     private IServiceScope? _seamCarvingScope;
     private IServiceScope? _poissonBlendingScope;
+    private IServiceScope? _spectralArtScope;
 
     public MainWindow()
     {
@@ -65,6 +67,7 @@ public sealed partial class MainWindow : Window
         _paletteColorTransferScope = services.CreateScope();
         _seamCarvingScope = services.CreateScope();
         _poissonBlendingScope = services.CreateScope();
+        _spectralArtScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -99,6 +102,8 @@ public sealed partial class MainWindow : Window
         var seamCarvingView = _seamCarvingScope.ServiceProvider.GetRequiredService<SeamCarvingView>();
         var poissonBlendingDocument = _poissonBlendingScope.ServiceProvider.GetRequiredService<PoissonBlendingDocument>();
         var poissonBlendingView = _poissonBlendingScope.ServiceProvider.GetRequiredService<PoissonBlendingView>();
+        var spectralArtDocument = _spectralArtScope.ServiceProvider.GetRequiredService<SpectralArtDocument>();
+        var spectralArtView = _spectralArtScope.ServiceProvider.GetRequiredService<SpectralArtView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -132,6 +137,8 @@ public sealed partial class MainWindow : Window
         seamCarvingDocument.InitializeAsync(new NewDocumentActivation("内容感知缩放"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         poissonBlendingDocument.InitializeAsync(new NewDocumentActivation("梯度域融合"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        spectralArtDocument.InitializeAsync(new NewDocumentActivation("频谱艺术"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -167,6 +174,8 @@ public sealed partial class MainWindow : Window
         SeamCarvingPreview.Content = seamCarvingView;
         poissonBlendingView.DataContext = poissonBlendingDocument;
         PoissonBlendingPreview.Content = poissonBlendingView;
+        spectralArtView.DataContext = spectralArtDocument;
+        SpectralArtPreview.Content = spectralArtView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -186,6 +195,7 @@ public sealed partial class MainWindow : Window
             paletteColorTransferDocument.Dispose();
             seamCarvingDocument.Dispose();
             poissonBlendingDocument.Dispose();
+            spectralArtDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -203,6 +213,7 @@ public sealed partial class MainWindow : Window
             _paletteColorTransferScope?.Dispose();
             _seamCarvingScope?.Dispose();
             _poissonBlendingScope?.Dispose();
+            _spectralArtScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -220,6 +231,7 @@ public sealed partial class MainWindow : Window
             _paletteColorTransferScope = null;
             _seamCarvingScope = null;
             _poissonBlendingScope = null;
+            _spectralArtScope = null;
         };
     }
 }
