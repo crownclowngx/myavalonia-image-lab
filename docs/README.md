@@ -1,6 +1,6 @@
 # ImageLab 文档中心
 
-ImageLab 当前提供十七项产品能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移、内容感知缩放、梯度域融合和频谱艺术。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
+ImageLab 当前提供十八项产品能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移、内容感知缩放、梯度域融合、频谱艺术和混合图像。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
 
 ## 我是第一次使用
 
@@ -23,6 +23,7 @@ ImageLab 当前提供十七项产品能力：频域隐式水印、频域分析�
 15. [内容感知缩放新手说明书](design/seam-carving/user-manual.md)：绘制区域、观察 Sobel 能量和最小缝并逐步缩放。
 16. [梯度域融合新手说明书](design/poisson-blending/user-manual.md)：选择源区域、放置目标并比较直接 Alpha 与 Poisson。
 17. [频谱艺术新手说明书](design/spectral-art/user-manual.md)：把文字或已有图片映射为共轭安全频谱图案。
+18. [混合图像新手说明书](design/hybrid-image/user-manual.md)：对齐两张图片并观察低频/高频主体随真实缩放切换。
 
 ## 我需要开发或维护
 
@@ -35,7 +36,7 @@ ImageLab 当前提供十七项产品能力：频域隐式水印、频域分析�
 - `mathematical-principles.md`：涉及的数学原理背景；
 - `history/`：实施阶段记录。
 
-公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；Spectral Art 已从[专用实现与证据入口](design/spectral-art/README.md)进入。最近完成的能力还包括[梯度域融合](design/poisson-blending/README.md)、[调色板与颜色迁移](design/palette-and-color-transfer/README.md)和[内容感知缩放](design/seam-carving/README.md)。
+公共架构、Host/Standalone 职责、领域边界和发布资料见 [design/shared](design/shared/README.md)。尚未实现或计划中的方向见 [未来能力](future-capabilities.md)；Hybrid Image／混合图像已进入[专用实现与证据入口](design/hybrid-image/README.md)。最近完成的能力还包括[Spectral Art](design/spectral-art/README.md)、[梯度域融合](design/poisson-blending/README.md)和[内容感知缩放](design/seam-carving/README.md)。
 
 ## 项目与最短开发流程
 
@@ -64,6 +65,6 @@ Standalone 适合检查 AXAML、编译绑定、命令和插件对象图，不能
 - `myavalonia.plugin.image.lab` 是持久身份，不能随显示名或目录名改变。
 - manifest 由构建生成，不手工长期维护。
 - 插件只通过公开 Plugin SDK 接入 Host，不引用 Host 内部项目。
-- 当前实现登记十八个 Persistable Document，分别是水印写入、提取与验证、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移、内容感知缩放、梯度域融合和频谱艺术。
+- 当前实现登记十九个 Persistable Document，分别是水印写入、提取与验证、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移、内容感知缩放、梯度域融合、频谱艺术和混合图像。
 - 当前不登记 Tool、Workflow Action 或 Workbench Command，也不使用 AIFLOW。
 - 当前没有执行 Windows CI、真实 Host、ZIP 和发布封板，不能用 Standalone 结果冒充这些结论。

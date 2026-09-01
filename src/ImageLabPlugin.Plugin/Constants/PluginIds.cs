@@ -76,4 +76,8 @@ public static class PluginIds
     /// <summary>“Spectral Art／频谱艺术”幅度图案实验的多实例持久身份。</summary>
     public static readonly DocumentTypeId SpectralArtDocument =
         new("myavalonia.plugin.image.lab.document.spectral-art");
+
+    /// <summary>“Hybrid Image／混合图像”双图对齐与频率混合实验的多实例持久身份。</summary>
+    public static readonly DocumentTypeId HybridImageDocument =
+        new("myavalonia.plugin.image.lab.document.hybrid-image");
 }

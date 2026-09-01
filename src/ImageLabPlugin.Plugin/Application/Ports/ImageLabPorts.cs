@@ -125,6 +125,17 @@ internal interface ISpectralArtFileDialog
     Task<string?> PickSpectralReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>Hybrid Image 只暴露双输入、PNG、配方和脱敏报告所需的文件意图。</summary>
+internal interface IHybridImageFileDialog
+{
+    Task<string?> PickHybridInputAsync(string role, CancellationToken cancellationToken);
+    Task<string?> PickHybridResultPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickHybridRecipeInputAsync(CancellationToken cancellationToken);
+    Task<string?> PickHybridRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickHybridReportJsonAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickHybridReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

@@ -1,0 +1,110 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.HybridImage.HybridImageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.HybridImage"
+    x:DataType="vm:HybridImageDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
+    <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10">
+      <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto" ColumnSpacing="8">
+          <TextBlock VerticalAlignment="Center" Text="A 低频／远看" FontWeight="SemiBold" />
+          <TextBox Grid.Column="1" Text="{Binding PathA}" PlaceholderText="选择图像 A" />
+          <Button Grid.Column="2" Command="{Binding SelectACommand}" Content="选择 A" />
+          <TextBox Grid.Column="3" Text="{Binding PathB}" PlaceholderText="选择图像 B" />
+          <Button Grid.Column="4" Command="{Binding SelectBCommand}" Content="选择 B" />
+        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+          <Button Command="{Binding PrepareCommand}" Content="1. 准备双输入" />
+          <Button Command="{Binding SwapInputsCommand}" Content="交换 A/B" />
+          <Button Command="{Binding SolveAlignmentCommand}" Content="2. 求解 B→A" />
+          <Button Command="{Binding RenderPreviewCommand}" Content="3. 生成代理" />
+          <Button Command="{Binding RenderFullSizeCommand}" Content="显式完整尺寸" />
+          <Button Command="{Binding CancelCommand}" Content="取消" />
+          <ProgressBar Width="120" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+        </StackPanel>
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="330,*" ColumnSpacing="10">
+      <ScrollViewer>
+        <StackPanel Spacing="10">
+          <TextBlock Text="控制点（归一化 0–1；完整点对才进入领域层）" FontWeight="Bold" />
+          <ItemsControl ItemsSource="{Binding ControlPoints}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HybridAlignmentPointRow">
+                <Grid ColumnDefinitions="36,*,*,*,*" ColumnSpacing="4" Margin="0,2">
+                  <TextBlock Text="{Binding Id}" VerticalAlignment="Center" />
+                  <NumericUpDown Grid.Column="1" Minimum="0" Maximum="1" Increment="0.001" FormatString="F4" Value="{Binding PointAX}" />
+                  <NumericUpDown Grid.Column="2" Minimum="0" Maximum="1" Increment="0.001" FormatString="F4" Value="{Binding PointAY}" />
+                  <NumericUpDown Grid.Column="3" Minimum="0" Maximum="1" Increment="0.001" FormatString="F4" Value="{Binding PointBX}" />
+                  <NumericUpDown Grid.Column="4" Minimum="0" Maximum="1" Increment="0.001" FormatString="F4" Value="{Binding PointBY}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Command="{Binding AddPointCommand}" Content="添加点对" />
+            <Button Command="{Binding RemovePointCommand}" Content="删除末对" />
+          </StackPanel>
+          <TextBlock Text="{Binding AlignmentSummary}" TextWrapping="Wrap" />
+
+          <TextBlock Text="Gaussian 与合成" FontWeight="Bold" />
+          <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+            <TextBlock Text="A 低通 σ" /><NumericUpDown Grid.Column="1" Minimum="0.8" Maximum="32" Increment="0.1" Value="{Binding LowSigmaPixels}" />
+            <TextBlock Grid.Row="1" Text="B 高通 σ" /><NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="0.8" Maximum="32" Increment="0.1" Value="{Binding HighSigmaPixels}" />
+            <TextBlock Grid.Row="2" Text="低频增益" /><NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="2" Increment="0.05" Value="{Binding LowGain}" />
+            <TextBlock Grid.Row="3" Text="高频增益" /><NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="2" Increment="0.05" Value="{Binding HighGain}" />
+          </Grid>
+          <TextBlock Text="σ 越大，空间模糊越强。高频 B 是 B−Gaussian(B)，保留负值；灰色分量预览不参与计算。" TextWrapping="Wrap" />
+
+          <TextBlock Text="有效裁切（A 归一化，左闭右开）" FontWeight="Bold" />
+          <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="6" RowSpacing="6">
+            <NumericUpDown Minimum="0" Maximum="1" Increment="0.001" Value="{Binding CropLeft}" />
+            <NumericUpDown Grid.Column="1" Minimum="0" Maximum="1" Increment="0.001" Value="{Binding CropTop}" />
+            <NumericUpDown Grid.Row="1" Minimum="0" Maximum="1" Increment="0.001" Value="{Binding CropRight}" />
+            <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1" Increment="0.001" Value="{Binding CropBottom}" />
+          </Grid>
+          <TextBlock Text="{Binding ResultSummary}" TextWrapping="Wrap" />
+          <WrapPanel>
+            <Button Margin="0,0,6,6" Command="{Binding ImportRecipeCommand}" Content="导入配方" />
+            <Button Margin="0,0,6,6" Command="{Binding ExportRecipeCommand}" Content="导出配方" />
+            <Button Margin="0,0,6,6" Command="{Binding ExportImageCommand}" Content="导出 PNG" />
+            <Button Margin="0,0,6,6" Command="{Binding ExportReportJsonCommand}" Content="报告 JSON" />
+            <Button Margin="0,0,6,6" Command="{Binding ExportReportCsvCommand}" Content="报告 CSV" />
+          </WrapPanel>
+        </StackPanel>
+      </ScrollViewer>
+
+      <TabControl Grid.Column="1">
+        <TabItem Header="输入与重影">
+          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+            <Border BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="A：低频参考" /><Image Grid.Row="1" Source="{Binding SourceAPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="B：高频输入" /><Image Grid.Row="1" Source="{Binding SourceBPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="2" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="红 A / 青 B 边缘（非自动判定）" /><Image Grid.Row="1" Source="{Binding EdgeOverlayPreview}" Stretch="Uniform" /></Grid></Border>
+          </Grid>
+        </TabItem>
+        <TabItem Header="分量">
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <Border BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="A Gaussian 低频" /><Image Grid.Row="1" Source="{Binding LowComponentPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="B 有符号高频（0.5 中性灰，显示×2）" /><Image Grid.Row="1" Source="{Binding HighComponentPreview}" Stretch="Uniform" /></Grid></Border>
+          </Grid>
+        </TabItem>
+        <TabItem Header="四尺度">
+          <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="8">
+            <Border BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="1×" /><Image Grid.Row="1" Source="{Binding Scale1Preview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="1/2×" /><Image Grid.Row="1" Source="{Binding Scale2Preview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="1/4×" /><Image Grid.Row="1" Source="{Binding Scale4Preview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="1/8×" /><Image Grid.Row="1" Source="{Binding Scale8Preview}" Stretch="Uniform" /></Grid></Border>
+          </Grid>
+        </TabItem>
+        <TabItem Header="频谱">
+          <Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="混合 raw 的中心化频谱；A/B/低/高/raw 使用同一量程。黄=低通 f50，青虚线=高通 f50；理论环与离散截断核会略有差异。" TextWrapping="Wrap" /><vm:HybridSpectrumPreviewControl Grid.Row="1" Source="{Binding SpectrumPreview}" LowRadius="{Binding LowCutoffRadius}" HighRadius="{Binding HighCutoffRadius}" /></Grid>
+        </TabItem>
+      </TabControl>
+    </Grid>
+
+    <TextBlock Grid.Row="2" Text="两点没有独立残差验证；三点以上低残差也不保证主体语义匹配。远看效果由确定性缩小近似，不承诺所有图片、显示器或观察者获得同样感知。" TextWrapping="Wrap" />
+  </Grid>
+</UserControl>

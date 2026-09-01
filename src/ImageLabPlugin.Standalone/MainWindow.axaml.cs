@@ -17,6 +17,7 @@ using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
 using ImageLabPlugin.Features.SpectralArt;
+using ImageLabPlugin.Features.HybridImage;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -42,6 +43,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _seamCarvingScope;
     private IServiceScope? _poissonBlendingScope;
     private IServiceScope? _spectralArtScope;
+    private IServiceScope? _hybridImageScope;
 
     public MainWindow()
     {
@@ -68,6 +70,7 @@ public sealed partial class MainWindow : Window
         _seamCarvingScope = services.CreateScope();
         _poissonBlendingScope = services.CreateScope();
         _spectralArtScope = services.CreateScope();
+        _hybridImageScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -104,6 +107,8 @@ public sealed partial class MainWindow : Window
         var poissonBlendingView = _poissonBlendingScope.ServiceProvider.GetRequiredService<PoissonBlendingView>();
         var spectralArtDocument = _spectralArtScope.ServiceProvider.GetRequiredService<SpectralArtDocument>();
         var spectralArtView = _spectralArtScope.ServiceProvider.GetRequiredService<SpectralArtView>();
+        var hybridImageDocument = _hybridImageScope.ServiceProvider.GetRequiredService<HybridImageDocument>();
+        var hybridImageView = _hybridImageScope.ServiceProvider.GetRequiredService<HybridImageView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -139,6 +144,8 @@ public sealed partial class MainWindow : Window
         poissonBlendingDocument.InitializeAsync(new NewDocumentActivation("梯度域融合"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         spectralArtDocument.InitializeAsync(new NewDocumentActivation("频谱艺术"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        hybridImageDocument.InitializeAsync(new NewDocumentActivation("混合图像"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -176,6 +183,8 @@ public sealed partial class MainWindow : Window
         PoissonBlendingPreview.Content = poissonBlendingView;
         spectralArtView.DataContext = spectralArtDocument;
         SpectralArtPreview.Content = spectralArtView;
+        hybridImageView.DataContext = hybridImageDocument;
+        HybridImagePreview.Content = hybridImageView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -196,6 +205,7 @@ public sealed partial class MainWindow : Window
             seamCarvingDocument.Dispose();
             poissonBlendingDocument.Dispose();
             spectralArtDocument.Dispose();
+            hybridImageDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -214,6 +224,7 @@ public sealed partial class MainWindow : Window
             _seamCarvingScope?.Dispose();
             _poissonBlendingScope?.Dispose();
             _spectralArtScope?.Dispose();
+            _hybridImageScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -232,6 +243,7 @@ public sealed partial class MainWindow : Window
             _seamCarvingScope = null;
             _poissonBlendingScope = null;
             _spectralArtScope = null;
+            _hybridImageScope = null;
         };
     }
 }

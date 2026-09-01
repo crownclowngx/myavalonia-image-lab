@@ -18,6 +18,7 @@ using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
 using ImageLabPlugin.Features.SpectralArt;
+using ImageLabPlugin.Features.HybridImage;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -136,6 +137,13 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.SpectralArtDocument,
                 "频谱艺术",
                 "把文字、Logo 或二维码图片映射为共轭安全的 FFT 幅度图案，并观察空间质量与频域诊断",
+                "图像分析"));
+        // Hybrid Image 只在既有十八个稳定身份之后追加；旧 ID、顺序和零 Tool 约束保持不变。
+        registration.AddPersistableDocument<HybridImageDocument, HybridImageView>(
+            new DocumentDescriptor(
+                PluginIds.HybridImageDocument,
+                "混合图像",
+                "以控制点对齐、Gaussian 低高频和真实多尺度预览实验近看／远看主体切换",
                 "图像分析"));
     }
 }

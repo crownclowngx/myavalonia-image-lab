@@ -48,6 +48,8 @@ using ImageLabPlugin.Domain.PoissonBlending;
 using ImageLabPlugin.Infrastructure.PoissonBlending;
 using ImageLabPlugin.Application.SpectralArt;
 using ImageLabPlugin.Domain.SpectralArt;
+using ImageLabPlugin.Application.HybridImage;
+using ImageLabPlugin.Domain.HybridImage;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -77,6 +79,7 @@ public static class ImageLabPluginServices
         AddSeamCarvingServices(services);
         AddPoissonBlendingServices(services);
         AddSpectralArtServices(services);
+        AddHybridImageServices(services);
         return services;
     }
 
@@ -116,6 +119,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<ISeamCarvingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IPoissonBlendingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ISpectralArtFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IHybridImageFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -495,5 +499,32 @@ public static class ImageLabPluginServices
         services.AddSingleton<IImportSpectralArtRecipeUseCase, ImportSpectralArtRecipeUseCase>();
         services.AddSingleton<IExportSpectralArtRecipeUseCase, ExportSpectralArtRecipeUseCase>();
         services.AddSingleton<IExportSpectralArtReportUseCase, ExportSpectralArtReportUseCase>();
+    }
+
+    /// <summary>登记 Hybrid Image 无状态数值服务、严格协议、窄用例和每 Document Scope 独占 Session 所需依赖。</summary>
+    private static void AddHybridImageServices(IServiceCollection services)
+    {
+        // 固定 Gaussian 与相似变换没有运行期变化点；使用 sealed singleton，避免为单一实现制造策略/工厂层。
+        services.AddSingleton<HybridLumaProjector>();
+        services.AddSingleton<SimilarityTransformSolver>();
+        services.AddSingleton<AlignedImageSampler>();
+        services.AddSingleton<HybridCropValidator>();
+        services.AddSingleton<GaussianPlaneFilter>();
+        services.AddSingleton<HybridImageComposer>();
+        services.AddSingleton<HybridScaleProjector>();
+        services.AddSingleton<HybridImageDiagnostics>();
+        services.AddSingleton<HybridResourceEstimator>();
+        services.AddSingleton<HybridRenderCoordinator>();
+        services.AddSingleton<IHybridImageRecipeSerializer, HybridImageRecipeSerializer>();
+        services.AddSingleton<IHybridImageReportSerializer, HybridImageReportSerializer>();
+        services.AddSingleton<IHybridImageSnapshotSerializer, HybridImageSnapshotSerializer>();
+        services.AddSingleton<IPrepareHybridInputsUseCase, PrepareHybridInputsUseCase>();
+        services.AddSingleton<ISolveHybridAlignmentUseCase, SolveHybridAlignmentUseCase>();
+        services.AddSingleton<IRenderHybridPreviewUseCase, RenderHybridPreviewUseCase>();
+        services.AddSingleton<IRenderHybridFullSizeUseCase, RenderHybridFullSizeUseCase>();
+        services.AddSingleton<IExportHybridImageUseCase, ExportHybridImageUseCase>();
+        services.AddSingleton<IImportHybridRecipeUseCase, ImportHybridRecipeUseCase>();
+        services.AddSingleton<IExportHybridRecipeUseCase, ExportHybridRecipeUseCase>();
+        services.AddSingleton<IExportHybridReportUseCase, ExportHybridReportUseCase>();
     }
 }

@@ -6,7 +6,7 @@ namespace ImageLabPlugin.Infrastructure.Ui;
 
 /// <summary>把 SDK 文件窗口端口适配成 ImageLab 的四个明确用户意图。</summary>
 internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction interaction) :
-    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, ISvdFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, IColorTransferFileDialog, ISeamCarvingFileDialog, IPoissonBlendingFileDialog, ISpectralArtFileDialog, ITextClipboard
+    IImageFileDialog, IPayloadFileDialog, IComparisonReportFileDialog, IRobustnessReportFileDialog, IFingerprintReportFileDialog, ILsbReportFileDialog, IWaveletReportFileDialog, ISvdFileDialog, IFrequencyMaskRecipeFileDialog, IPeriodicNoiseFileDialog, IColorTransferFileDialog, ISeamCarvingFileDialog, IPoissonBlendingFileDialog, ISpectralArtFileDialog, IHybridImageFileDialog, ITextClipboard
 {
     private static readonly FilePickerFileType Images = new("图片")
     {
@@ -248,6 +248,33 @@ internal sealed class AvaloniaImageLabFileDialog(IPluginWindowInteraction intera
 
     public Task<string?> PickSpectralReportCsvAsync(string suggestedName, CancellationToken cancellationToken) =>
         interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 Spectral Art CSV 报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }] }, cancellationToken);
+
+    public async Task<string?> PickHybridInputAsync(string role, CancellationToken cancellationToken)
+    {
+        var paths = await interaction.PickOpenFilesAsync(new FilePickerOpenOptions
+        {
+            Title = $"选择 Hybrid Image 图像 {role}", AllowMultiple = false, FileTypeFilter = [Images]
+        }, cancellationToken).ConfigureAwait(false);
+        return paths.Count == 0 ? null : paths[0];
+    }
+
+    public Task<string?> PickHybridResultPngAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 Hybrid Image 完整尺寸 PNG", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("PNG") { Patterns = ["*.png"] }] }, cancellationToken);
+
+    public async Task<string?> PickHybridRecipeInputAsync(CancellationToken cancellationToken)
+    {
+        var paths = await interaction.PickOpenFilesAsync(new FilePickerOpenOptions { Title = "导入 Hybrid Image 配方", AllowMultiple = false, FileTypeFilter = [new FilePickerFileType("JSON 配方") { Patterns = ["*.json"] }] }, cancellationToken).ConfigureAwait(false);
+        return paths.Count == 0 ? null : paths[0];
+    }
+
+    public Task<string?> PickHybridRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 Hybrid Image 配方", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("JSON 配方") { Patterns = ["*.json"] }] }, cancellationToken);
+
+    public Task<string?> PickHybridReportJsonAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 Hybrid Image JSON 报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }] }, cancellationToken);
+
+    public Task<string?> PickHybridReportCsvAsync(string suggestedName, CancellationToken cancellationToken) =>
+        interaction.PickSaveFileAsync(new FilePickerSaveOptions { Title = "导出 Hybrid Image CSV 报告", SuggestedFileName = suggestedName, FileTypeChoices = [new FilePickerFileType("CSV") { Patterns = ["*.csv"] }] }, cancellationToken);
 
     public Task<bool> TrySetTextAsync(string text, CancellationToken cancellationToken) =>
         interaction.TrySetClipboardTextAsync(text, cancellationToken);

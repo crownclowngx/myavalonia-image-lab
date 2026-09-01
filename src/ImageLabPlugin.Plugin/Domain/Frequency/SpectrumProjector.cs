@@ -52,6 +52,26 @@ internal sealed class SpectrumProjector
         return new SpectrumDisplayScale(mode, Math.Max(firstLimit, secondLimit));
     }
 
+    /// <summary>为三张以上同屏频谱冻结一个共同量程，避免逐对比较时遗漏后续更大的幅度。</summary>
+    /// <remarks>
+    /// 该入口只扫描只读幅度，不保存频谱或创建额外 Complex 副本。Hybrid Image 需要同时比较 A、B、
+    /// 低频、高频和结果五项事实，因此由通用投影器集中一次确定量程，比在产品层复制量程算法更可靠。
+    /// </remarks>
+    public SpectrumDisplayScale CreateSharedScale(
+        IReadOnlyList<FrequencySpectrum> spectra,
+        SpectrumMagnitudeMode mode)
+    {
+        ArgumentNullException.ThrowIfNull(spectra);
+        if (spectra.Count == 0) throw new ArgumentException("至少需要一张频谱。", nameof(spectra));
+        double maximum = 0d;
+        foreach (var spectrum in spectra)
+        {
+            ArgumentNullException.ThrowIfNull(spectrum);
+            maximum = Math.Max(maximum, ResolveMagnitudeLimit(spectrum.Values.Span, mode));
+        }
+        return new SpectrumDisplayScale(mode, maximum);
+    }
+
     /// <summary>为只读 Session 频谱与调用方拥有的工作数组建立共同量程，不复制第二份完整频谱。</summary>
     internal SpectrumDisplayScale CreateSharedScale(
         FrequencySpectrum first,

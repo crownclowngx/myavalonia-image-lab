@@ -60,5 +60,8 @@
     <TabItem Header="频谱艺术">
       <ContentControl x:Name="SpectralArtPreview" />
     </TabItem>
+    <TabItem Header="混合图像">
+      <ContentControl x:Name="HybridImagePreview" />
+    </TabItem>
   </TabControl>
 </Window>
