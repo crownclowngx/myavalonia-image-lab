@@ -2,8 +2,9 @@ using System.Security.Cryptography;
 using System.Text;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Watermarking;
@@ -55,7 +56,8 @@ internal sealed class PrepareRobustnessBaselineUseCase(
 
 internal sealed class PlanRobustnessExperimentUseCase(RobustnessExperimentPlanner planner) : IPlanRobustnessExperimentUseCase
 {
-    public RobustnessExecutionPlan Execute(RobustnessRecipe recipe, IReadOnlyList<EmbeddingProfileId> profiles) => planner.Plan(recipe, profiles);
+    public RobustnessExecutionPlan Execute(RobustnessRecipe recipe, IReadOnlyList<EmbeddingProfileId> profiles) =>
+        planner.Plan(recipe, profiles.Select(RobustnessModelMapper.ToRobustnessProfile).ToArray());
 }
 
 internal sealed class RunRobustnessExperimentUseCase(
@@ -82,7 +84,7 @@ internal sealed class RunRobustnessExperimentUseCase(
                 foreach (var planned in plan.Cases)
                 {
                     token.ThrowIfCancellationRequested(); progress?.Report(new(results.Count, plan.Cases.Count, planned.Key));
-                    var controlled = baseline.Profiles[planned.Key.Profile];
+                    var controlled = baseline.Profiles[RobustnessModelMapper.ToEmbeddingProfile(planned.Key.Profile)];
                     try
                     {
                         var executed = await chain.ExecuteAsync(controlled.Image, planned, plan.Recipe.ExperimentSeed, plan.Recipe.ProbeEachStep,
@@ -97,7 +99,7 @@ internal sealed class RunRobustnessExperimentUseCase(
                     catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
                     catch (Exception exception)
                     {
-                        var failed = new WatermarkDiagnosticResult(false, WatermarkDetectionStatus.UnrecoverableDamage, IntegrityStatus.NotChecked, false, null, null, RobustnessFailureReason.OperatorFailed, exception.GetType().Name);
+                        var failed = new WatermarkDiagnosticResult(false, RobustnessDetectionStatus.UnrecoverableDamage, RobustnessIntegrityStatus.NotChecked, false, null, null, RobustnessFailureReason.OperatorFailed, exception.GetType().Name);
                         results.Add(new(planned.Key, true, failed, [], null, false, new(null, QualityUnavailableReason.OperatorFailed), new(null, QualityUnavailableReason.OperatorFailed), [], OperatorError: exception.Message));
                     }
                 }
@@ -133,16 +135,17 @@ internal sealed class FingerprintObservationProbe(
 {
     private readonly IReadOnlyDictionary<FingerprintAlgorithmId, IImageFingerprintAlgorithm> _algorithms = algorithms.ToDictionary(value => value.Id);
 
-    public IReadOnlyList<FingerprintObservation> Observe(PixelImage reference, PixelImage candidate, IReadOnlyList<FingerprintAlgorithmId> algorithms, CancellationToken cancellationToken)
+    public IReadOnlyList<RobustnessFingerprintObservation> Observe(PixelImage reference, PixelImage candidate, IReadOnlyList<FingerprintAlgorithmId> algorithms, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(reference); ArgumentNullException.ThrowIfNull(candidate); ArgumentNullException.ThrowIfNull(algorithms);
-        var result = new List<FingerprintObservation>(algorithms.Count);
+        var result = new List<RobustnessFingerprintObservation>(algorithms.Count);
         foreach (var id in algorithms.Distinct())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (!_algorithms.TryGetValue(id, out var algorithm)) throw new ArgumentException($"未登记指纹算法 {id}。", nameof(algorithms));
             var left = algorithm.Compute(reference, cancellationToken); var right = algorithm.Compute(candidate, cancellationToken);
-            result.Add(new(id, left, right, distanceCalculator.Calculate(left, right)));
+            result.Add(RobustnessModelMapper.ToRobustnessObservation(
+                new(id, left, right, distanceCalculator.Calculate(left, right))));
         }
         return result;
     }

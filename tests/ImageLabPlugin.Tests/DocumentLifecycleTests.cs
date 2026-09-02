@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Features.WatermarkEmbed;
 using ImageLabPlugin.Features.WatermarkInspect;

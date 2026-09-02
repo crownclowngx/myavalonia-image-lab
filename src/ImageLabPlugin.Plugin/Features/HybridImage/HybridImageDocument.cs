@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.HybridImage;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.HybridImage;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using MyAvaloniaManagement.PluginSdk;
 
 namespace ImageLabPlugin.Features.HybridImage;

@@ -1,12 +1,12 @@
 using System.Text;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Wavelets;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Wavelets;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -163,7 +163,7 @@ public sealed class WaveletUseCaseAndReportTests
     {
         public PerturbationKind Kind => kind;
         public ValueTask<PixelImage> ApplyAsync(PixelImage source, PerturbationParameters parameters,
-            DeterministicTrialContext trial, CancellationToken cancellationToken)
+            PerturbationExecutionContext trial, CancellationToken cancellationToken)
         { calls.Add(kind); return ValueTask.FromResult(source.Clone()); }
     }
 }

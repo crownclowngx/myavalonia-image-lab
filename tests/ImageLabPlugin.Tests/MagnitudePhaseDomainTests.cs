@@ -1,7 +1,7 @@
 using System.Numerics;
 using ImageLabPlugin.Application.MagnitudePhaseSwap;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.MagnitudePhaseSwap;
 using ImageLabPlugin.Plugin;
 using Microsoft.Extensions.DependencyInjection;

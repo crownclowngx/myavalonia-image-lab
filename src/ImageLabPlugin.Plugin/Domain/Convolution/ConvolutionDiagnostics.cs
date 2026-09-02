@@ -1,4 +1,5 @@
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spatial;
 
 namespace ImageLabPlugin.Domain.Convolution;
 

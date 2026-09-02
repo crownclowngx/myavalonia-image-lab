@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Application.Watermarking;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Watermarking;
@@ -17,7 +17,7 @@ internal sealed class WatermarkDiagnosticReader(FrequencyWatermarkCarrier carrie
         try { headerRead = carrier.ReadHeaderChannel(image, token); try { _ = protocol.DecodeHeader(headerRead.VotedBytes, out var corrected); headerCorrections = corrected; } catch (Exception e) when (e is InvalidDataException or ArgumentException or NotSupportedException) { } }
         catch (Exception exception) when (exception is InvalidDataException or ArgumentException)
         {
-            return new(false, WatermarkDetectionStatus.NoSupportedWatermark, IntegrityStatus.NotChecked, false, null, null, RobustnessFailureReason.InsufficientCarrierSlots, exception.GetType().Name);
+            return new(false, RobustnessDetectionStatus.NoSupportedWatermark, RobustnessIntegrityStatus.NotChecked, false, null, null, RobustnessFailureReason.InsufficientCarrierSlots, exception.GetType().Name);
         }
         var headerDiagnostic = ToDiagnostic(headerRead, baseline.Frame.EncodedHeader, FrequencyWatermarkCarrier.HeaderRedundancy, headerCorrections);
         try
@@ -33,12 +33,18 @@ internal sealed class WatermarkDiagnosticReader(FrequencyWatermarkCarrier carrie
         catch (Exception exception) when (exception is InvalidDataException or ArgumentException)
         {
             var formalWithoutData = extractor.Extract(image, password, token);
-            return new(false, formalWithoutData.Status, formalWithoutData.Integrity, false, headerDiagnostic, null, RobustnessFailureReason.InsufficientCarrierSlots, exception.GetType().Name);
+            return new(false,
+                RobustnessModelMapper.ToRobustnessStatus(formalWithoutData.Status),
+                RobustnessModelMapper.ToRobustnessIntegrity(formalWithoutData.Integrity),
+                false, headerDiagnostic, null, RobustnessFailureReason.InsufficientCarrierSlots, exception.GetType().Name);
         }
         var dataDiagnostic = ToDiagnostic(dataRead, baseline.Frame.EncodedData, EmbeddingProfile.Resolve(baseline.Profile).DataRedundancy, dataCorrections);
         var formal = extractor.Extract(image, password, token); var matches = formal.Payload.Span.SequenceEqual(expectedPayload);
         var success = formal.Status is WatermarkDetectionStatus.RecoveredIntegrityValid or WatermarkDetectionStatus.RecoveredWithCorrections && formal.Integrity == IntegrityStatus.Valid && matches;
-        return new(success, formal.Status, formal.Integrity, matches, headerDiagnostic, dataDiagnostic, success ? RobustnessFailureReason.None : Classify(formal, matches), formal.Status.ToString());
+        return new(success,
+            RobustnessModelMapper.ToRobustnessStatus(formal.Status),
+            RobustnessModelMapper.ToRobustnessIntegrity(formal.Integrity),
+            matches, headerDiagnostic, dataDiagnostic, success ? RobustnessFailureReason.None : Classify(formal, matches), formal.Status.ToString());
     }
 
     private static ChannelDiagnostic ToDiagnostic(PhysicalChannelRead read, ReadOnlySpan<byte> expected, int redundancy, int? corrections)

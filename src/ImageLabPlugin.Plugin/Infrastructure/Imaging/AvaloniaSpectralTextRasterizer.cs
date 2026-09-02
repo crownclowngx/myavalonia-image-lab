@@ -5,7 +5,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ImageLabPlugin.Application.SpectralArt;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Infrastructure.Imaging;
 

@@ -1,9 +1,9 @@
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.SpectralArt;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SpectralArt;
 using ImageLabPlugin.Infrastructure.Persistence;
 using Xunit;
@@ -129,7 +129,7 @@ public sealed class SpectralArtApplicationTests
         var inverse = new FrequencyInverseTransformer(new Fft2DTransform(new Fft1DTransform()));
         return new(new SpectralPatternMapper(), new SpectralAmplitudeWriter(radial),
             new SpectralArtReconstructor(inverse, converter),
-            new SpectralArtDiagnostics(new FullReferenceQualityAnalyzer(new ImagePairValidator()), new FrequencyDifferenceProjector(), radial),
+            new SpectralArtDiagnostics(new FullReferenceQualityAnalyzer(new ImagePairValidator()), new ChannelDifferenceProjector(), radial),
             new SpectrumProjector(), new SpectralPatternPreviewProjector());
     }
 

@@ -1,5 +1,5 @@
 using ImageLabPlugin.Domain.Convolution;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.Convolution;
 

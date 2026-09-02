@@ -1,6 +1,6 @@
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 

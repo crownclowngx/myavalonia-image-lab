@@ -1,8 +1,9 @@
 using System.Text.Json;
 using ImageLabPlugin.Application.ImageComparison;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.ImageComparison;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Features.ImageCompareLab;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;

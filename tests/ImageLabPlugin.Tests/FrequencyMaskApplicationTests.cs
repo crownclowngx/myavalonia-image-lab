@@ -1,10 +1,10 @@
 using ImageLabPlugin.Application.FrequencyMaskEditing;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Infrastructure.Persistence;
 using Xunit;
 
@@ -140,7 +140,7 @@ public sealed class FrequencyMaskApplicationTests
 
     private static RenderFrequencyMaskUseCase Render() => new(new FrequencyMaskRasterizer(new ConjugateMaskWriter()),
         new FrequencyMaskApplier(Fft()), new ImageChannelConverter(), new FrequencyMaskDiagnostics(),
-        new FrequencyDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()));
+        new ChannelDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()));
 
     private static Fft2DTransform Fft() => new(new Fft1DTransform());
     private static FrequencySpectrumBuilder Builder() => new(Fft());

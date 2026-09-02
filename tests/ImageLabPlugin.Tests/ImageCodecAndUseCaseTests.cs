@@ -7,8 +7,9 @@ using Avalonia.Skia;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
 using ImageLabPlugin.Application.SpectrumAnalysis;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Cryptography;
 using ImageLabPlugin.Infrastructure.ErrorCorrection;
@@ -23,14 +24,14 @@ using ImageLabPlugin.Features.ImageCompareLab;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Infrastructure.Robustness;
+using ImageLabPlugin.Infrastructure.Perturbations;
 using ImageLabPlugin.Features.ImageFingerprint;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using ImageLabPlugin.Application.BitPlanes;
 using ImageLabPlugin.Domain.BitPlanes;
 using ImageLabPlugin.Application.LsbSteganography;
 using ImageLabPlugin.Domain.Steganography;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using ImageLabPlugin.Features.WaveletLab;
@@ -383,12 +384,12 @@ public sealed class ImageCodecAndUseCaseTests
     public async Task 鲁棒性JpegStrategy使用正式Codec并阻断Alpha()
     {
         var operation = new JpegReencodeOperator(new AvaloniaImageCodec());
-        var key = new RobustnessCaseKey(EmbeddingProfileId.Robust, 0, 95m, 0);
+        var key = new RobustnessCaseKey(RobustnessProfileId.Robust, 0, 95m, 0);
         await Assert.ThrowsAsync<InvalidOperationException>(() => operation.ApplyAsync(
-            CreateTexturedImage(64, 48, includeAlpha: true), new JpegParameters(95), new(1, key, "jpeg", PerturbationKind.JpegReencode), default).AsTask());
+            CreateTexturedImage(64, 48, includeAlpha: true), new JpegParameters(95), PerturbationTestContext.From(1, key, "jpeg", PerturbationKind.JpegReencode), default).AsTask());
 
         var opaque = CreateTexturedImage(64, 48, includeAlpha: false);
-        var output = await operation.ApplyAsync(opaque, new JpegParameters(95), new(1, key, "jpeg", PerturbationKind.JpegReencode), default);
+        var output = await operation.ApplyAsync(opaque, new JpegParameters(95), PerturbationTestContext.From(1, key, "jpeg", PerturbationKind.JpegReencode), default);
         Assert.Equal(opaque.Size, output.Size); Assert.NotEqual(opaque.Rgba.ToArray(), output.Rgba.ToArray());
     }
 
@@ -516,12 +517,12 @@ public sealed class ImageCodecAndUseCaseTests
 
         var encoded = await codec.EncodeAsync(source, ImageOutputFormat.Jpeg, 95, CancellationToken.None);
         var decoded = await codec.DecodeAsync(encoded, CancellationToken.None);
-        var quality = ImageQualityCalculator.Compare(source, decoded);
+        var quality = new FullReferenceQualityAnalyzer(new ImagePairValidator()).Analyze(source, decoded);
 
         Assert.Equal(source.Size, decoded.Size);
         Assert.True(encoded.Length > 100);
-        Assert.True(quality.Psnr > 20d);
-        Assert.True(quality.Ssim > 0.70d);
+        Assert.True(quality.PsnrLumaDb > 20d);
+        Assert.True(quality.GlobalSsimLuma > 0.70d);
     }
 
     [Fact]
@@ -660,6 +661,7 @@ public sealed class ImageCodecAndUseCaseTests
                 protocol,
                 carrier,
                 new FrequencySpectrumProjector(new Dct8x8Transform()),
+                new FullReferenceQualityAnalyzer(new ImagePairValidator()),
                 extract),
             extract);
     }
@@ -690,7 +692,7 @@ public sealed class ImageCodecAndUseCaseTests
         var builder = new FrequencySpectrumBuilder(fft);
         var rasterizer = new FrequencyMaskRasterizer(new ConjugateMaskWriter());
         var render = new RenderFrequencyMaskUseCase(rasterizer, new FrequencyMaskApplier(fft), converter,
-            new FrequencyMaskDiagnostics(), new FrequencyDifferenceProjector(),
+            new FrequencyMaskDiagnostics(), new ChannelDifferenceProjector(),
             new FullReferenceQualityAnalyzer(new ImagePairValidator()));
         var serializer = new FrequencyMaskRecipeSerializer();
         return new FrequencyMaskEditorDocument(
@@ -710,7 +712,7 @@ public sealed class ImageCodecAndUseCaseTests
         var builder = new FrequencySpectrumBuilder(fft);
         var render = new RenderPeriodicNoisePreviewUseCase(new NotchMaskFactory(new NotchResponse()),
             new FrequencyMaskApplier(fft), new FrequencyGainSpectrumProjector(new SpectrumProjector()), converter,
-            new FrequencyDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()),
+            new ChannelDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()),
             new PeriodicNoiseLossAnalyzer());
         var serializer = new PeriodicNoiseRecipeSerializer();
         return new PeriodicNoiseRemovalDocument(

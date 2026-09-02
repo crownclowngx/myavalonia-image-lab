@@ -1,5 +1,5 @@
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.MagnitudePhaseSwap;
 

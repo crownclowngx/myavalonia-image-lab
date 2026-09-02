@@ -1,5 +1,5 @@
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.PoissonBlending;
 
 namespace ImageLabPlugin.Application.PoissonBlending;

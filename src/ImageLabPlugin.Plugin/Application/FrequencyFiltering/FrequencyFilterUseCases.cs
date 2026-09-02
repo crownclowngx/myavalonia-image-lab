@@ -1,14 +1,15 @@
 using System.Diagnostics;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
+using ImageLabPlugin.Domain.Shared.Analysis;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
 
 namespace ImageLabPlugin.Application.FrequencyFiltering;
 
 /// <summary>解码一次、建立有界代理及其全局 FFT；失败或取消时不返回半成品 Session。</summary>
 internal sealed class PrepareFrequencyFilterSessionUseCase(IImageCodec codec, ImageAnalysisProxyProjector proxyProjector,
-    ImageChannelConverter channelConverter, FrequencySpectrumBuilder spectrumBuilder, Domain.Frequency.SpectrumProjector spectrumProjector)
+    ImageChannelConverter channelConverter, FrequencySpectrumBuilder spectrumBuilder, Domain.Shared.Spectral.SpectrumProjector spectrumProjector)
     : IPrepareFrequencyFilterSessionUseCase
 {
     public async Task<FrequencyFilterSession> ExecuteAsync(FrequencyFilterSessionRequest request, CancellationToken cancellationToken)
@@ -22,7 +23,7 @@ internal sealed class PrepareFrequencyFilterSessionUseCase(IImageCodec codec, Im
             var proxy = proxyProjector.Create(source, request.AnalysisMaximumEdge, cancellationToken);
             var plane = channelConverter.Extract(proxy, request.Channel, cancellationToken);
             var spectrum = spectrumBuilder.Build(plane, cancellationToken);
-            var magnitude = spectrumProjector.CreateMagnitude(spectrum, Domain.Frequency.SpectrumMagnitudeMode.Logarithmic, cancellationToken);
+            var magnitude = spectrumProjector.CreateMagnitude(spectrum, Domain.Shared.Spectral.SpectrumMagnitudeMode.Logarithmic, cancellationToken);
             return new FrequencyFilterSession(request.SourcePath, source, proxy, plane, spectrum, magnitude, request.AnalysisMaximumEdge);
         }, cancellationToken).ConfigureAwait(false);
     }
@@ -30,7 +31,7 @@ internal sealed class PrepareFrequencyFilterSessionUseCase(IImageCodec codec, Im
 
 /// <summary>协调遮罩、IFFT、输出投影和诊断；不读取文件、不创建 Bitmap，也不修改缓存频谱。</summary>
 internal sealed class ApplyFrequencyFilterUseCase(FrequencyFilterMaskFactory maskFactory, FrequencyFilterEngine engine,
-    FrequencySignalProjector signalProjector, FrequencyDifferenceProjector differenceProjector,
+    FrequencySignalProjector signalProjector, ChannelDifferenceProjector differenceProjector,
     FrequencySideEffectAnalyzer sideEffectAnalyzer, FullReferenceQualityAnalyzer qualityAnalyzer)
     : IApplyFrequencyFilterUseCase
 {
@@ -44,7 +45,7 @@ internal sealed class ApplyFrequencyFilterUseCase(FrequencyFilterMaskFactory mas
     }
 
     internal FrequencyFilterResult Execute(FrequencyFilterSession session, PixelImage image, ImageChannelPlane plane,
-        Domain.Frequency.FrequencySpectrum spectrum, FrequencyFilterRecipe recipe, bool isFullSize,
+        Domain.Shared.Spectral.FrequencySpectrum spectrum, FrequencyFilterRecipe recipe, bool isFullSize,
         bool allowSessionCache, CancellationToken token)
     {
         var watch = Stopwatch.StartNew(); var mask = maskFactory.Create(spectrum, recipe, token); var maskElapsed = watch.Elapsed;

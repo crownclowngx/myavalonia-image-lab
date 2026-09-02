@@ -1,7 +1,7 @@
 using System.Numerics;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SpectralArt;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Application.SpectralArt;

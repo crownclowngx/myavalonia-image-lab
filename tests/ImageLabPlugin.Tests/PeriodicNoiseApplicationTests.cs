@@ -1,10 +1,10 @@
 using System.Text;
 using ImageLabPlugin.Application.PeriodicNoiseRemoval;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 using ImageLabPlugin.Infrastructure.Persistence;
 using Xunit;
@@ -150,7 +150,7 @@ public sealed class PeriodicNoiseApplicationTests
         return new RenderPeriodicNoisePreviewUseCase(new NotchMaskFactory(new NotchResponse()),
             new FrequencyMaskApplier(PeriodicNoiseDomainTests.Fft()),
             new FrequencyGainSpectrumProjector(new SpectrumProjector()), converter,
-            new FrequencyDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()),
+            new ChannelDifferenceProjector(), new FullReferenceQualityAnalyzer(new ImagePairValidator()),
             new PeriodicNoiseLossAnalyzer());
     }
 

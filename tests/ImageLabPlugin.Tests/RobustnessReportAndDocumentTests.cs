@@ -2,10 +2,11 @@ using System.Text.Json;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Domain.Robustness;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Features.RobustnessLab;
 using ImageLabPlugin.Infrastructure.Robustness;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;
 using System.Diagnostics;
@@ -17,11 +18,11 @@ public sealed class RobustnessReportAndDocumentTests
     [Fact]
     public void 报告与CSV不泄漏路径Payload密码或MappingKey()
     {
-        var diagnostic = new WatermarkDiagnosticResult(true, WatermarkDetectionStatus.RecoveredIntegrityValid, IntegrityStatus.Valid, true,
+        var diagnostic = new WatermarkDiagnosticResult(true, RobustnessDetectionStatus.RecoveredIntegrityValid, RobustnessIntegrityStatus.Valid, true,
             new(new(0, 24), new(0, 8), 0, 1, 1), new(new(0, 24), new(0, 8), 0, .9, .8), RobustnessFailureReason.None, "ok");
         var quality = new QualityMeasurement(null, QualityUnavailableReason.SizeMismatch);
-        var item = new RobustnessCaseResult(new(EmbeddingProfileId.Balanced, 0, 1m, 0), true, diagnostic, [], null, false, quality, quality, []);
-        var recipe = new RobustnessRecipeFacts(1, [new("s", "brightness", true, "BrightnessParameters { Offset = 1 }")], "s", "offset", [1m], 1, [EmbeddingProfileId.Balanced], true);
+        var item = new RobustnessCaseResult(new(RobustnessProfileId.Balanced, 0, 1m, 0), true, diagnostic, [], null, false, quality, quality, []);
+        var recipe = new RobustnessRecipeFacts(1, [new("s", "brightness", true, "BrightnessParameters { Offset = 1 }")], "s", "offset", [1m], 1, [RobustnessProfileId.Balanced], true);
         var report = new RobustnessExperimentReport(1, "abc", DateTimeOffset.UnixEpoch, true, 7, "SplitMix64", "D:/secret/carrier.png", 12, "digest-id", recipe, [item], RobustnessResultAggregator.Aggregate([item]));
         var serializer = new RobustnessReportSerializer(); var json = serializer.SerializeJson(report); var csv = serializer.SerializeCsv(report);
         Assert.Contains("carrier.png", json, StringComparison.Ordinal); Assert.DoesNotContain("D:/secret", json, StringComparison.OrdinalIgnoreCase);
@@ -36,9 +37,9 @@ public sealed class RobustnessReportAndDocumentTests
         var success = Diagnostic(true); var failure = Diagnostic(false);
         var cases = new[]
         {
-            new RobustnessCaseResult(new(EmbeddingProfileId.Stealth, 0, 1, 0), true, success, [], null, false, quality, quality, []),
-            new RobustnessCaseResult(new(EmbeddingProfileId.Stealth, 0, 1, 1), true, failure, [], "x", false, quality, quality, []),
-            new RobustnessCaseResult(new(EmbeddingProfileId.Stealth, 0, 1, 2), false, null, [], null, false, quality, quality, [])
+            new RobustnessCaseResult(new(RobustnessProfileId.Stealth, 0, 1, 0), true, success, [], null, false, quality, quality, []),
+            new RobustnessCaseResult(new(RobustnessProfileId.Stealth, 0, 1, 1), true, failure, [], "x", false, quality, quality, []),
+            new RobustnessCaseResult(new(RobustnessProfileId.Stealth, 0, 1, 2), false, null, [], null, false, quality, quality, [])
         };
         var point = Assert.Single(RobustnessResultAggregator.Aggregate(cases)); Assert.Equal(2, point.CompletedTrials); Assert.Equal(.5, point.SuccessRate); Assert.Null(cases[0].AttackOnlyQuality.Metrics);
     }
@@ -140,8 +141,8 @@ public sealed class RobustnessReportAndDocumentTests
         Assert.Contains("尺寸", step.AttackHelp.Caution, StringComparison.Ordinal);
     }
 
-    private static WatermarkDiagnosticResult Diagnostic(bool success) => new(success, success ? WatermarkDetectionStatus.RecoveredIntegrityValid : WatermarkDetectionStatus.UnrecoverableDamage,
-        success ? IntegrityStatus.Valid : IntegrityStatus.Invalid, success, null, null, success ? RobustnessFailureReason.None : RobustnessFailureReason.DataUnrecoverable, "test");
+    private static WatermarkDiagnosticResult Diagnostic(bool success) => new(success, success ? RobustnessDetectionStatus.RecoveredIntegrityValid : RobustnessDetectionStatus.UnrecoverableDamage,
+        success ? RobustnessIntegrityStatus.Valid : RobustnessIntegrityStatus.Invalid, success, null, null, success ? RobustnessFailureReason.None : RobustnessFailureReason.DataUnrecoverable, "test");
 
     private static RobustnessLabDocument CreateDocument(IPrepareRobustnessBaselineUseCase prepare) => new(prepare,
         new PlanRobustnessExperimentUseCase(new(new())), new NeverRun(), new NeverExport(), new NullImageDialog(), new NullReportDialog(), new TestLifetime());

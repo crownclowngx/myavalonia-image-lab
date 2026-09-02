@@ -2,8 +2,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using ImageLabPlugin.Application.ImageComparison;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.ImageComparison;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Infrastructure.Persistence;
 

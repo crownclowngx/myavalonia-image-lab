@@ -3,8 +3,8 @@ using System.Text.Json;
 using System.Xml.Linq;
 using ImageLabPlugin.Application.ColorTransfer;
 using ImageLabPlugin.Domain.ColorTransfer;
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Comparison;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
 using ImageLabPlugin.Infrastructure.ColorTransfer;
 using Xunit;
 
@@ -45,7 +45,7 @@ public sealed class ColorTransferReportAndArchitectureTests
     [Fact]
     public void Domain不依赖AvaloniaJson文件对话框DI且生产代码无Aiflow与WindowsCI()
     {
-        var root = Root(); var imagingRoot = Path.Combine(root, "src", "ImageLabPlugin.Plugin", "Domain", "Imaging");
+        var root = Root(); var imagingRoot = Path.Combine(root, "src", "ImageLabPlugin.Plugin", "Domain", "Shared", "Imaging");
         var domain = ReadAll(Path.Combine(root, "src", "ImageLabPlugin.Plugin", "Domain", "ColorTransfer")) +
             string.Join('\n', new[] { "SrgbColorSpace.cs", "CieLabColorSpace.cs", "HsvColorSpace.cs", "CieDeltaE.cs" }
                 .Select(name => File.ReadAllText(Path.Combine(imagingRoot, name))));
@@ -65,8 +65,8 @@ public sealed class ColorTransferReportAndArchitectureTests
     {
         var root = Root(); var files = new[]
         {
-            "Domain/Imaging/SrgbColorSpace.cs", "Domain/Imaging/CieLabColorSpace.cs", "Domain/Imaging/HsvColorSpace.cs",
-            "Domain/Imaging/CieDeltaE.cs", "Domain/ColorTransfer/ColorDistributionAnalyzer.cs",
+            "Domain/Shared/Imaging/SrgbColorSpace.cs", "Domain/Shared/Imaging/CieLabColorSpace.cs", "Domain/Shared/Imaging/HsvColorSpace.cs",
+            "Domain/Shared/Imaging/CieDeltaE.cs", "Domain/ColorTransfer/ColorDistributionAnalyzer.cs",
             "Domain/ColorTransfer/RgbColorAggregator.cs", "Domain/ColorTransfer/DominantColorClusterer.cs",
             "Domain/ColorTransfer/LabStatisticsTransfer.cs", "Domain/ColorTransfer/FixedPaletteRemapper.cs",
             "Application/ColorTransfer/ColorTransferSession.cs", "Features/PaletteColorTransfer/PaletteColorTransferDocument.cs",

@@ -1,8 +1,7 @@
 using System.Numerics;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Domain.SpectralArt;
 
@@ -36,7 +35,7 @@ internal sealed record SpectralFrequencyDiagnostics(
 /// </remarks>
 internal sealed class SpectralArtDiagnostics(
     FullReferenceQualityAnalyzer qualityAnalyzer,
-    FrequencyDifferenceProjector differenceProjector,
+    ChannelDifferenceProjector differenceProjector,
     RadialLogPowerBaseline radialBaseline)
 {
     /// <summary>强度零在创建完整工作频谱前返回真实源能量和明确的“未写入”诊断。</summary>
@@ -79,7 +78,7 @@ internal sealed class SpectralArtDiagnostics(
         CancellationToken cancellationToken = default) =>
         qualityAnalyzer.Analyze(source, result, cancellationToken);
 
-    public FrequencyDifferenceProjection CreateSpatialDifference(
+    public ChannelDifferenceProjection CreateSpatialDifference(
         ImageChannelPlane source,
         ImageChannelPlane result,
         double amplification,

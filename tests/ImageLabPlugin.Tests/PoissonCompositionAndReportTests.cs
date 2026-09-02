@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using ImageLabPlugin.Application.PoissonBlending;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.PoissonBlending;
 using ImageLabPlugin.Infrastructure.PoissonBlending;
 using Xunit;

@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Wavelets;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Wavelets;
 using MyAvaloniaManagement.PluginSdk;
 

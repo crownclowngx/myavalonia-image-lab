@@ -1,7 +1,8 @@
 using ImageLabPlugin.Application.Convolution;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.Convolution;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spatial;
 using ImageLabPlugin.Features.ConvolutionPlayground;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;

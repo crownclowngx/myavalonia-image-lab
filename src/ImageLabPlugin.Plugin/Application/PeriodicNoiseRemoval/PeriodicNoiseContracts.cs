@@ -1,6 +1,7 @@
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 
 namespace ImageLabPlugin.Application.PeriodicNoiseRemoval;
@@ -59,7 +60,7 @@ internal sealed record PeriodicNoiseRenderResult(
     FrequencyMaskApplicationResult Raw,
     PixelImage Reconstruction,
     PixelImage FilteredSpectrumPreview,
-    FrequencyDifferenceProjection Difference,
+    ChannelDifferenceProjection Difference,
     PeriodicNoiseLossDiagnostics Diagnostics);
 
 internal enum PeriodicNoiseExportArtifact { Reconstruction, MaskPreview }

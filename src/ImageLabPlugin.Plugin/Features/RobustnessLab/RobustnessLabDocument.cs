@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Domain.Robustness;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Domain.Fingerprinting;
 using MyAvaloniaManagement.PluginSdk;

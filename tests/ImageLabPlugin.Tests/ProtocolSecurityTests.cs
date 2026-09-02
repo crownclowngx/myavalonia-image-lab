@@ -6,7 +6,7 @@ using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Cryptography;
 using ImageLabPlugin.Infrastructure.ErrorCorrection;
 using ImageLabPlugin.Infrastructure.Watermarking;
-using ImageLabPlugin.Domain.Checksums;
+using ImageLabPlugin.Domain.Shared.Checksums;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;

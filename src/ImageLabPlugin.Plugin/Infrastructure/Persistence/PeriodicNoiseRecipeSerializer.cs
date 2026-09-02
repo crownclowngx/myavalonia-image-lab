@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImageLabPlugin.Application.PeriodicNoiseRemoval;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 
 namespace ImageLabPlugin.Infrastructure.Persistence;

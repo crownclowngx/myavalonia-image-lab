@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using ImageLabPlugin.Domain.Shared.Spatial;
 
 namespace ImageLabPlugin.Domain.Convolution;
 

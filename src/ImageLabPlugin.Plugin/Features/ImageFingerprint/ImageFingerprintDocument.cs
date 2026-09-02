@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.Fingerprinting;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.Fingerprinting;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using MyAvaloniaManagement.PluginSdk;
 
 namespace ImageLabPlugin.Features.ImageFingerprint;

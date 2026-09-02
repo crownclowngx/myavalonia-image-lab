@@ -1,7 +1,8 @@
 using System.Security.Cryptography;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Watermarking;
 
@@ -224,6 +225,7 @@ internal sealed class EmbedWatermarkUseCase(
     WatermarkFrameProtocol frameProtocol,
     FrequencyWatermarkCarrier carrier,
     FrequencySpectrumProjector spectrumProjector,
+    FullReferenceQualityAnalyzer qualityAnalyzer,
     IExtractWatermarkUseCase extractor) : IEmbedWatermarkUseCase
 {
     public async Task<EmbedResult> ExecuteAsync(
@@ -247,7 +249,8 @@ internal sealed class EmbedWatermarkUseCase(
         try
         {
             var outputImage = carrier.Embed(source, frame, cancellationToken);
-            var quality = ImageQualityCalculator.Compare(source, outputImage);
+            var qualityFacts = qualityAnalyzer.Analyze(source, outputImage, cancellationToken);
+            var quality = new WatermarkQualityMetrics(qualityFacts.PsnrLumaDb, qualityFacts.GlobalSsimLuma);
             // 差异和频谱只供解释，不参与协议。先限制到 1024 像素边长，避免大图再复制多组全尺寸缓冲区。
             var analysisSource = ImagePreviewProjector.FitWithin(source);
             var analysisOutput = ImagePreviewProjector.FitWithin(outputImage);

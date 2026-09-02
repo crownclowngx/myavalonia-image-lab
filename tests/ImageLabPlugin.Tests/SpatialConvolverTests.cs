@@ -1,5 +1,6 @@
 using ImageLabPlugin.Domain.Convolution;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spatial;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;

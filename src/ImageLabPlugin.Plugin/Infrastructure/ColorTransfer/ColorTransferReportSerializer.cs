@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using ImageLabPlugin.Application.ColorTransfer;
 using ImageLabPlugin.Domain.ColorTransfer;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Infrastructure.ColorTransfer;
 

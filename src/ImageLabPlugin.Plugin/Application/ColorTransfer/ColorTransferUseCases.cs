@@ -1,7 +1,7 @@
 using System.Globalization;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.ColorTransfer;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.ColorTransfer;
 

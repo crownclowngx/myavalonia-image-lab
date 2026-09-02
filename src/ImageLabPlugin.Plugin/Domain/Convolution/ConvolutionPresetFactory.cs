@@ -1,3 +1,5 @@
+using ImageLabPlugin.Domain.Shared.Spatial;
+
 namespace ImageLabPlugin.Domain.Convolution;
 
 /// <summary>以显式分支生成有限 V1 预设，不通过反射发现“滤镜”。</summary>

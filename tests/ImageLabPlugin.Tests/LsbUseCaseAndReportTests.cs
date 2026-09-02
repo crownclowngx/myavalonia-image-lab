@@ -1,9 +1,9 @@
 using System.Text;
 using ImageLabPlugin.Application.LsbSteganography;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Steganography;
 using ImageLabPlugin.Infrastructure.Steganography;
 using Xunit;

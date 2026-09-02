@@ -3,7 +3,7 @@ using System.Text;
 using ImageLabPlugin.Application.HybridImage;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.HybridImage;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
 using Microsoft.Extensions.DependencyInjection;

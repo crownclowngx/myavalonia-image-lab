@@ -1,6 +1,6 @@
 using ImageLabPlugin.Domain.Fingerprinting;
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;

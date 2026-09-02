@@ -1,9 +1,7 @@
 using ImageLabPlugin.Application.Fingerprinting;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
-using ImageLabPlugin.Domain.Watermarking;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 
 namespace ImageLabPlugin.Infrastructure.Fingerprinting;
 
@@ -30,8 +28,13 @@ internal sealed class FingerprintStabilityChannel(
         }
 
         var (operatorKind, parameters) = CreateParameters(source.Size, kind, value);
-        var key = new RobustnessCaseKey(EmbeddingProfileId.Balanced, 0, value, 0);
-        var context = new DeterministicTrialContext(0UL, key, $"fingerprint-{kind}", operatorKind);
+        var context = PerturbationSeedDeriver.FromCanonicalFacts(
+            0UL,
+            2,
+            value,
+            0,
+            $"fingerprint-{kind}",
+            operatorKind);
         var image = await _operators[operatorKind].ApplyAsync(source, parameters, context, cancellationToken).ConfigureAwait(false);
         return new(image, null);
     }

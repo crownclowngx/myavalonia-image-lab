@@ -1,7 +1,7 @@
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SpectralArt;
 
 namespace ImageLabPlugin.Application.SpectralArt;
@@ -125,9 +125,9 @@ internal sealed record SpectralArtResult(
     PixelImage SourceSpectrumPreview,
     PixelImage ResultSpectrumPreview,
     PixelImage SpectrumDifferencePreview,
-    FrequencyDifferenceProjection Difference2X,
-    FrequencyDifferenceProjection Difference4X,
-    FrequencyDifferenceProjection Difference8X,
+    ChannelDifferenceProjection Difference2X,
+    ChannelDifferenceProjection Difference4X,
+    ChannelDifferenceProjection Difference8X,
     FullReferenceQualityMetrics Quality,
     SpectralRawStatistics Raw,
     SpectralFrequencyDiagnostics Frequency,

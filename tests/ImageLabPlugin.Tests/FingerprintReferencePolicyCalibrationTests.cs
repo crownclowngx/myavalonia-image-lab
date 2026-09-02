@@ -1,7 +1,7 @@
 using ImageLabPlugin.Domain.Fingerprinting;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Watermarking;
 using Xunit;
 
@@ -15,9 +15,9 @@ public sealed class FingerprintReferencePolicyCalibrationTests
     {
         var pixels = Enumerable.Range(0, 32 * 32).Select(index => (byte)((index * 29 + (index / 32) * 17 + ((index % 32) * (index / 32))) % 216 + 20)).ToArray();
         var baseline = FingerprintNormalizationTests.GrayImage(32, 32, pixels);
-        var key = new RobustnessCaseKey(EmbeddingProfileId.Balanced, 0, 0, 0);
-        var scaled = await new ScaleOperator().ApplyAsync(baseline, new ScaleParameters(0.75m, 0.75m), new(0, key, "scale", PerturbationKind.Scale), default);
-        var bright = await new BrightnessOperator().ApplyAsync(baseline, new BrightnessParameters(10), new(0, key, "brightness", PerturbationKind.Brightness), default);
+        var key = new RobustnessCaseKey(RobustnessProfileId.Balanced, 0, 0, 0);
+        var scaled = await new ScaleOperator().ApplyAsync(baseline, new ScaleParameters(0.75m, 0.75m), PerturbationTestContext.From(0, key, "scale", PerturbationKind.Scale), default);
+        var bright = await new BrightnessOperator().ApplyAsync(baseline, new BrightnessParameters(10), PerturbationTestContext.From(0, key, "brightness", PerturbationKind.Brightness), default);
         var inverted = FingerprintNormalizationTests.GrayImage(32, 32, pixels.Select(value => (byte)(255 - value)).ToArray());
         var policy = new FingerprintDecisionPolicy(); var calculator = new FingerprintDistanceCalculator();
 

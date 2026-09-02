@@ -1,6 +1,6 @@
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SeamCarving;
 
 namespace ImageLabPlugin.Application.SeamCarving;

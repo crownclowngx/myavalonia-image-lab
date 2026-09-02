@@ -1,5 +1,5 @@
 using ImageLabPlugin.Domain.HybridImage;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.HybridImage;
 

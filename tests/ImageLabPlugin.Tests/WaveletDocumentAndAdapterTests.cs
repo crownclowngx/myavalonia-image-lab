@@ -1,8 +1,8 @@
 using Avalonia.Platform.Storage;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Wavelets;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Domain.Wavelets;
 using ImageLabPlugin.Features.WaveletLab;

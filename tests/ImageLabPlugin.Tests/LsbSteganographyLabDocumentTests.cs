@@ -1,6 +1,6 @@
 using ImageLabPlugin.Application.LsbSteganography;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Steganography;
 using ImageLabPlugin.Features.LsbSteganographyLab;
 using MyAvaloniaManagement.PluginSdk;

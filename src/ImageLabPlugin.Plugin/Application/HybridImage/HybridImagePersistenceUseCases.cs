@@ -1,5 +1,6 @@
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.HybridImage;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.HybridImage;
 
@@ -32,7 +33,7 @@ internal sealed class ExportHybridImageUseCase(IImageCodec codec, IAtomicFileWri
         Verify(targetReadback, result.Composition.Quantized, "目标文件");
     }
 
-    private static void Verify(Domain.Imaging.PixelImage actual, Domain.Imaging.PixelImage expected, string stage)
+    private static void Verify(PixelImage actual, PixelImage expected, string stage)
     {
         if (actual.Size != expected.Size || !actual.Rgba.Span.SequenceEqual(expected.Rgba.Span))
             throw new InvalidOperationException($"PNG {stage}回读与完整尺寸结果不一致。");

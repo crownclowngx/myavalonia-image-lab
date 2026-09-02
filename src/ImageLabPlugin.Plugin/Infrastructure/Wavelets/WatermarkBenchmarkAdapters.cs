@@ -1,5 +1,5 @@
 using ImageLabPlugin.Application.Wavelets;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Domain.Wavelets;
 using ImageLabPlugin.Domain.Robustness;

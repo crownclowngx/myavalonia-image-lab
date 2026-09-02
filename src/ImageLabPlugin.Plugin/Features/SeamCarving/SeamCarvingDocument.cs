@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.SeamCarving;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SeamCarving;
 using MyAvaloniaManagement.PluginSdk;
 

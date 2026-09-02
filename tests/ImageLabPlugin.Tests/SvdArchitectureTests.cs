@@ -49,7 +49,7 @@ public sealed class SvdArchitectureTests
         var root = Root();
         string[] files =
         [
-            "Domain/Imaging/ImageAreaResampler.cs",
+            "Domain/Shared/Imaging/ImageAreaResampler.cs",
             "Domain/SvdDecomposition/SvdModels.cs",
             "Domain/SvdDecomposition/JacobiSvdDecomposer.cs",
             "Domain/SvdDecomposition/SvdAnalysis.cs",

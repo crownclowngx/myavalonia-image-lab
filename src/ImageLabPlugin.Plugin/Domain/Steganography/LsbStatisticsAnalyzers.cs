@@ -1,3 +1,5 @@
+using ImageLabPlugin.Domain.Shared.Imaging;
+
 namespace ImageLabPlugin.Domain.Steganography;
 
 /// <summary>在完全相同的通道、bit、坐标和 Scope 上计算 cover/stego 的教学统计。</summary>
@@ -8,8 +10,8 @@ namespace ImageLabPlugin.Domain.Steganography;
 internal sealed class LsbStatisticsAnalyzer
 {
     public LsbStatisticsComparison Compare(
-        Domain.Imaging.PixelImage cover,
-        Domain.Imaging.PixelImage stego,
+        PixelImage cover,
+        PixelImage stego,
         LsbSlotLayout layout,
         LsbRecipe recipe,
         IReadOnlyList<int> selectedSlots,
@@ -28,8 +30,8 @@ internal sealed class LsbStatisticsAnalyzer
     }
 
     private static IReadOnlyDictionary<LsbChannel, LsbChannelStatisticsComparison> BuildChannelBreakdown(
-        Domain.Imaging.PixelImage cover,
-        Domain.Imaging.PixelImage stego,
+        PixelImage cover,
+        PixelImage stego,
         LsbSlotLayout layout,
         LsbRecipe recipe,
         IReadOnlyList<int> selectedSlots,
@@ -58,7 +60,7 @@ internal sealed class LsbStatisticsAnalyzer
     }
 
     private static LsbStatistics AnalyzeOne(
-        Domain.Imaging.PixelImage image,
+        PixelImage image,
         LsbSlotLayout layout,
         LsbRecipe recipe,
         ScopeSelector selector,
@@ -107,7 +109,7 @@ internal sealed class LsbStatisticsAnalyzer
     }
 
     private static LsbAdjacency CountAdjacency(
-        Domain.Imaging.PixelImage image,
+        PixelImage image,
         LsbSlotLayout layout,
         LsbRecipe recipe,
         ScopeSelector selector,

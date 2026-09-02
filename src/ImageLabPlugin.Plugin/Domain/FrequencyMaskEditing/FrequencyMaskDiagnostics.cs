@@ -1,5 +1,5 @@
 using System.Numerics;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spectral;
 
 namespace ImageLabPlugin.Domain.FrequencyMaskEditing;
 

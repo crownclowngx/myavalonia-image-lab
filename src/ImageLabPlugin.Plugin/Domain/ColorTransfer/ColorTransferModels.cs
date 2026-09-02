@@ -1,5 +1,5 @@
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Comparison;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
 
 namespace ImageLabPlugin.Domain.ColorTransfer;
 

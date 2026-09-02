@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SvdDecomposition;
 
 namespace ImageLabPlugin.Application.SvdDecomposition;

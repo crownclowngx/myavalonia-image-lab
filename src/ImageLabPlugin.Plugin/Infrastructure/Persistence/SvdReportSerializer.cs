@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using ImageLabPlugin.Application.SvdDecomposition;
-using ImageLabPlugin.Domain.Comparison;
+using ImageLabPlugin.Domain.Shared.Analysis;
 using ImageLabPlugin.Domain.SvdDecomposition;
 
 namespace ImageLabPlugin.Infrastructure.Persistence;

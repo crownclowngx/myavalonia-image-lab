@@ -1,4 +1,4 @@
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
 using Xunit;
 

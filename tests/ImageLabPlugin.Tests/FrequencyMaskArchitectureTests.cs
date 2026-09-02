@@ -39,8 +39,8 @@ public sealed class FrequencyMaskArchitectureTests
         var root = FindRepositoryRoot();
         var files = new[]
         {
-            "Domain/Frequency/FrequencyGainMask.cs",
-            "Domain/Frequency/FrequencyMaskApplier.cs",
+            "Domain/Shared/Spectral/FrequencyGainMask.cs",
+            "Domain/Shared/Spectral/FrequencyMaskApplier.cs",
             "Domain/FrequencyMaskEditing/FrequencyMaskModels.cs",
             "Domain/FrequencyMaskEditing/FrequencyMaskRasterizer.cs",
             "Application/FrequencyMaskEditing/FrequencyMaskEditorUseCases.cs",

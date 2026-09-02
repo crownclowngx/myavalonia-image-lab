@@ -310,7 +310,7 @@ internal sealed partial class BitPlaneViewerDocument : ObservableObject, IPersis
         catch { source.Dispose(); throw; }
     }
 
-    private async Task<Bitmap> CreateBitmapAsync(ImageLabPlugin.Domain.Imaging.PixelImage image, CancellationToken token)
+    private async Task<Bitmap> CreateBitmapAsync(ImageLabPlugin.Domain.Shared.Imaging.PixelImage image, CancellationToken token)
     {
         var bytes = await _codec.EncodeAsync(image, ImageOutputFormat.Png, 100, token).ConfigureAwait(false);
         using var stream = new MemoryStream(bytes, writable: false);

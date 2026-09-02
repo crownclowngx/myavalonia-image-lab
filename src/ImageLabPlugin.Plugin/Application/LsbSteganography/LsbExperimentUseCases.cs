@@ -1,8 +1,8 @@
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Steganography;
 using ImageLabPlugin.Infrastructure.Steganography;
 
@@ -128,7 +128,7 @@ internal sealed class RunLsbFragilityUseCase(
     private async ValueTask<PixelImage> ApplyAsync(PixelImage source, PerturbationKind kind, PerturbationParameters parameters, ulong seed, CancellationToken token)
     {
         if (!_operators.TryGetValue(kind, out var implementation)) throw new InvalidOperationException($"未登记复用扰动：{kind.ToStableId()}");
-        return await implementation.ApplyAsync(source, parameters, DeterministicTrialContext.ForStandalone(seed, $"lsb-{kind.ToStableId()}", kind), token).ConfigureAwait(false);
+        return await implementation.ApplyAsync(source, parameters, PerturbationSeedDeriver.ForStandalone(seed, $"lsb-{kind.ToStableId()}", kind), token).ConfigureAwait(false);
     }
 
     private static (PerturbationKind Kind, PerturbationParameters Parameters) ResolvePreset(LsbFragilityPreset preset) => preset switch

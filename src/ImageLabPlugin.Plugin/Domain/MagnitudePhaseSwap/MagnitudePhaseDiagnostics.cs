@@ -1,5 +1,5 @@
 using System.Numerics;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spectral;
 
 namespace ImageLabPlugin.Domain.MagnitudePhaseSwap;
 
@@ -99,7 +99,7 @@ internal sealed class MagnitudePhaseDiagnostics
             MagnitudePhaseMetric.Available(covariance / denominator, "ratio");
     }
 
-    private static MagnitudePhaseMetric Psnr(ImageLabPlugin.Domain.Imaging.PixelImage image, ReadOnlySpan<double> reference)
+    private static MagnitudePhaseMetric Psnr(ImageLabPlugin.Domain.Shared.Imaging.PixelImage image, ReadOnlySpan<double> reference)
     {
         double mse = 0d;
         for (var i = 0; i < reference.Length; i++)
@@ -112,7 +112,7 @@ internal sealed class MagnitudePhaseDiagnostics
         return MagnitudePhaseMetric.Available(10d * Math.Log10((255d * 255d) / mse), "dB");
     }
 
-    private static MagnitudePhaseMetric Ssim(ImageLabPlugin.Domain.Imaging.PixelImage image, ReadOnlySpan<double> reference)
+    private static MagnitudePhaseMetric Ssim(ImageLabPlugin.Domain.Shared.Imaging.PixelImage image, ReadOnlySpan<double> reference)
     {
         var count = reference.Length;
         double meanA = 0d, meanB = Mean(reference);

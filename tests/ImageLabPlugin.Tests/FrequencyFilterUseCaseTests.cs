@@ -1,10 +1,11 @@
 using ImageLabPlugin.Application.FrequencyFiltering;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
+using ImageLabPlugin.Domain.Shared.Analysis;
 using ImageLabPlugin.Domain.Convolution;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spatial;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -92,7 +93,7 @@ public sealed class FrequencyFilterUseCaseTests
         var converter = new ImageChannelConverter();
         return new ApplyFrequencyFilterUseCase(new FrequencyFilterMaskFactory(new RadialFilterResponse()),
             new FrequencyFilterEngine(new FrequencyMaskApplier(new Fft2DTransform(new Fft1DTransform()))), new FrequencySignalProjector(converter),
-            new FrequencyDifferenceProjector(), new FrequencySideEffectAnalyzer(),
+            new ChannelDifferenceProjector(), new FrequencySideEffectAnalyzer(),
             new FullReferenceQualityAnalyzer(new ImagePairValidator()));
     }
 

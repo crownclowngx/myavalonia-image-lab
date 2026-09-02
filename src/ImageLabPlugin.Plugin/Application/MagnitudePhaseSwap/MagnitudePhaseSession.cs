@@ -1,5 +1,5 @@
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.MagnitudePhaseSwap;
 
 namespace ImageLabPlugin.Application.MagnitudePhaseSwap;

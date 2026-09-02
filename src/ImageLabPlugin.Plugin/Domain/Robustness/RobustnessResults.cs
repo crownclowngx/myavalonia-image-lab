@@ -1,10 +1,23 @@
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Watermarking;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using System.Numerics;
-using ImageLabPlugin.Domain.Fingerprinting;
 
 namespace ImageLabPlugin.Domain.Robustness;
+
+internal enum RobustnessDetectionStatus
+{
+    NoSupportedWatermark,
+    DetectedKeyRequired,
+    DetectedReady,
+    RecoveredWithCorrections,
+    RecoveredIntegrityValid,
+    UnsupportedVersionOrProfile,
+    UnrecoverableDamage,
+    AuthenticationFailed,
+    MalformedOrResourceRejected
+}
+
+internal enum RobustnessIntegrityStatus { NotChecked, Valid, Invalid }
 
 internal enum RobustnessFailureReason
 {
@@ -49,8 +62,8 @@ internal sealed record ChannelDiagnostic(
 
 internal sealed record WatermarkDiagnosticResult(
     bool Success,
-    WatermarkDetectionStatus DetectionStatus,
-    IntegrityStatus Integrity,
+    RobustnessDetectionStatus DetectionStatus,
+    RobustnessIntegrityStatus Integrity,
     bool PayloadMatches,
     ChannelDiagnostic? Header,
     ChannelDiagnostic? Data,
@@ -79,10 +92,22 @@ internal sealed record RobustnessCaseResult(
     IReadOnlyList<LocalQualityCell> LocalQuality,
     long? JpegEncodedBytes = null,
     string? OperatorError = null,
-    IReadOnlyList<FingerprintObservation>? FingerprintObservations = null);
+    IReadOnlyList<RobustnessFingerprintObservation>? FingerprintObservations = null);
+
+internal readonly record struct RobustnessFingerprintAlgorithmId(string Value);
+internal readonly record struct RobustnessImageFingerprint(RobustnessFingerprintAlgorithmId AlgorithmId, ulong Bits);
+internal readonly record struct RobustnessFingerprintDistance(int Distance)
+{
+    public double BitSimilarityPercent => 100d * (64 - Distance) / 64d;
+}
+internal sealed record RobustnessFingerprintObservation(
+    RobustnessFingerprintAlgorithmId AlgorithmId,
+    RobustnessImageFingerprint Reference,
+    RobustnessImageFingerprint Candidate,
+    RobustnessFingerprintDistance Distance);
 
 internal sealed record RobustnessCurvePoint(
-    EmbeddingProfileId Profile,
+    RobustnessProfileId Profile,
     decimal ScanValue,
     int CompletedTrials,
     int Successes,
@@ -99,7 +124,7 @@ internal sealed record RobustnessRecipeFacts(
     string ScanParameterId,
     IReadOnlyList<decimal> ScanPoints,
     int TrialCount,
-    IReadOnlyList<EmbeddingProfileId> Profiles,
+    IReadOnlyList<RobustnessProfileId> Profiles,
     bool ProbeEachStep);
 
 internal sealed record RobustnessExperimentReport(

@@ -3,9 +3,10 @@ using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Watermarking;
 using ImageLabPlugin.Application.SpectrumAnalysis;
 using ImageLabPlugin.Application.ImageComparison;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Spatial;
 using ImageLabPlugin.Infrastructure.Cryptography;
 using ImageLabPlugin.Infrastructure.ErrorCorrection;
 using ImageLabPlugin.Infrastructure.Imaging;
@@ -14,8 +15,9 @@ using ImageLabPlugin.Infrastructure.Ui;
 using ImageLabPlugin.Infrastructure.Watermarking;
 using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Infrastructure.Robustness;
+using ImageLabPlugin.Infrastructure.Perturbations;
 using ImageLabPlugin.Application.Fingerprinting;
 using ImageLabPlugin.Domain.Fingerprinting;
 using ImageLabPlugin.Infrastructure.Fingerprinting;
@@ -64,7 +66,11 @@ public static class ImageLabPluginServices
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        AddSharedDomainServices(services);
+        AddSharedImagingServices(services);
+        AddSharedAnalysisServices(services);
+        AddSharedSpectralServices(services);
+        AddSharedSpatialServices(services);
+        AddSharedPerturbationServices(services);
         AddInfrastructurePorts(services);
         AddWatermarkServices(services);
         AddSpectrumServices(services);
@@ -89,19 +95,67 @@ public static class ImageLabPluginServices
         return services;
     }
 
-    /// <summary>登记被多个产品领域复用的图像、DCT 与 FFT 数值基础。</summary>
-    private static void AddSharedDomainServices(IServiceCollection services)
+    private static void AddSharedImagingServices(IServiceCollection services)
     {
-        services.AddSingleton<Dct8x8Transform>();
-        services.AddSingleton<LowFrequencyDctTransform>();
         services.AddSingleton<ImageChannelConverter>();
         services.AddSingleton<ImageAreaResampler>();
         services.AddSingleton<ImageAnalysisProxyProjector>();
+    }
+
+    private static void AddSharedAnalysisServices(IServiceCollection services)
+    {
+        services.AddSingleton<ImagePairValidator>();
+        services.AddSingleton<FullReferenceQualityAnalyzer>();
+        services.AddSingleton<ImageHistogramAnalyzer>();
+        services.AddSingleton<ImageDifferenceProxyAnalyzer>();
+        services.AddSingleton<ImageDifferenceProxyProjector>();
+        services.AddSingleton<DifferenceHeatmapProjector>();
+        services.AddSingleton<ImagePairPixelInspector>();
+        services.AddSingleton<ChannelDifferenceProjector>();
+    }
+
+    private static void AddSharedSpectralServices(IServiceCollection services)
+    {
+        services.AddSingleton<Dct8x8Transform>();
+        services.AddSingleton<LowFrequencyDctTransform>();
         services.AddSingleton<Fft1DTransform>();
         services.AddSingleton<Fft2DTransform>();
         services.AddSingleton<FrequencyInverseTransformer>();
         services.AddSingleton<FrequencyMaskApplier>();
         services.AddSingleton<FrequencyGainSpectrumProjector>();
+        services.AddSingleton<FrequencySpectrumBuilder>();
+        services.AddSingleton<FrequencySpectrumProjector>();
+        services.AddSingleton<SpectrumProjector>();
+        services.AddSingleton<DctSpectrumProjector>();
+        services.AddSingleton<DctBlockAnalyzer>();
+        services.AddSingleton<RadialEnergyAnalyzer>();
+        services.AddSingleton<FrequencyBandMaskFactory>();
+        services.AddSingleton<RadialLogPowerBaseline>();
+    }
+
+    private static void AddSharedSpatialServices(IServiceCollection services) =>
+        services.AddSingleton<SpatialConvolver>();
+
+    private static void AddSharedPerturbationServices(IServiceCollection services)
+    {
+        services.AddSingleton<IImagePerturbationOperator, DeterministicPixelOperator>();
+        services.AddSingleton<IImagePerturbationOperator, GaussianNoiseOperator>();
+        services.AddSingleton<IImagePerturbationOperator, SaltPepperNoiseOperator>();
+        services.AddSingleton<IImagePerturbationOperator, BrightnessOperator>();
+        services.AddSingleton<IImagePerturbationOperator, ContrastOperator>();
+        services.AddSingleton<IImagePerturbationOperator, GammaOperator>();
+        services.AddSingleton<IImagePerturbationOperator, SaturationOperator>();
+        services.AddSingleton<IImagePerturbationOperator, ColorBiasOperator>();
+        services.AddSingleton<IImagePerturbationOperator, GaussianBlurOperator>();
+        services.AddSingleton<IImagePerturbationOperator, MedianBlurOperator>();
+        services.AddSingleton<IImagePerturbationOperator, UnsharpMaskOperator>();
+        services.AddSingleton<IImagePerturbationOperator, ScaleOperator>();
+        services.AddSingleton<IImagePerturbationOperator, CropOperator>();
+        services.AddSingleton<IImagePerturbationOperator, PadOperator>();
+        services.AddSingleton<IImagePerturbationOperator, TranslateOperator>();
+        services.AddSingleton<IImagePerturbationOperator, RotateOperator>();
+        services.AddSingleton<IImagePerturbationOperator, PerspectiveOperator>();
+        services.AddSingleton<IImagePerturbationOperator, JpegReencodeOperator>();
     }
 
     /// <summary>登记 Avalonia、文件系统和安全随机源等领域外端口。</summary>
@@ -146,12 +200,6 @@ public static class ImageLabPluginServices
     /// <summary>登记全局 FFT、分块 DCT、频带分析和频谱投影用例。</summary>
     private static void AddSpectrumServices(IServiceCollection services)
     {
-        services.AddSingleton<FrequencySpectrumProjector>();
-        services.AddSingleton<SpectrumProjector>();
-        services.AddSingleton<DctSpectrumProjector>();
-        services.AddSingleton<DctBlockAnalyzer>();
-        services.AddSingleton<RadialEnergyAnalyzer>();
-        services.AddSingleton<FrequencyBandMaskFactory>();
         services.AddSingleton<IAnalyzeSpectrumUseCase, AnalyzeSpectrumUseCase>();
         services.AddSingleton<IInspectDctBlockUseCase, InspectDctBlockUseCase>();
         services.AddSingleton<IReconstructSpectrumBandUseCase, ReconstructSpectrumBandUseCase>();
@@ -161,13 +209,6 @@ public static class ImageLabPluginServices
     /// <summary>登记同尺寸图像比较、差异投影、指标和摘要导出。</summary>
     private static void AddImageComparisonServices(IServiceCollection services)
     {
-        services.AddSingleton<ImagePairValidator>();
-        services.AddSingleton<FullReferenceQualityAnalyzer>();
-        services.AddSingleton<ImageHistogramAnalyzer>();
-        services.AddSingleton<ImageDifferenceProxyAnalyzer>();
-        services.AddSingleton<ImageDifferenceProxyProjector>();
-        services.AddSingleton<DifferenceHeatmapProjector>();
-        services.AddSingleton<ImagePairPixelInspector>();
         services.AddSingleton<ImageComparisonSummarySerializer>();
         services.AddSingleton<IPrepareImageComparisonUseCase, PrepareImageComparisonUseCase>();
         services.AddSingleton<IProjectImageDifferenceUseCase, ProjectImageDifferenceUseCase>();
@@ -180,24 +221,6 @@ public static class ImageLabPluginServices
     {
         services.AddSingleton<RobustnessRecipeValidator>();
         services.AddSingleton<RobustnessExperimentPlanner>();
-        services.AddSingleton<IImagePerturbationOperator, DeterministicPixelOperator>();
-        services.AddSingleton<IImagePerturbationOperator, GaussianNoiseOperator>();
-        services.AddSingleton<IImagePerturbationOperator, SaltPepperNoiseOperator>();
-        services.AddSingleton<IImagePerturbationOperator, BrightnessOperator>();
-        services.AddSingleton<IImagePerturbationOperator, ContrastOperator>();
-        services.AddSingleton<IImagePerturbationOperator, GammaOperator>();
-        services.AddSingleton<IImagePerturbationOperator, SaturationOperator>();
-        services.AddSingleton<IImagePerturbationOperator, ColorBiasOperator>();
-        services.AddSingleton<IImagePerturbationOperator, GaussianBlurOperator>();
-        services.AddSingleton<IImagePerturbationOperator, MedianBlurOperator>();
-        services.AddSingleton<IImagePerturbationOperator, UnsharpMaskOperator>();
-        services.AddSingleton<IImagePerturbationOperator, ScaleOperator>();
-        services.AddSingleton<IImagePerturbationOperator, CropOperator>();
-        services.AddSingleton<IImagePerturbationOperator, PadOperator>();
-        services.AddSingleton<IImagePerturbationOperator, TranslateOperator>();
-        services.AddSingleton<IImagePerturbationOperator, RotateOperator>();
-        services.AddSingleton<IImagePerturbationOperator, PerspectiveOperator>();
-        services.AddSingleton<IImagePerturbationOperator, JpegReencodeOperator>();
         services.AddSingleton<PerturbationChainExecutor>();
         services.AddSingleton<IWatermarkDiagnosticReader, WatermarkDiagnosticReader>();
         services.AddSingleton<RobustnessReportSerializer>();
@@ -269,7 +292,6 @@ public static class ImageLabPluginServices
         // 卷积领域类均为无状态数学服务；Document/Session 才拥有每实例图片、结果和取消状态。
         services.AddSingleton<ConvolutionKernelParser>();
         services.AddSingleton<ConvolutionPresetFactory>();
-        services.AddSingleton<SpatialConvolver>();
         services.AddSingleton<GradientCombiner>();
         services.AddSingleton<ConvolutionImageProcessor>();
         services.AddSingleton<KernelFrequencyResponseAnalyzer>();
@@ -313,12 +335,10 @@ public static class ImageLabPluginServices
     private static void AddFrequencyFilterServices(IServiceCollection services)
     {
         services.AddSingleton<RadialFilterResponse>();
-        services.AddSingleton<FrequencySpectrumBuilder>();
         services.AddSingleton<FrequencyFilterMaskFactory>();
         services.AddSingleton<FrequencyFilterEngine>();
         services.AddSingleton<FrequencySignalProjector>();
         services.AddSingleton<FrequencySideEffectAnalyzer>();
-        services.AddSingleton<FrequencyDifferenceProjector>();
         services.AddSingleton<FrequencyImpulseResponseFactory>();
         services.AddSingleton<FrequencySpatialComparator>();
         services.AddSingleton<IPrepareFrequencyFilterSessionUseCase, PrepareFrequencyFilterSessionUseCase>();
@@ -349,7 +369,6 @@ public static class ImageLabPluginServices
     /// <summary>登记周期峰检测、共轭陷波、损失诊断和独立导入导出窄用例。</summary>
     private static void AddPeriodicNoiseRemovalServices(IServiceCollection services)
     {
-        services.AddSingleton<RadialLogPowerBaseline>();
         services.AddSingleton<PeriodicPeakRiskAssessor>();
         services.AddSingleton<PeriodicPeakDetector>();
         services.AddSingleton<NotchResponse>();
@@ -487,7 +506,6 @@ public static class ImageLabPluginServices
     /// <summary>登记 Spectral Art 无状态数值服务、平台适配器和窄用例；大频谱只由用例创建的 Session 独占。</summary>
     private static void AddSpectralArtServices(IServiceCollection services)
     {
-        services.AddSingleton<RadialLogPowerBaseline>();
         services.AddSingleton<SpectralPatternNormalizer>();
         services.AddSingleton<SpectralPatternMapper>();
         services.AddSingleton<SpectralPatternPreviewProjector>();

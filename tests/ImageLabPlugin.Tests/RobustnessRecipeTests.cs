@@ -1,4 +1,5 @@
 using ImageLabPlugin.Domain.Robustness;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Domain.Watermarking;
 using Xunit;
 
@@ -17,10 +18,10 @@ public sealed class RobustnessRecipeTests
     public void 相同配方计划案例键顺序和哈希稳定()
     {
         var recipe = Recipe(new ExplicitValueScan([5m, 10m]), trials: 2); var planner = new RobustnessExperimentPlanner(new());
-        var first = planner.Plan(recipe, [EmbeddingProfileId.Robust, EmbeddingProfileId.Stealth]);
-        var second = planner.Plan(recipe, [EmbeddingProfileId.Stealth, EmbeddingProfileId.Robust]);
+        var first = planner.Plan(recipe, [RobustnessProfileId.Robust, RobustnessProfileId.Stealth]);
+        var second = planner.Plan(recipe, [RobustnessProfileId.Stealth, RobustnessProfileId.Robust]);
         Assert.Equal(first.RecipeHash, second.RecipeHash); Assert.Equal(first.Cases.Select(x => x.Key), second.Cases.Select(x => x.Key));
-        Assert.Equal(EmbeddingProfileId.Stealth, first.Cases[0].Key.Profile); Assert.Equal(8, first.Cases.Count);
+        Assert.Equal(RobustnessProfileId.Stealth, first.Cases[0].Key.Profile); Assert.Equal(8, first.Cases.Count);
     }
 
     [Fact]
@@ -28,7 +29,7 @@ public sealed class RobustnessRecipeTests
     {
         var step = new PerturbationStep("same", PerturbationKind.GaussianNoise, true, new GaussianNoiseParameters());
         var recipe = new RobustnessRecipe(1, [step, step], new("same", "sigma", new ExplicitValueScan(Enumerable.Range(0, 101).Select(x => (decimal)x).ToArray())), 20, 1);
-        var result = new RobustnessRecipeValidator().Validate(recipe, [EmbeddingProfileId.Stealth, EmbeddingProfileId.Balanced, EmbeddingProfileId.Robust]);
+        var result = new RobustnessRecipeValidator().Validate(recipe, [RobustnessProfileId.Stealth, RobustnessProfileId.Balanced, RobustnessProfileId.Robust]);
         Assert.False(result.IsValid); Assert.Contains(result.Errors, x => x.Contains("唯一", StringComparison.Ordinal)); Assert.Contains(result.Errors, x => x.Contains("案例数", StringComparison.Ordinal));
     }
 
@@ -36,7 +37,7 @@ public sealed class RobustnessRecipeTests
     public void 未知扫描参数失效安全失败()
     {
         var recipe = Recipe(new ExplicitValueScan([1m])) with { Scan = new("noise", "unknown", new ExplicitValueScan([1m])) };
-        Assert.Throws<ArgumentException>(() => new RobustnessExperimentPlanner(new()).Plan(recipe, [EmbeddingProfileId.Balanced]));
+        Assert.Throws<ArgumentException>(() => new RobustnessExperimentPlanner(new()).Plan(recipe, [RobustnessProfileId.Balanced]));
     }
 
     internal static RobustnessRecipe Recipe(RobustnessScan scan, int trials = 1) => new(1,

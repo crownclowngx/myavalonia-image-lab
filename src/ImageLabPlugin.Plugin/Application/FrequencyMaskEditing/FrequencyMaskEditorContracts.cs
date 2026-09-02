@@ -1,8 +1,8 @@
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.FrequencyMaskEditing;
 
@@ -58,7 +58,7 @@ internal sealed record FrequencyMaskRenderResult(
     PixelImage MaskPreview,
     FrequencyMaskApplicationResult Raw,
     PixelImage Reconstruction,
-    FrequencyDifferenceProjection Difference,
+    ChannelDifferenceProjection Difference,
     FrequencyMaskStatistics MaskStatistics,
     FrequencyMaskRawStatistics RawStatistics,
     FullReferenceQualityMetrics Quality,

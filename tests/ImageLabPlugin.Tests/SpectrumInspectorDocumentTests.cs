@@ -1,8 +1,8 @@
 using System.Text.Json;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.SpectrumAnalysis;
-using ImageLabPlugin.Domain.Frequency;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Spectral;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Features.SpectrumInspector;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;

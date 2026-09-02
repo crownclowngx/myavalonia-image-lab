@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.Convolution;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.Convolution;
 

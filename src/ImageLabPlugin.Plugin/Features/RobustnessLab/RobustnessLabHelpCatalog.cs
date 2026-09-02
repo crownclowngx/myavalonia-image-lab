@@ -1,4 +1,5 @@
 using ImageLabPlugin.Domain.Robustness;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 
 namespace ImageLabPlugin.Features.RobustnessLab;
 

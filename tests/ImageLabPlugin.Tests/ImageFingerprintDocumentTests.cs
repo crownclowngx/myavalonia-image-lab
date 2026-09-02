@@ -1,7 +1,7 @@
 using ImageLabPlugin.Application.Fingerprinting;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.Fingerprinting;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Features.ImageFingerprint;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;

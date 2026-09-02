@@ -3,11 +3,11 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Domain.FrequencyMaskEditing;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.FrequencyMaskEditing;
 
@@ -40,7 +40,7 @@ internal sealed class PrepareFrequencyMaskEditorSessionUseCase(IImageCodec codec
 /// <summary>协调配方重放、共享 IFFT、通道回写和解释性诊断。</summary>
 internal sealed class RenderFrequencyMaskUseCase(FrequencyMaskRasterizer rasterizer, FrequencyMaskApplier applier,
     ImageChannelConverter channelConverter, FrequencyMaskDiagnostics maskDiagnostics,
-    FrequencyDifferenceProjector differenceProjector, FullReferenceQualityAnalyzer qualityAnalyzer)
+    ChannelDifferenceProjector differenceProjector, FullReferenceQualityAnalyzer qualityAnalyzer)
     : IRenderFrequencyMaskUseCase
 {
     public Task<FrequencyMaskRenderResult> ExecuteAsync(FrequencyMaskEditorSession session, FrequencyMaskRecipe recipe,

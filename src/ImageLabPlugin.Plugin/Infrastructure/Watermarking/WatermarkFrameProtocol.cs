@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.ErrorCorrection;
-using ImageLabPlugin.Domain.Checksums;
+using ImageLabPlugin.Domain.Shared.Checksums;
 
 namespace ImageLabPlugin.Infrastructure.Watermarking;
 

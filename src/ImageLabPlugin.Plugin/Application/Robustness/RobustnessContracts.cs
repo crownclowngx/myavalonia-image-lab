@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Robustness;
 using ImageLabPlugin.Domain.Watermarking;
 using ImageLabPlugin.Infrastructure.Watermarking;
@@ -83,7 +83,7 @@ internal interface IRunRobustnessExperimentUseCase
 /// <summary>鲁棒性应用层的窄观测入口；只返回指纹事实，不修改实验结论。</summary>
 internal interface IFingerprintObservationProbe
 {
-    IReadOnlyList<FingerprintObservation> Observe(PixelImage reference, PixelImage candidate, IReadOnlyList<FingerprintAlgorithmId> algorithms, CancellationToken cancellationToken);
+    IReadOnlyList<RobustnessFingerprintObservation> Observe(PixelImage reference, PixelImage candidate, IReadOnlyList<FingerprintAlgorithmId> algorithms, CancellationToken cancellationToken);
 }
 internal interface IWatermarkDiagnosticReader
 {

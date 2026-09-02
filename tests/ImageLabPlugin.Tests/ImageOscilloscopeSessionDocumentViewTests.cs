@@ -5,7 +5,7 @@ using ImageLabPlugin.Application.ImageOscilloscope;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Constants;
 using ImageLabPlugin.Domain.ImageOscilloscope;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Features.ImageOscilloscope;
 using ImageLabPlugin.Plugin;
 using Microsoft.Extensions.DependencyInjection;

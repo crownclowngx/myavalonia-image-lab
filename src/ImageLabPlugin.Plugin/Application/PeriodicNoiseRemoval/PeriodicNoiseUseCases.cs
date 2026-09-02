@@ -1,8 +1,8 @@
 using ImageLabPlugin.Application.Ports;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Spectral;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.PeriodicNoiseRemoval;
 
 namespace ImageLabPlugin.Application.PeriodicNoiseRemoval;
@@ -75,7 +75,7 @@ internal sealed class MapPeriodicSpectrumSelectionUseCase : IMapPeriodicSpectrum
 /// </remarks>
 internal sealed class RenderPeriodicNoisePreviewUseCase(NotchMaskFactory maskFactory,
     FrequencyMaskApplier maskApplier, FrequencyGainSpectrumProjector filteredSpectrumProjector,
-    ImageChannelConverter channelConverter, FrequencyDifferenceProjector differenceProjector,
+    ImageChannelConverter channelConverter, ChannelDifferenceProjector differenceProjector,
     FullReferenceQualityAnalyzer qualityAnalyzer, PeriodicNoiseLossAnalyzer lossAnalyzer)
     : IRenderPeriodicNoisePreviewUseCase
 {

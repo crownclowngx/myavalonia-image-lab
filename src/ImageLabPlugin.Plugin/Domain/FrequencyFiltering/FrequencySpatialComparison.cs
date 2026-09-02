@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
-using ImageLabPlugin.Domain.Convolution;
-using ImageLabPlugin.Domain.Frequency;
+using ImageLabPlugin.Domain.Shared.Spatial;
+using ImageLabPlugin.Domain.Shared.Spectral;
 
 namespace ImageLabPlugin.Domain.FrequencyFiltering;
 

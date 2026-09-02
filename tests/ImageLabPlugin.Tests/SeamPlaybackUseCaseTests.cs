@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using ImageLabPlugin.Application.SeamCarving;
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.SeamCarving;
 using ImageLabPlugin.Infrastructure.SeamCarving;
 using ImageLabPlugin.Application.Ports;

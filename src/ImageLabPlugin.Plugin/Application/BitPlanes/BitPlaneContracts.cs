@@ -1,5 +1,5 @@
 using ImageLabPlugin.Domain.BitPlanes;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.BitPlanes;
 

@@ -112,11 +112,14 @@ internal sealed record ExtractionReport(
     int CorrectedSymbols = 0,
     double Confidence = 0d);
 
+/// <summary>水印写入结果对外保留的两项稳定质量事实。</summary>
+internal readonly record struct WatermarkQualityMetrics(double Psnr, double Ssim);
+
 internal sealed record EmbedResult(
     byte[] EncodedImage,
     byte[] DifferencePreviewPng,
     byte[] SpectrumPreviewPng,
     string OutputFormat,
     CapacityEstimate Capacity,
-    ImageLabPlugin.Domain.Imaging.ImageQualityMetrics Quality,
+    WatermarkQualityMetrics Quality,
     ExtractionReport SelfCheck);

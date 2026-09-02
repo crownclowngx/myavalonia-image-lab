@@ -2,8 +2,8 @@ using ImageLabPlugin.Application.Fingerprinting;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Application.Robustness;
 using ImageLabPlugin.Domain.Fingerprinting;
-using ImageLabPlugin.Domain.Imaging;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Imaging;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 using ImageLabPlugin.Infrastructure.Fingerprinting;
 using Xunit;
 

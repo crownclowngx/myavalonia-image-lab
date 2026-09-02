@@ -1,6 +1,6 @@
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.ImageOscilloscope;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Application.ImageOscilloscope;
 

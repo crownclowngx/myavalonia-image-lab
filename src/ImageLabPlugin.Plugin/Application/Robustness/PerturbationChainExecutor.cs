@@ -1,6 +1,6 @@
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 
 namespace ImageLabPlugin.Application.Robustness;
 
@@ -26,7 +26,14 @@ internal sealed class PerturbationChainExecutor
         {
             token.ThrowIfCancellationRequested();
             if (!_operators.TryGetValue(step.Kind, out var implementation)) throw new InvalidOperationException($"未登记扰动 Strategy：{step.Kind.ToStableId()}");
-            current = await implementation.ApplyAsync(current, step.Parameters, new(experimentSeed, plannedCase.Key, step.StepId, step.Kind), token).ConfigureAwait(false);
+            var executionContext = PerturbationSeedDeriver.FromCanonicalFacts(
+                experimentSeed,
+                (byte)plannedCase.Key.Profile,
+                plannedCase.Key.CanonicalValue,
+                plannedCase.Key.TrialIndex,
+                step.StepId,
+                step.Kind);
+            current = await implementation.ApplyAsync(current, step.Parameters, executionContext, token).ConfigureAwait(false);
             enabledIndex++;
             if (!probeEachStep && enabledIndex < plannedCase.Steps.Count(value => value.Enabled)) continue;
             var diagnostic = probe(current, step, enabledIndex - 1); observations.Add(new(step.StepId, enabledIndex - 1, diagnostic));

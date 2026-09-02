@@ -1,7 +1,7 @@
-using ImageLabPlugin.Domain.Comparison;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Analysis;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Robustness;
-using ImageLabPlugin.Domain.Robustness.Operators;
+using ImageLabPlugin.Domain.Shared.Perturbations;
 
 namespace ImageLabPlugin.Application.Wavelets;
 
@@ -34,9 +34,14 @@ internal sealed class RunWatermarkCarrierBenchmarkUseCase(
                 var current = embedded.Image;
                 foreach (var step in definition.Steps)
                 {
-                    var key = new RobustnessCaseKey(default, definition.Sequence, definition.Sequence, 0);
                     current = await operatorMap[step.Kind].ApplyAsync(current, step.Parameters,
-                        new(0x574156454c4554ul, key, step.StepId, step.Kind), cancellationToken).ConfigureAwait(false);
+                        PerturbationSeedDeriver.FromCanonicalFacts(
+                            0x574156454c4554ul,
+                            0,
+                            definition.Sequence,
+                            0,
+                            step.StepId,
+                            step.Kind), cancellationToken).ConfigureAwait(false);
                 }
                 var read = await carrier.ReadAsync(current, embedded, payload, cancellationToken).ConfigureAwait(false);
                 results.Add(new(definition.Id, carrier.CarrierId, read.IntegrityValid, read.Confidence, read.RawBitErrorRate,

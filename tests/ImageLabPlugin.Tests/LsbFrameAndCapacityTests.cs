@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
-using ImageLabPlugin.Domain.Checksums;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Checksums;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Steganography;
 using Xunit;
 

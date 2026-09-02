@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 
 namespace ImageLabPlugin.Domain.Steganography;
 

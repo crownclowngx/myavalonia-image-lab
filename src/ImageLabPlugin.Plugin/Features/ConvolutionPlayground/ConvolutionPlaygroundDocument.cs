@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.Convolution;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.Convolution;
+using ImageLabPlugin.Domain.Shared.Spatial;
 using MyAvaloniaManagement.PluginSdk;
 
 namespace ImageLabPlugin.Features.ConvolutionPlayground;
@@ -364,7 +365,7 @@ internal sealed partial class ConvolutionPlaygroundDocument : ObservableObject, 
     partial void OnIsFullBusyChanged(bool value) => OnPropertyChanged(nameof(IsOperationBusy));
     partial void OnIsExportingChanged(bool value) => OnPropertyChanged(nameof(IsOperationBusy));
 
-    private async Task<Bitmap> CreateBitmapAsync(ImageLabPlugin.Domain.Imaging.PixelImage image, CancellationToken token)
+    private async Task<Bitmap> CreateBitmapAsync(ImageLabPlugin.Domain.Shared.Imaging.PixelImage image, CancellationToken token)
     {
         var bytes = await _codec.EncodeAsync(image, ImageOutputFormat.Png, 100, token).ConfigureAwait(false);
         using var stream = new MemoryStream(bytes, writable: false); return new Bitmap(stream);

@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using ImageLabPlugin.Application.FrequencyFiltering;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.FrequencyFiltering;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using MyAvaloniaManagement.PluginSdk;
 
 namespace ImageLabPlugin.Features.FrequencyFilter;

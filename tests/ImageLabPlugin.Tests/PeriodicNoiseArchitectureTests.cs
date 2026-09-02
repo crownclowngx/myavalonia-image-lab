@@ -41,7 +41,7 @@ public sealed class PeriodicNoiseArchitectureTests
         var files = new[]
         {
             "Domain/PeriodicNoiseRemoval/PeriodicNoiseModels.cs",
-            "Domain/Frequency/RadialLogPowerBaseline.cs",
+            "Domain/Shared/Spectral/RadialLogPowerBaseline.cs",
             "Domain/PeriodicNoiseRemoval/PeriodicPeakDetector.cs",
             "Domain/PeriodicNoiseRemoval/NotchMaskFactory.cs",
             "Domain/PeriodicNoiseRemoval/PeriodicNoiseLossAnalyzer.cs",

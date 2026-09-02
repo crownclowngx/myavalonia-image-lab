@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Domain.Steganography;
 
 namespace ImageLabPlugin.Application.LsbSteganography;

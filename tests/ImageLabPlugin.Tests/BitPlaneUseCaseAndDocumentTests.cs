@@ -1,7 +1,7 @@
 using ImageLabPlugin.Application.BitPlanes;
 using ImageLabPlugin.Application.Ports;
 using ImageLabPlugin.Domain.BitPlanes;
-using ImageLabPlugin.Domain.Imaging;
+using ImageLabPlugin.Domain.Shared.Imaging;
 using ImageLabPlugin.Features.BitPlaneViewer;
 using MyAvaloniaManagement.PluginSdk;
 using Xunit;
