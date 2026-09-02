@@ -109,7 +109,7 @@ Domain/SpectralArt
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、文字栅格、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码/字体、平台密码学、Host 文件交互、JSON 与磁盘发布。十九个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、文字栅格、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码/字体、平台密码学、Host 文件交互、JSON 与磁盘发布。二十个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -122,6 +122,7 @@ Domain/SpectralArt
 - 所有输出保持原始尺寸和 Alpha；源 `PixelImage` 不被原地修改。
 - 频谱 Session 只缓存一份只读复数频谱；重建使用一份短生命周期工作副本，不建立滤镜注册中心、万能图像服务或全局可变缓存。
 - Spectral Art Session 独占源图、Y 平面和只读频谱；一次 Render 只创建一个完整工作 `Complex[]`，全部频域诊断后由 IFFT 原地消费。Pattern、recipe、serializer 和成功语义保持产品专用。
+- Magnitude/Phase Session 独占两张规范亮度画布和两张只读频谱；一次实验只创建一个结果工作 `Complex[]`，先投影/记录能量再由 IFFT 原地消费。画布、Recipe、圆周插值和供体诊断保持产品专用。
 - 频谱遮罩历史保存最多 128 条操作描述而非完整 `double[]`；导入只接受严格 Recipe 并重新光栅化，不信任外部增益数组。
 - 比较 Session 由单个 scoped Document 独占，两张全图长期保留；两张显示代理、基础差异场和当前投影最大边均为 1024。
 - 质量统计按行确定性扫描，仅保留常量个累加器，不再为两张图创建全尺寸 `double[]` 亮度平面。
@@ -140,3 +141,7 @@ Domain/SpectralArt
 ## 扩展规则
 
 后续工具只有满足以下条件才可把能力提升到公共领域：至少两个产品用例需要；语义不包含某个 UI 或协议；可以用纯数值测试验证；内存所有权明确。否则先留在具体 Feature/Watermarking 内部。
+
+## 幅相交换的产品专用边界
+
+Magnitude/Phase Swap 已按[专用实现与证据入口](../magnitude-phase-swap/README.md)落地，只复用现有公共 FFT/IFFT、频谱形状和显示尺度；规范双画布、分量 Recipe、相位插值、供体诊断与 Session 保留在产品专用 `Domain/MagnitudePhaseSwap` 和 `Application/MagnitudePhaseSwap`。只有出现第二个真实消费者并通过独立数值门禁，才允许把其中的语义中立部分提升到公共 Frequency/Imaging，不能为了减少文件数建立万能频域引擎。

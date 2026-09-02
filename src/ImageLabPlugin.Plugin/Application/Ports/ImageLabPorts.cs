@@ -136,6 +136,17 @@ internal interface IHybridImageFileDialog
     Task<string?> PickHybridReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
 }
 
+/// <summary>幅相交换只暴露双输入、规范结果、独立配方与脱敏报告的文件意图。</summary>
+internal interface IMagnitudePhaseFileDialog
+{
+    Task<string?> PickMagnitudePhaseInputAsync(string role, CancellationToken cancellationToken);
+    Task<string?> PickMagnitudePhaseResultPngAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickMagnitudePhaseRecipeInputAsync(CancellationToken cancellationToken);
+    Task<string?> PickMagnitudePhaseRecipeOutputAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickMagnitudePhaseReportJsonAsync(string suggestedName, CancellationToken cancellationToken);
+    Task<string?> PickMagnitudePhaseReportCsvAsync(string suggestedName, CancellationToken cancellationToken);
+}
+
 /// <summary>LSB 二进制载荷的有界读取端口；实现必须在读取前后都执行 64 KiB 门禁。</summary>
 internal interface ILsbPayloadFileReader
 {

@@ -18,6 +18,7 @@ using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
 using ImageLabPlugin.Features.SpectralArt;
 using ImageLabPlugin.Features.HybridImage;
+using ImageLabPlugin.Features.MagnitudePhaseSwap;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 
@@ -44,6 +45,7 @@ public sealed partial class MainWindow : Window
     private IServiceScope? _poissonBlendingScope;
     private IServiceScope? _spectralArtScope;
     private IServiceScope? _hybridImageScope;
+    private IServiceScope? _magnitudePhaseScope;
 
     public MainWindow()
     {
@@ -71,6 +73,7 @@ public sealed partial class MainWindow : Window
         _poissonBlendingScope = services.CreateScope();
         _spectralArtScope = services.CreateScope();
         _hybridImageScope = services.CreateScope();
+        _magnitudePhaseScope = services.CreateScope();
         var embedDocument = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedDocument>();
         var embedView = _embedScope.ServiceProvider.GetRequiredService<WatermarkEmbedView>();
         var inspectDocument = _inspectScope.ServiceProvider.GetRequiredService<WatermarkInspectDocument>();
@@ -109,6 +112,8 @@ public sealed partial class MainWindow : Window
         var spectralArtView = _spectralArtScope.ServiceProvider.GetRequiredService<SpectralArtView>();
         var hybridImageDocument = _hybridImageScope.ServiceProvider.GetRequiredService<HybridImageDocument>();
         var hybridImageView = _hybridImageScope.ServiceProvider.GetRequiredService<HybridImageView>();
+        var magnitudePhaseDocument = _magnitudePhaseScope.ServiceProvider.GetRequiredService<MagnitudePhaseSwapDocument>();
+        var magnitudePhaseView = _magnitudePhaseScope.ServiceProvider.GetRequiredService<MagnitudePhaseSwapView>();
         embedDocument.InitializeAsync(new NewDocumentActivation("水印写入"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         inspectDocument.InitializeAsync(new NewDocumentActivation("提取与验证"), CancellationToken.None)
@@ -146,6 +151,8 @@ public sealed partial class MainWindow : Window
         spectralArtDocument.InitializeAsync(new NewDocumentActivation("频谱艺术"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         hybridImageDocument.InitializeAsync(new NewDocumentActivation("混合图像"), CancellationToken.None)
+            .AsTask().GetAwaiter().GetResult();
+        magnitudePhaseDocument.InitializeAsync(new NewDocumentActivation("幅度与相位交换"), CancellationToken.None)
             .AsTask().GetAwaiter().GetResult();
         embedView.DataContext = embedDocument;
         inspectView.DataContext = inspectDocument;
@@ -185,6 +192,8 @@ public sealed partial class MainWindow : Window
         SpectralArtPreview.Content = spectralArtView;
         hybridImageView.DataContext = hybridImageDocument;
         HybridImagePreview.Content = hybridImageView;
+        magnitudePhaseView.DataContext = magnitudePhaseDocument;
+        MagnitudePhasePreview.Content = magnitudePhaseView;
         Closed += (_, _) =>
         {
             embedDocument.Dispose();
@@ -206,6 +215,7 @@ public sealed partial class MainWindow : Window
             poissonBlendingDocument.Dispose();
             spectralArtDocument.Dispose();
             hybridImageDocument.Dispose();
+            magnitudePhaseDocument.Dispose();
             _embedScope?.Dispose();
             _inspectScope?.Dispose();
             _spectrumScope?.Dispose();
@@ -225,6 +235,7 @@ public sealed partial class MainWindow : Window
             _poissonBlendingScope?.Dispose();
             _spectralArtScope?.Dispose();
             _hybridImageScope?.Dispose();
+            _magnitudePhaseScope?.Dispose();
             _embedScope = null;
             _inspectScope = null;
             _spectrumScope = null;
@@ -244,6 +255,7 @@ public sealed partial class MainWindow : Window
             _poissonBlendingScope = null;
             _spectralArtScope = null;
             _hybridImageScope = null;
+            _magnitudePhaseScope = null;
         };
     }
 }

@@ -1,0 +1,76 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.MagnitudePhaseSwap.MagnitudePhaseSwapView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.MagnitudePhaseSwap"
+    x:DataType="vm:MagnitudePhaseSwapDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
+    <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10">
+      <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto" ColumnSpacing="8">
+          <TextBlock VerticalAlignment="Center" Text="双输入" FontWeight="SemiBold" />
+          <TextBox Grid.Column="1" Text="{Binding PathA}" PlaceholderText="图像 A" />
+          <Button Grid.Column="2" Command="{Binding SelectACommand}" Content="选择 A" />
+          <TextBox Grid.Column="3" Text="{Binding PathB}" PlaceholderText="图像 B" />
+          <Button Grid.Column="4" Command="{Binding SelectBCommand}" Content="选择 B" />
+        </Grid>
+        <WrapPanel Grid.Row="1">
+          <TextBlock Margin="0,6,6,0" VerticalAlignment="Center" Text="规范画布" />
+          <ComboBox Width="90" Margin="0,0,8,0" ItemsSource="{Binding CanvasSizes}" SelectedItem="{Binding CanvasSize}" />
+          <Button Margin="0,0,8,0" Command="{Binding PrepareCommand}" Content="1. 准备 A/B" />
+          <Button Margin="0,0,8,0" Command="{Binding SwapInputsCommand}" Content="交换角色" />
+          <ComboBox Width="210" Margin="0,0,8,0" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}" />
+          <TextBlock Margin="0,6,4,0" VerticalAlignment="Center" Text="t" IsVisible="{Binding UsesInterpolation}" />
+          <NumericUpDown Width="90" Margin="0,0,8,0" Minimum="0" Maximum="1" Increment="0.05" Value="{Binding Amount}" IsVisible="{Binding UsesInterpolation}" />
+          <Button Margin="0,0,8,0" Command="{Binding RunExperimentCommand}" Content="2. 运行实验" />
+          <Button Margin="0,0,8,0" Command="{Binding CancelCommand}" Content="取消" />
+          <ProgressBar Width="110" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+        </WrapPanel>
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,320" ColumnSpacing="10">
+      <TabControl SelectedIndex="{Binding SelectedPageIndex}">
+        <TabItem Header="联动总览">
+          <Grid RowDefinitions="*,*" ColumnDefinitions="*,*,*" RowSpacing="8" ColumnSpacing="8">
+            <Border BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="规范 A（白底 BT.601）" /><Image Grid.Row="1" Source="{Binding CanvasAPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="规范 B（白底 BT.601）" /><Image Grid.Row="1" Source="{Binding CanvasBPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="2" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="当前重建" /><Image Grid.Row="1" Source="{Binding ResultPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="A 幅度谱（共享量程）" /><Image Grid.Row="1" Source="{Binding MagnitudeAPreview}" Stretch="Uniform" PointerMoved="OnSpectrumPointerMoved" /></Grid></Border>
+            <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="B 幅度谱（共享量程）" /><Image Grid.Row="1" Source="{Binding MagnitudeBPreview}" Stretch="Uniform" PointerMoved="OnSpectrumPointerMoved" /></Grid></Border>
+            <Border Grid.Row="1" Grid.Column="2" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="结果幅度谱（同一量程）" /><Image Grid.Row="1" Source="{Binding ResultMagnitudePreview}" Stretch="Uniform" PointerMoved="OnSpectrumPointerMoved" /></Grid></Border>
+          </Grid>
+        </TabItem>
+        <TabItem Header="相位与无数据">
+          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+            <Border BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="A 相位（棋盘=无数据）" /><Image Grid.Row="1" Source="{Binding PhaseAPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="B 相位（棋盘=无数据）" /><Image Grid.Row="1" Source="{Binding PhaseBPreview}" Stretch="Uniform" /></Grid></Border>
+            <Border Grid.Column="2" BorderThickness="1" BorderBrush="Gray"><Grid RowDefinitions="Auto,*"><TextBlock Margin="6" Text="结果相位" /><Image Grid.Row="1" Source="{Binding ResultPhasePreview}" Stretch="Uniform" /></Grid></Border>
+          </Grid>
+        </TabItem>
+      </TabControl>
+
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="10">
+          <TextBlock Text="指标与解释" FontWeight="Bold" />
+          <TextBlock Text="{Binding DiagnosticLabel}" Foreground="Orange" FontWeight="Bold" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding MetricsSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="供体误差描述频域是否按配方组合；NCC、梯度、PSNR 与 SSIM 描述空间相似性。它们不构成‘相位必然决定结构’的因果结论。" TextWrapping="Wrap" />
+          <CheckBox IsChecked="{Binding SynchronizedZoom}" Content="同步缩放（参数快照）" />
+          <CheckBox IsChecked="{Binding MetricsVisible}" Content="显示指标面板（参数快照）" />
+          <Separator />
+          <TextBlock Text="导入与导出" FontWeight="Bold" />
+          <Button Command="{Binding ImportRecipeCommand}" Content="导入严格配方" />
+          <Button Command="{Binding ExportRecipeCommand}" Content="导出配方" />
+          <Button Command="{Binding ExportImageCommand}" Content="导出当前规范 PNG" />
+          <Button Command="{Binding ExportReportJsonCommand}" Content="导出脱敏 JSON 报告" />
+          <Button Command="{Binding ExportReportCsvCommand}" Content="导出脱敏 CSV 报告" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <TextBlock Grid.Row="2" Text="phase-only 使用固定 P99.5 零中心科学投影并将 PSNR/SSIM 标为 N/A；普通结果只做物理裁切，不自动拉伸。" TextWrapping="Wrap" />
+  </Grid>
+</UserControl>

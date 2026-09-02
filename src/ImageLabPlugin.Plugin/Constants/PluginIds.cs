@@ -80,4 +80,8 @@ public static class PluginIds
     /// <summary>“Hybrid Image／混合图像”双图对齐与频率混合实验的多实例持久身份。</summary>
     public static readonly DocumentTypeId HybridImageDocument =
         new("myavalonia.plugin.image.lab.document.hybrid-image");
+
+    /// <summary>“幅度与相位交换”双输入 FFT 分量实验的多实例持久身份。</summary>
+    public static readonly DocumentTypeId MagnitudePhaseSwapDocument =
+        new("myavalonia.plugin.image.lab.document.magnitude-phase-swap");
 }

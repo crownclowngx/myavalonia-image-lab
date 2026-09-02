@@ -63,5 +63,8 @@
     <TabItem Header="混合图像">
       <ContentControl x:Name="HybridImagePreview" />
     </TabItem>
+    <TabItem Header="幅度与相位交换">
+      <ContentControl x:Name="MagnitudePhasePreview" />
+    </TabItem>
   </TabControl>
 </Window>

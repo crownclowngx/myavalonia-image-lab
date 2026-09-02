@@ -50,6 +50,8 @@ using ImageLabPlugin.Application.SpectralArt;
 using ImageLabPlugin.Domain.SpectralArt;
 using ImageLabPlugin.Application.HybridImage;
 using ImageLabPlugin.Domain.HybridImage;
+using ImageLabPlugin.Application.MagnitudePhaseSwap;
+using ImageLabPlugin.Domain.MagnitudePhaseSwap;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -80,6 +82,7 @@ public static class ImageLabPluginServices
         AddPoissonBlendingServices(services);
         AddSpectralArtServices(services);
         AddHybridImageServices(services);
+        AddMagnitudePhaseServices(services);
         return services;
     }
 
@@ -120,6 +123,7 @@ public static class ImageLabPluginServices
         services.AddSingleton<IPoissonBlendingFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ISpectralArtFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<IHybridImageFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
+        services.AddSingleton<IMagnitudePhaseFileDialog>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextClipboard>(static provider => provider.GetRequiredService<AvaloniaImageLabFileDialog>());
         services.AddSingleton<ITextFileReader, BoundedTextFileReader>();
     }
@@ -526,5 +530,29 @@ public static class ImageLabPluginServices
         services.AddSingleton<IImportHybridRecipeUseCase, ImportHybridRecipeUseCase>();
         services.AddSingleton<IExportHybridRecipeUseCase, ExportHybridRecipeUseCase>();
         services.AddSingleton<IExportHybridReportUseCase, ExportHybridReportUseCase>();
+    }
+
+    /// <summary>登记幅相交换固定数值服务、严格协议与窄应用用例。</summary>
+    private static void AddMagnitudePhaseServices(IServiceCollection services)
+    {
+        // 固定算法没有运行期替代实现，使用 sealed singleton；只在文件与层间边界保留接口。
+        services.AddSingleton<FrequencyPairCanvasProjector>();
+        services.AddSingleton<MagnitudePhaseSpectrumBuilder>();
+        services.AddSingleton<MagnitudePhaseSpectrumProjector>();
+        services.AddSingleton<SpectrumComponentMixer>();
+        services.AddSingleton<MagnitudePhaseReconstructor>();
+        services.AddSingleton<MagnitudePhaseDisplayProjector>();
+        services.AddSingleton<MagnitudePhaseDiagnostics>();
+        services.AddSingleton<MagnitudePhaseResourceEstimator>();
+        services.AddSingleton<IMagnitudePhaseRecipeSerializer, MagnitudePhaseRecipeSerializer>();
+        services.AddSingleton<IMagnitudePhaseReportSerializer, MagnitudePhaseReportSerializer>();
+        services.AddSingleton<IMagnitudePhaseSnapshotSerializer, MagnitudePhaseSnapshotSerializer>();
+        services.AddSingleton<IPrepareMagnitudePhasePairUseCase, PrepareMagnitudePhasePairUseCase>();
+        services.AddSingleton<IRenderMagnitudePhaseExperimentUseCase, RenderMagnitudePhaseExperimentUseCase>();
+        services.AddSingleton<IInspectMagnitudePhasePointUseCase, InspectMagnitudePhasePointUseCase>();
+        services.AddSingleton<IExportMagnitudePhaseImageUseCase, ExportMagnitudePhaseImageUseCase>();
+        services.AddSingleton<IImportMagnitudePhaseRecipeUseCase, ImportMagnitudePhaseRecipeUseCase>();
+        services.AddSingleton<IExportMagnitudePhaseRecipeUseCase, ExportMagnitudePhaseRecipeUseCase>();
+        services.AddSingleton<IExportMagnitudePhaseReportUseCase, ExportMagnitudePhaseReportUseCase>();
     }
 }

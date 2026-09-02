@@ -19,6 +19,7 @@ using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.PoissonBlending;
 using ImageLabPlugin.Features.SpectralArt;
 using ImageLabPlugin.Features.HybridImage;
+using ImageLabPlugin.Features.MagnitudePhaseSwap;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -144,6 +145,13 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.HybridImageDocument,
                 "混合图像",
                 "以控制点对齐、Gaussian 低高频和真实多尺度预览实验近看／远看主体切换",
+                "图像分析"));
+        // 幅相交换只在既有十九个稳定身份之后追加；旧 ID、顺序和零 Tool 约束保持不变。
+        registration.AddPersistableDocument<MagnitudePhaseSwapDocument, MagnitudePhaseSwapView>(
+            new DocumentDescriptor(
+                PluginIds.MagnitudePhaseSwapDocument,
+                "幅度与相位交换",
+                "交换或插值两张图片 FFT 的幅度与相位并联动观察重建",
                 "图像分析"));
     }
 }
