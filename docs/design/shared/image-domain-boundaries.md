@@ -109,7 +109,7 @@ Domain/SpectralArt
 
 ## 依赖方向
 
-`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、文字栅格、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码/字体、平台密码学、Host 文件交互、JSON 与磁盘发布。二十个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
+`Domain` 不依赖 Avalonia、文件系统、JSON、DI 或密码库。`Application` 通过图片、文字栅格、报告、剪贴板和原子写入窄端口协调领域对象。`Infrastructure` 才接入 Avalonia 编解码/字体、平台密码学、Host 文件交互、JSON 与磁盘发布。二十一个 Document 依赖应用用例接口，不直接执行像素扫描、FFT、DCT、卷积、聚类、颜色迁移、BER、加密或文件编码。
 
 该方向满足 SOLID 中的单一职责、接口隔离与依赖倒置：新增频谱查看器可以复用 `PixelImage`、`LumaPlane` 与 DCT；新增水印算法必须进入自己的 Watermarking 领域，不能把算法路由塞进 Imaging。
 
@@ -145,3 +145,7 @@ Domain/SpectralArt
 ## 幅相交换的产品专用边界
 
 Magnitude/Phase Swap 已按[专用实现与证据入口](../magnitude-phase-swap/README.md)落地，只复用现有公共 FFT/IFFT、频谱形状和显示尺度；规范双画布、分量 Recipe、相位插值、供体诊断与 Session 保留在产品专用 `Domain/MagnitudePhaseSwap` 和 `Application/MagnitudePhaseSwap`。只有出现第二个真实消费者并通过独立数值门禁，才允许把其中的语义中立部分提升到公共 Frequency/Imaging，不能为了减少文件数建立万能频域引擎。
+
+## 图像示波器的产品专用边界
+
+Image Oscilloscope 已按[专用实现与证据入口](../image-oscilloscope/README.md)落地，只复用公共 `PixelImage`、`ImageSize` 与图片解码端口。白底 Scope 颜色协议、Waveform/Parade/Vectorscope 计数栅格、P99.5 密度投影、裁切覆盖层、参考目标、探针坐标和 Session 保留在产品专用 `Domain/ImageOscilloscope` 与 `Application/ImageOscilloscope`。这些类型不会反向进入公共 Imaging；只有第二个真实产品需要完全相同且语义中立的数值协议时，才评估提升，不能为表面复用建立万能 Scope Engine。

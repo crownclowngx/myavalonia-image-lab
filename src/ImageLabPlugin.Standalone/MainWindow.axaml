@@ -66,5 +66,8 @@
     <TabItem Header="幅度与相位交换">
       <ContentControl x:Name="MagnitudePhasePreview" />
     </TabItem>
+    <TabItem Header="图像示波器">
+      <ContentControl x:Name="ImageOscilloscopePreview" />
+    </TabItem>
   </TabControl>
 </Window>

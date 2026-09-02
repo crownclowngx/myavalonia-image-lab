@@ -20,6 +20,7 @@ using ImageLabPlugin.Features.PoissonBlending;
 using ImageLabPlugin.Features.SpectralArt;
 using ImageLabPlugin.Features.HybridImage;
 using ImageLabPlugin.Features.MagnitudePhaseSwap;
+using ImageLabPlugin.Features.ImageOscilloscope;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -152,6 +153,13 @@ public sealed class ImageLabPluginModule : IPluginModule
                 PluginIds.MagnitudePhaseSwapDocument,
                 "幅度与相位交换",
                 "交换或插值两张图片 FFT 的幅度与相位并联动观察重建",
+                "图像分析"));
+        // 图像示波器只在既有二十个稳定身份之后追加；旧 ID、顺序和零 Tool 约束保持不变。
+        registration.AddPersistableDocument<ImageOscilloscopeDocument, ImageOscilloscopeView>(
+            new DocumentDescriptor(
+                PluginIds.ImageOscilloscopeDocument,
+                "图像示波器",
+                "用全图 Waveform、RGB Parade、Vectorscope、直方图与探针观察静态图片信号",
                 "图像分析"));
     }
 }

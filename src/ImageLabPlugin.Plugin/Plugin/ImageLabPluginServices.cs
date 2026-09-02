@@ -52,6 +52,8 @@ using ImageLabPlugin.Application.HybridImage;
 using ImageLabPlugin.Domain.HybridImage;
 using ImageLabPlugin.Application.MagnitudePhaseSwap;
 using ImageLabPlugin.Domain.MagnitudePhaseSwap;
+using ImageLabPlugin.Application.ImageOscilloscope;
+using ImageLabPlugin.Domain.ImageOscilloscope;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -83,6 +85,7 @@ public static class ImageLabPluginServices
         AddSpectralArtServices(services);
         AddHybridImageServices(services);
         AddMagnitudePhaseServices(services);
+        AddImageOscilloscopeServices(services);
         return services;
     }
 
@@ -554,5 +557,24 @@ public static class ImageLabPluginServices
         services.AddSingleton<IImportMagnitudePhaseRecipeUseCase, ImportMagnitudePhaseRecipeUseCase>();
         services.AddSingleton<IExportMagnitudePhaseRecipeUseCase, ExportMagnitudePhaseRecipeUseCase>();
         services.AddSingleton<IExportMagnitudePhaseReportUseCase, ExportMagnitudePhaseReportUseCase>();
+    }
+
+    /// <summary>登记图像示波器固定数值服务和四个窄应用用例；大数组只由每个 Document 的 Session 独占。</summary>
+    private static void AddImageOscilloscopeServices(IServiceCollection services)
+    {
+        // 固定颜色与坐标协议不存在运行期替换者，因此直接登记 sealed 服务，不制造策略目录或工厂。
+        services.AddSingleton<OscilloscopeColorConverter>();
+        services.AddSingleton<ImageOscilloscopeAnalyzer>();
+        services.AddSingleton<ClippingAnalyzer>();
+        services.AddSingleton<ImageOscilloscopePreviewProjector>();
+        services.AddSingleton<ScopeDensityProjector>();
+        services.AddSingleton<ImageOscilloscopeRasterizer>();
+        services.AddSingleton<ScopeProbeMapper>();
+        services.AddSingleton<ImageProbeCoordinateMapper>();
+        services.AddSingleton<VectorscopeReferenceTargetProvider>();
+        services.AddSingleton<IPrepareImageOscilloscopeSessionUseCase, PrepareImageOscilloscopeSessionUseCase>();
+        services.AddSingleton<IRecalculateImageOscilloscopeClippingUseCase, RecalculateImageOscilloscopeClippingUseCase>();
+        services.AddSingleton<IProjectImageOscilloscopeDisplayUseCase, ProjectImageOscilloscopeDisplayUseCase>();
+        services.AddSingleton<IInspectImageOscilloscopePixelUseCase, InspectImageOscilloscopePixelUseCase>();
     }
 }

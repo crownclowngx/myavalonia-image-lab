@@ -1,0 +1,104 @@
+<UserControl
+    x:Class="ImageLabPlugin.Features.ImageOscilloscope.ImageOscilloscopeView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:ImageLabPlugin.Features.ImageOscilloscope"
+    x:DataType="vm:ImageOscilloscopeDocument">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="10">
+    <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" Padding="10">
+      <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+          <TextBlock VerticalAlignment="Center" Text="静态图片" FontWeight="SemiBold" />
+          <TextBox Grid.Column="1" Text="{Binding SourcePath}" PlaceholderText="选择 PNG/JPEG" />
+          <Button Grid.Column="2" Command="{Binding SelectSourceCommand}" Content="选择图片" />
+          <Button Grid.Column="3" Command="{Binding AnalyzeCommand}" Content="分析全部像素" />
+          <Button Grid.Column="4" Command="{Binding CancelCommand}" Content="取消" />
+        </Grid>
+        <WrapPanel Grid.Row="1">
+          <TextBlock Margin="0,6,4,0" Text="密度" />
+          <ComboBox Width="90" Margin="0,0,10,0" ItemsSource="{Binding DensityModes}" SelectedItem="{Binding SelectedDensityMode}" />
+          <TextBlock Margin="0,6,4,0" Text="阴影 ≤" />
+          <NumericUpDown Width="120" MinWidth="120" Margin="0,0,8,0" Minimum="0" Maximum="254" Increment="1" Value="{Binding ShadowThreshold}" />
+          <TextBlock Margin="0,6,4,0" Text="高光 ≥" />
+          <NumericUpDown Width="120" MinWidth="120" Margin="0,0,8,0" Minimum="1" Maximum="255" Increment="1" Value="{Binding HighlightThreshold}" />
+          <TextBlock Margin="0,6,4,0" Text="覆盖层" />
+          <ComboBox Width="150" Margin="0,0,10,0" ItemsSource="{Binding ClippingModes}" SelectedItem="{Binding SelectedClippingMode}" />
+          <Button Margin="0,0,10,0" Command="{Binding ClearPinnedProbeCommand}" Content="清除固定探针" />
+          <ProgressBar Width="120" IsIndeterminate="True" IsVisible="{Binding IsOperationBusy}" />
+        </WrapPanel>
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="360,*" ColumnSpacing="10">
+      <ScrollViewer>
+        <StackPanel Spacing="8">
+          <TextBlock Text="源图与裁切诊断（白底合成）" FontWeight="Bold" />
+          <Border BorderThickness="1" BorderBrush="Gray" Height="300">
+            <Grid x:Name="SourceViewport" Focusable="True"
+                  PointerMoved="OnSourcePointerMoved"
+                  PointerPressed="OnSourcePointerPressed"
+                  PointerExited="OnSourcePointerExited">
+              <Image Source="{Binding SourcePreview}" Stretch="Uniform" />
+              <Image Source="{Binding ClippingOverlay}" Stretch="Uniform" IsHitTestVisible="False" />
+            </Grid>
+          </Border>
+          <TextBlock Text="{Binding AnalysisSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ClippingSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ProbeSummary}" TextWrapping="Wrap" />
+          <TextBlock Text="覆盖层：蓝色=阴影阈值，橙红=高光阈值；颜色和图案说明不作为唯一信息源。" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+
+      <ScrollViewer Grid.Column="1">
+        <StackPanel Spacing="8">
+          <Expander Header="Waveform / Parade" IsExpanded="True">
+            <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+            <Border IsVisible="{Binding WaveformVisible}" BorderThickness="1" BorderBrush="Gray">
+              <Grid RowDefinitions="Auto,*">
+                <TextBlock Margin="6" Text="Luma Waveform　纵轴顶部 255 / 底部 0" />
+                <vm:ScopePlotControl Grid.Row="1" MinHeight="220" Source="{Binding WaveformImage}" PlotKind="Waveform" Probe="{Binding CurrentProbe}" />
+              </Grid>
+            </Border>
+            <Border Grid.Row="1" IsVisible="{Binding ParadeVisible}" BorderThickness="1" BorderBrush="Gray">
+              <Grid RowDefinitions="Auto,*">
+                <TextBlock Margin="6" Text="RGB Parade　R 实线位置 / G 中段 / B 右段（共享密度量程）" />
+                <vm:ScopePlotControl Grid.Row="1" MinHeight="220" Source="{Binding ParadeImage}" PlotKind="Parade" Probe="{Binding CurrentProbe}" />
+              </Grid>
+            </Border>
+            </Grid>
+          </Expander>
+          <Expander Header="Vectorscope / Histogram" IsExpanded="True">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <Border IsVisible="{Binding VectorscopeVisible}" BorderThickness="1" BorderBrush="Gray">
+              <Grid RowDefinitions="Auto,*,Auto">
+                <TextBlock Margin="6" Text="YCbCr Vectorscope　右=+Cb，上=+Cr" />
+                <vm:ScopePlotControl Grid.Row="1" MinHeight="360" Source="{Binding VectorscopeImage}" PlotKind="Vectorscope" Probe="{Binding CurrentProbe}" ReferenceTargets="{Binding VectorscopeReferenceTargets}" />
+                <TextBlock Grid.Row="2" Margin="6" Text="纯色参考：R / Mg / B / Cy / G / Yl；圆环不是广播合法框。" TextWrapping="Wrap" />
+              </Grid>
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="8" IsVisible="{Binding HistogramVisible}">
+              <TextBlock Text="R/G/B/Y 直方图（字母与固定颜色同时区分）" />
+              <vm:ScopeHistogramControl Height="240" Analysis="{Binding Analysis}" Probe="{Binding CurrentProbe}" ChartKind="Histogram" />
+              <TextBlock Text="饱和度 S（蓝）/ 色度半径（黄）/ Hue（紫）；Hue 为饱和度加权，灰阶不计入。" TextWrapping="Wrap" />
+              <vm:ScopeHistogramControl Height="180" Analysis="{Binding Analysis}" Probe="{Binding CurrentProbe}" ChartKind="Distribution" />
+            </StackPanel>
+            </Grid>
+          </Expander>
+          <Expander Header="显示与可访问性">
+            <StackPanel Margin="12" Spacing="10">
+            <CheckBox IsChecked="{Binding WaveformVisible}" Content="显示 Luma Waveform" />
+            <CheckBox IsChecked="{Binding ParadeVisible}" Content="显示 RGB Parade" />
+            <CheckBox IsChecked="{Binding VectorscopeVisible}" Content="显示 Vectorscope" />
+            <CheckBox IsChecked="{Binding HistogramVisible}" Content="显示直方图与颜色分布" />
+            <TextBlock Text="键盘可聚焦顶部按钮、阈值框、下拉框、源图与清除探针按钮。R/G/B、阴影/高光均有文字和固定位置，不只依赖颜色。" TextWrapping="Wrap" />
+            <TextBlock Text="本产品展示 8-bit 静态图片的固定 sRGB/BT.601 数值事实，不是 HDR、ICC 或广播认证仪表。" TextWrapping="Wrap" />
+            </StackPanel>
+          </Expander>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <TextBlock Grid.Row="2" Text="高光/阴影表示阈值命中；平均 Cb/Cr 表示画面内容均值，都不自动构成调色或白平衡结论。" TextWrapping="Wrap" />
+  </Grid>
+</UserControl>

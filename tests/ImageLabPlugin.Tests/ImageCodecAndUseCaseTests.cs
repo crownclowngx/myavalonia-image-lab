@@ -47,6 +47,7 @@ using ImageLabPlugin.Features.PaletteColorTransfer;
 using ImageLabPlugin.Application.ColorTransfer;
 using ImageLabPlugin.Features.SeamCarving;
 using ImageLabPlugin.Features.SpectralArt;
+using ImageLabPlugin.Features.ImageOscilloscope;
 using Xunit;
 
 namespace ImageLabPlugin.Tests;
@@ -88,7 +89,7 @@ public sealed class AvaloniaHeadlessFixture
 public sealed class ImageCodecAndUseCaseTests
 {
     [Fact]
-    public void 十七项能力的真实Document视图与轻量控件可在Headless环境独立加载()
+    public void 全部真实Document视图与图像示波器轻量控件可在Headless环境独立加载()
     {
         var embedView = new WatermarkEmbedView();
         var inspectView = new WatermarkInspectView();
@@ -127,6 +128,9 @@ public sealed class ImageCodecAndUseCaseTests
         var seamComparison = new SeamComparisonControl();
         var spectralArtView = new SpectralArtView();
         var spectralRegion = new SpectralArtRegionCanvas();
+        var imageOscilloscopeView = new ImageOscilloscopeView();
+        var scopePlot = new ScopePlotControl();
+        var scopeHistogram = new ScopeHistogramControl();
 
         Assert.NotNull(embedView.Content);
         Assert.NotNull(inspectView.Content);
@@ -162,6 +166,7 @@ public sealed class ImageCodecAndUseCaseTests
         Assert.NotNull(paletteStrip); Assert.NotNull(colorHistogram); Assert.NotNull(colorPlane); Assert.NotNull(differenceHistogram);
         Assert.NotNull(seamView.Content); Assert.NotNull(seamOverlay); Assert.NotNull(energyMap); Assert.NotNull(seamComparison);
         Assert.NotNull(spectralArtView.Content); Assert.NotNull(spectralRegion);
+        Assert.NotNull(imageOscilloscopeView.Content); Assert.NotNull(scopePlot); Assert.NotNull(scopeHistogram);
         Assert.NotSame(lsbView.Content, convolutionView.Content);
     }
 
@@ -183,7 +188,8 @@ public sealed class ImageCodecAndUseCaseTests
             new SvdDecompositionView(),
             new PaletteColorTransferView(),
             new SeamCarvingView(),
-            new SpectralArtView()
+            new SpectralArtView(),
+            new ImageOscilloscopeView()
         ];
 
         var numericInputs = new List<NumericUpDown>();
@@ -201,7 +207,7 @@ public sealed class ImageCodecAndUseCaseTests
             window.Close();
         }
 
-        Assert.Equal(72, numericInputs.Count);
+        Assert.Equal(74, numericInputs.Count);
     }
 
     [Fact]

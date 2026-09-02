@@ -84,4 +84,8 @@ public static class PluginIds
     /// <summary>“幅度与相位交换”双输入 FFT 分量实验的多实例持久身份。</summary>
     public static readonly DocumentTypeId MagnitudePhaseSwapDocument =
         new("myavalonia.plugin.image.lab.document.magnitude-phase-swap");
+
+    /// <summary>“图像示波器”全图信号分析与像素探针联动的多实例持久身份。</summary>
+    public static readonly DocumentTypeId ImageOscilloscopeDocument =
+        new("myavalonia.plugin.image.lab.document.image-oscilloscope");
 }

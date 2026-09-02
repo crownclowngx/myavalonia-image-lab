@@ -25,6 +25,7 @@ using ImageLabPlugin.Domain.PoissonBlending;
 using ImageLabPlugin.Features.HybridImage;
 using ImageLabPlugin.Domain.HybridImage;
 using ImageLabPlugin.Features.MagnitudePhaseSwap;
+using ImageLabPlugin.Features.ImageOscilloscope;
 using ImageLabPlugin.Domain.FrequencyFiltering;
 using ImageLabPlugin.Infrastructure.Persistence;
 using ImageLabPlugin.Plugin;
@@ -40,14 +41,14 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献二十个稳定的PersistableDocument且不贡献Tool()
+    public void Module只贡献二十一个稳定的PersistableDocument且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
         new ImageLabPluginModule().Configure(registration);
 
         Assert.Equal(
-            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument, PluginIds.PoissonBlendingDocument, PluginIds.SpectralArtDocument, PluginIds.HybridImageDocument, PluginIds.MagnitudePhaseSwapDocument },
+            new[] { PluginIds.WatermarkEmbedDocument, PluginIds.WatermarkInspectDocument, PluginIds.SpectrumInspectorDocument, PluginIds.ImageCompareLabDocument, PluginIds.RobustnessLabDocument, PluginIds.ImageFingerprintDocument, PluginIds.BitPlaneViewerDocument, PluginIds.LsbSteganographyLabDocument, PluginIds.ConvolutionPlaygroundDocument, PluginIds.WaveletLabDocument, PluginIds.FrequencyFilterDocument, PluginIds.FrequencyMaskEditorDocument, PluginIds.PeriodicNoiseRemovalDocument, PluginIds.SvdDecompositionDocument, PluginIds.PaletteColorTransferDocument, PluginIds.SeamCarvingDocument, PluginIds.PoissonBlendingDocument, PluginIds.SpectralArtDocument, PluginIds.HybridImageDocument, PluginIds.MagnitudePhaseSwapDocument, PluginIds.ImageOscilloscopeDocument },
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
@@ -103,6 +104,8 @@ public sealed class CompositionAndPersistenceTests
         var secondHybridImage = secondScope.ServiceProvider.GetRequiredService<HybridImageDocument>();
         var magnitudePhase = firstScope.ServiceProvider.GetRequiredService<MagnitudePhaseSwapDocument>();
         var secondMagnitudePhase = secondScope.ServiceProvider.GetRequiredService<MagnitudePhaseSwapDocument>();
+        var imageOscilloscope = firstScope.ServiceProvider.GetRequiredService<ImageOscilloscopeDocument>();
+        var secondImageOscilloscope = secondScope.ServiceProvider.GetRequiredService<ImageOscilloscopeDocument>();
 
         Assert.NotSame(first, second);
         Assert.NotSame(first, inspect);
@@ -125,6 +128,9 @@ public sealed class CompositionAndPersistenceTests
         Assert.NotSame(spectralArt, secondSpectralArt);
         Assert.NotSame(hybridImage, secondHybridImage);
         Assert.NotSame(magnitudePhase, secondMagnitudePhase);
+        Assert.NotSame(imageOscilloscope, secondImageOscilloscope);
+        imageOscilloscope.SourcePath = "scope-oscilloscope-one";
+        Assert.Empty(secondImageOscilloscope.SourcePath);
         magnitudePhase.PathA = "scope-magnitude-one";
         Assert.Empty(secondMagnitudePhase.PathA);
         hybridImage.PathA = "scope-hybrid-one";

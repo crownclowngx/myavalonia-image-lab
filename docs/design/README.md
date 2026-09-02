@@ -23,6 +23,7 @@
 | [Spectral Art／频谱艺术](spectral-art/README.md) | 把文字或图片变成频谱可见图案 | Pattern、径向稳健尺度、共轭幅度、IFFT 与诊断 |
 | [Hybrid Image／混合图像](hybrid-image/README.md) | 对齐两张图片并观察近看／远看主体 | 相似变换、Gaussian、有效裁切、四尺度与共享频谱 |
 | [Magnitude/Phase Swap／幅度与相位交换](magnitude-phase-swap/README.md) | 交换或插值两张图片的 FFT 幅度与相位 | 规范画布、共轭安全组合、IFFT、供体误差与空间指标 |
+| [Image Oscilloscope／图像示波器](image-oscilloscope/README.md) | 观察亮度、RGB、色度、裁切与鼠标采样点 | 全图流式累计、固定密度栅格、探针映射与 Document 生命周期 |
 
 跨能力的架构、领域边界、工作台命令、工作流和发布资料见 [公共设计资料](shared/README.md)。
 
@@ -41,6 +42,7 @@
 | Spectral Art／频谱艺术 | V1 本地开发封板 | [专用实现与证据入口](spectral-art/README.md) |
 | Hybrid Image／混合图像 | V1 本地自动门禁完成；发布前人工观察待执行 | [专用实现与证据入口](hybrid-image/README.md) |
 | Magnitude/Phase Swap／幅度与相位交换 | V1 本地自动门禁完成；发布前人工观察待执行 | [专用实现与证据入口](magnitude-phase-swap/README.md) |
+| Image Oscilloscope／图像示波器 | V1 本地自动门禁完成；真实素材与发布前人工观察待执行 | [专用实现与证据入口](image-oscilloscope/README.md) |
 
 ## 每个能力目录的约定
 
@@ -52,5 +54,5 @@
 - `testing.md`：自动测试、本地命令、已证明与未证明的结论。
 - `history/`：各阶段实际实施记录，不作为当前入口文档。
 
-十九项产品能力均已完成生产接入与本地自动门禁，Module 当前登记二十个 Persistable Document。
+二十项产品能力均已完成生产接入与本地自动门禁，Module 当前登记二十一个 Persistable Document。
 上述状态不等于已通过真实 Host、ZIP、Windows CI 或发布验收。
