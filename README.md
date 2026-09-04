@@ -12,6 +12,9 @@
 > 第一次开始开发前，请先阅读 [项目文档与快速开始](docs/README.md)。其中说明了三个子项目和
 > Standalone 窗口的职责、接入真实 Host 的边界，以及临时部署和正式 ZIP 发布流程。
 
+G0007 已增加文件式 `apply-art-effects-file` Provider Action，以共享核心按 Blur → Bloom → Grain 固定顺序
+处理 Fractal 或其他合规生产者的 PNG Artifact；详见 [G0007 专项文档](docs/refactoring/G0007/README.md)。
+
 ```powershell
 dotnet restore
 dotnet build ImageLabPlugin.slnx -c Debug -warnaserror

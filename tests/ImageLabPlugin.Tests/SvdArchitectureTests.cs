@@ -79,7 +79,6 @@ public sealed class SvdArchitectureTests
         var root = Root();
         var production = ReadAll(Path.Combine(root, "src"));
         Assert.DoesNotContain("AIFLOW", production, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WorkflowAction", production, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("WorkbenchCommand", production, StringComparison.OrdinalIgnoreCase);
         var svd = ReadAll(Path.Combine(root, "src", "ImageLabPlugin.Plugin"));
         Assert.DoesNotContain("CompressionRatio", svd, StringComparison.Ordinal);

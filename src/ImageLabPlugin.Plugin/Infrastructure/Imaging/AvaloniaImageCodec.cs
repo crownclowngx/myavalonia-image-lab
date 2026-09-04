@@ -15,7 +15,7 @@ namespace ImageLabPlugin.Infrastructure.Imaging;
 internal sealed class AvaloniaImageCodec : IImageCodec
 {
     /// <summary>限制压缩文件本身，避免在交给平台解码器前把异常大文件整体读入内存。</summary>
-    public const int MaximumEncodedBytes = 64 * 1024 * 1024;
+    public const int MaximumEncodedBytes = 256 * 1024 * 1024;
 
     public async Task<PixelImage> DecodeAsync(string path, CancellationToken cancellationToken)
     {

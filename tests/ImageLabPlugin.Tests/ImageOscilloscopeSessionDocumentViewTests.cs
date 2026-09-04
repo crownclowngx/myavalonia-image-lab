@@ -197,7 +197,7 @@ public sealed class ImageOscilloscopeSessionDocumentViewTests
         public Task<byte[]> EncodeAsync(PixelImage image, ImageOutputFormat format, int jpegQuality, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
-    private sealed class RecordingRegistration : IPluginRegistration
+    private sealed class RecordingRegistration : IPluginRegistration, IWorkflowActionRegistration
     {
         public PluginId PluginId => PluginIds.Plugin;
         public IServiceCollection Services { get; } = new ServiceCollection();
@@ -208,6 +208,8 @@ public sealed class ImageOscilloscopeSessionDocumentViewTests
         public void AddPersistableDocument<TDocument, TView>(DocumentDescriptor descriptor) where TDocument : class, IPersistablePluginDocument where TView : Control, new()
         { Ids.Add(descriptor.DocumentTypeId); Services.AddScoped<TDocument>(); Services.AddTransient<TView>(); }
         public void AddTool<TTool, TView>(ToolDescriptor descriptor) where TTool : class where TView : Control, new() => ToolIds.Add(descriptor.ToolTypeId);
+        public void AddWorkflowAction<THandler>(WorkflowActionDescriptor descriptor) where THandler : class, IWorkflowActionHandler { }
+        public void UseWorkflowActionGateway() { }
     }
 
     private sealed class NullWindowInteraction : IPluginWindowInteraction

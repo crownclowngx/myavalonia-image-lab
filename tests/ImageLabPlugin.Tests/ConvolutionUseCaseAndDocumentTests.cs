@@ -83,7 +83,6 @@ public sealed class ConvolutionUseCaseAndDocumentTests
             .Concat(Directory.EnumerateFiles(sourceRoot, "*.axaml", SearchOption.AllDirectories))
             .Select(File.ReadAllText));
         Assert.DoesNotContain("AIFLOW", production, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WorkflowAction", production, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("WorkbenchCommand", production, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("FilterDag", production, StringComparison.OrdinalIgnoreCase);
     }
@@ -114,7 +113,8 @@ public sealed class ConvolutionUseCaseAndDocumentTests
 
     private sealed class RecordingCodec(PixelImage image) : IImageCodec
     {
-        public int DecodeCalls { get; private set; } public ImageOutputFormat? LastFormat { get; private set; }
+        public int DecodeCalls { get; private set; }
+        public ImageOutputFormat? LastFormat { get; private set; }
         public Task<PixelImage> DecodeAsync(string path, CancellationToken cancellationToken) { DecodeCalls++; return Task.FromResult(image.Clone()); }
         public Task<PixelImage> DecodeAsync(ReadOnlyMemory<byte> encodedImage, CancellationToken cancellationToken) => Task.FromResult(image.Clone());
         public Task<byte[]> EncodeAsync(PixelImage value, ImageOutputFormat format, int jpegQuality, CancellationToken cancellationToken)

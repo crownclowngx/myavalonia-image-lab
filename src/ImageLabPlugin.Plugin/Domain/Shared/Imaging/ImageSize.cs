@@ -4,7 +4,7 @@ namespace ImageLabPlugin.Domain.Shared.Imaging;
 internal readonly record struct ImageSize
 {
     /// <summary>V1 允许解码的最大像素数。该上限在分配大缓冲区前拒绝异常输入。</summary>
-    public const long MaximumPixelCount = 16_000_000;
+    public const long MaximumPixelCount = 16_777_216;
 
     public ImageSize(int width, int height)
     {

@@ -86,7 +86,6 @@ public sealed class MagnitudePhaseDocumentViewArchitectureTests
         Assert.DoesNotContain("Mediator", domain, StringComparison.OrdinalIgnoreCase);
         var production = ReadAll(Path.Combine(root, "src", "ImageLabPlugin.Plugin"));
         Assert.DoesNotContain("AIFLOW", production, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WorkflowAction", production, StringComparison.OrdinalIgnoreCase);
         var document = File.ReadAllText(Path.Combine(root, "src", "ImageLabPlugin.Plugin", "Features", "MagnitudePhaseSwap", "MagnitudePhaseSwapDocument.cs"));
         Assert.DoesNotContain("Fft2DTransform", document, StringComparison.Ordinal);
         Assert.DoesNotContain("SpectrumComponentMixer", document, StringComparison.Ordinal);
@@ -132,13 +131,15 @@ public sealed class MagnitudePhaseDocumentViewArchitectureTests
         throw new DirectoryNotFoundException("未找到 ImageLabPlugin.slnx。");
     }
 
-    private sealed class Registration : IPluginRegistration
+    private sealed class Registration : IPluginRegistration, IWorkflowActionRegistration
     {
         public PluginId PluginId => PluginIds.Plugin; public IServiceCollection Services { get; } = new ServiceCollection();
         public void UseLifecycle<TLifecycle>() where TLifecycle : class, IPluginLifecycle => Services.AddSingleton<TLifecycle>();
         public void AddDocument<TDocument, TView>(DocumentDescriptor descriptor) where TDocument : class, IPluginDocument where TView : Control, new() => Services.AddScoped<TDocument>();
         public void AddPersistableDocument<TDocument, TView>(DocumentDescriptor descriptor) where TDocument : class, IPersistablePluginDocument where TView : Control, new() { Services.AddScoped<TDocument>(); Services.AddTransient<TView>(); }
         public void AddTool<TTool, TView>(ToolDescriptor descriptor) where TTool : class where TView : Control, new() => throw new InvalidOperationException();
+        public void AddWorkflowAction<THandler>(WorkflowActionDescriptor descriptor) where THandler : class, IWorkflowActionHandler { }
+        public void UseWorkflowActionGateway() { }
     }
 
     private sealed class NullWindowInteraction : IPluginWindowInteraction

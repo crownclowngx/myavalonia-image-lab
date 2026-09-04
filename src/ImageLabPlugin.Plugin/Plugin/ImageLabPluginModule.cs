@@ -21,6 +21,7 @@ using ImageLabPlugin.Features.SpectralArt;
 using ImageLabPlugin.Features.HybridImage;
 using ImageLabPlugin.Features.MagnitudePhaseSwap;
 using ImageLabPlugin.Features.ImageOscilloscope;
+using ImageLabPlugin.Infrastructure.Workflow;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -161,5 +162,9 @@ public sealed class ImageLabPluginModule : IPluginModule
                 "图像示波器",
                 "用全图 Waveform、RGB Parade、Vectorscope、直方图与探针观察静态图片信号",
                 "图像分析"));
+
+        // G0007 只新增一个无 UI 的文件动作；既有二十一个 Document 的身份和顺序保持不变。
+        registration.AddWorkflowAction<ApplyArtEffectsFileWorkflowActionHandler>(
+            ApplyArtEffectsFileWorkflowAction.CreateDescriptor());
     }
 }

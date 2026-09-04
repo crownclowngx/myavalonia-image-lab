@@ -37,7 +37,7 @@ public sealed class PoissonArchitectureTests
     public void 没有AiflowWindowsWorkflow或发布门禁()
     {
         var root = Root(); var production = ReadAll(Path.Combine(root, "src"));
-        Assert.DoesNotContain("AIFLOW", production, StringComparison.OrdinalIgnoreCase); Assert.DoesNotContain("WorkflowAction", production, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("AIFLOW", production, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("WorkbenchCommand", production, StringComparison.OrdinalIgnoreCase); Assert.False(Directory.Exists(Path.Combine(root, ".github", "workflows")));
     }
 

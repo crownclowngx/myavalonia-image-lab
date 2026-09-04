@@ -118,7 +118,7 @@ public sealed class HybridImageDocumentViewAndArchitectureTests
         throw new DirectoryNotFoundException("未找到 ImageLabPlugin.slnx。");
     }
 
-    private sealed class TestRegistration : IPluginRegistration
+    private sealed class TestRegistration : IPluginRegistration, IWorkflowActionRegistration
     {
         public PluginId PluginId => PluginIds.Plugin;
         public IServiceCollection Services { get; } = new ServiceCollection();
@@ -126,6 +126,8 @@ public sealed class HybridImageDocumentViewAndArchitectureTests
         public void AddDocument<TDocument, TView>(DocumentDescriptor descriptor) where TDocument : class, IPluginDocument where TView : Control, new() => Services.AddScoped<TDocument>();
         public void AddPersistableDocument<TDocument, TView>(DocumentDescriptor descriptor) where TDocument : class, IPersistablePluginDocument where TView : Control, new() { Services.AddScoped<TDocument>(); Services.AddTransient<TView>(); }
         public void AddTool<TTool, TView>(ToolDescriptor descriptor) where TTool : class where TView : Control, new() => throw new InvalidOperationException();
+        public void AddWorkflowAction<THandler>(WorkflowActionDescriptor descriptor) where THandler : class, IWorkflowActionHandler { }
+        public void UseWorkflowActionGateway() { }
     }
 
     private sealed class NullWindowInteraction : IPluginWindowInteraction

@@ -56,6 +56,9 @@ using ImageLabPlugin.Application.MagnitudePhaseSwap;
 using ImageLabPlugin.Domain.MagnitudePhaseSwap;
 using ImageLabPlugin.Application.ImageOscilloscope;
 using ImageLabPlugin.Domain.ImageOscilloscope;
+using ImageLabPlugin.Application.ArtEffects;
+using ImageLabPlugin.Domain.Shared.ArtEffects;
+using ImageLabPlugin.Infrastructure.Workflow;
 
 namespace ImageLabPlugin.Plugin;
 
@@ -92,6 +95,7 @@ public static class ImageLabPluginServices
         AddHybridImageServices(services);
         AddMagnitudePhaseServices(services);
         AddImageOscilloscopeServices(services);
+        AddArtEffectWorkflowServices(services);
         return services;
     }
 
@@ -594,5 +598,17 @@ public static class ImageLabPluginServices
         services.AddSingleton<IRecalculateImageOscilloscopeClippingUseCase, RecalculateImageOscilloscopeClippingUseCase>();
         services.AddSingleton<IProjectImageOscilloscopeDisplayUseCase, ProjectImageOscilloscopeDisplayUseCase>();
         services.AddSingleton<IInspectImageOscilloscopePixelUseCase, InspectImageOscilloscopePixelUseCase>();
+    }
+
+    /// <summary>登记 G0007 的纯领域效果流水线与文件／Workflow 外层适配器。</summary>
+    private static void AddArtEffectWorkflowServices(IServiceCollection services)
+    {
+        services.AddSingleton<GaussianBlurArtEffectProcessor>();
+        services.AddSingleton<BloomArtEffectProcessor>();
+        services.AddSingleton<GrainArtEffectProcessor>();
+        services.AddSingleton<ImageArtEffectPipeline>();
+        services.AddSingleton<IWorkflowArtifactReader, WorkflowArtifactReader>();
+        services.AddSingleton<IExclusivePngCommitter, ExclusivePngCommitter>();
+        services.AddSingleton<IApplyArtEffectsFileUseCase, ApplyArtEffectsFileUseCase>();
     }
 }

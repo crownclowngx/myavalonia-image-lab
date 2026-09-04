@@ -41,7 +41,7 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module只贡献二十一个稳定的PersistableDocument且不贡献Tool()
+    public void Module贡献二十一个稳定PersistableDocument和一个WorkflowAction且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
@@ -52,6 +52,9 @@ public sealed class CompositionAndPersistenceTests
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
+        var action = Assert.Single(registration.WorkflowActions);
+        Assert.Equal("myavalonia.plugin.image.lab.workflow.apply-art-effects-file", action.Id.Value);
+        Assert.False(registration.GatewayRequested);
     }
 
     [Fact]
@@ -419,13 +422,15 @@ public sealed class CompositionAndPersistenceTests
         }
     }
 
-    private sealed class RecordingRegistration : IPluginRegistration
+    private sealed class RecordingRegistration : IPluginRegistration, IWorkflowActionRegistration
     {
         public PluginId PluginId => PluginIds.Plugin;
         public IServiceCollection Services { get; } = new ServiceCollection();
         public List<DocumentTypeId> DocumentIds { get; } = [];
         public List<DocumentTypeId> PersistableDocumentIds { get; } = [];
         public List<ToolTypeId> ToolIds { get; } = [];
+        public List<WorkflowActionDescriptor> WorkflowActions { get; } = [];
+        public bool GatewayRequested { get; private set; }
 
         public void UseLifecycle<TLifecycle>() where TLifecycle : class, IPluginLifecycle =>
             Services.AddSingleton<TLifecycle>();
@@ -452,6 +457,12 @@ public sealed class CompositionAndPersistenceTests
         {
             ToolIds.Add(descriptor.ToolTypeId);
         }
+
+        public void AddWorkflowAction<THandler>(WorkflowActionDescriptor descriptor)
+            where THandler : class, IWorkflowActionHandler =>
+            WorkflowActions.Add(descriptor);
+
+        public void UseWorkflowActionGateway() => GatewayRequested = true;
     }
 
     private sealed class NullWindowInteraction : IPluginWindowInteraction
