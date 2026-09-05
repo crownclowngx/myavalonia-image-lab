@@ -41,11 +41,11 @@ internal sealed class DifferenceHashAlgorithm(FingerprintLumaNormalizer normaliz
         var luma = normalizer.Normalize(source, 9, 8, cancellationToken);
         ulong bits = 0;
         for (var y = 0; y < 8; y++)
-        for (var x = 0; x < 8; x++)
-        {
-            // 固定 left > right；相等写 0，不能与 aHash 的 >= 规则共用。
-            if (luma[(y * 9) + x] > luma[(y * 9) + x + 1]) bits |= 1UL << (63 - ((y * 8) + x));
-        }
+            for (var x = 0; x < 8; x++)
+            {
+                // 固定 left > right；相等写 0，不能与 aHash 的 >= 规则共用。
+                if (luma[(y * 9) + x] > luma[(y * 9) + x + 1]) bits |= 1UL << (63 - ((y * 8) + x));
+            }
         return new ImageFingerprint(Id, bits);
     }
 }

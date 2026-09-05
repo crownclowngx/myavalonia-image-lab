@@ -1,0 +1,30 @@
+{
+              "type": "object",
+              "properties": {
+                "artifact": {
+                  "type": "object",
+                  "properties": {
+                    "contract": { "type": "string", "enum": ["myavalonia.workflow.file-artifact"] },
+                    "version": { "type": "integer", "enum": [1] },
+                    "producerPluginId": { "type": "string", "enum": ["myavalonia.plugin.image.lab"] },
+                    "producerOperationId": { "type": "string", "minLength": 36, "maxLength": 36 },
+                    "lifetime": { "type": "string", "enum": ["persistent"] },
+                    "path": { "type": "string", "minLength": 1, "maxLength": 32767 },
+                    "mediaType": { "type": "string", "enum": ["image/png"] },
+                    "byteLength": { "type": "integer", "minimum": 1, "maximum": 268435456 },
+                    "sha256": { "type": "string", "minLength": 64, "maxLength": 64 }
+                  },
+                  "required": ["contract", "version", "producerPluginId", "producerOperationId", "lifetime", "path", "mediaType", "byteLength", "sha256"],
+                  "additionalProperties": false
+                },
+                "image": {
+                  "type": "object",
+                  "properties": {
+                    "width": { "type": "integer", "minimum": 1, "maximum": 4096 },
+                    "height": { "type": "integer", "minimum": 1, "maximum": 4096 }
+                  },
+                  "required": ["width", "height"], "additionalProperties": false
+                }
+              },
+              "required": ["artifact", "image"], "additionalProperties": false
+            }

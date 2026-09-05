@@ -807,8 +807,12 @@ internal sealed partial class PeriodicNoiseRemovalDocument : ObservableObject,
         if (value is null) return null;
         var channel = value.Channel switch
         {
-            "R" => ImageChannel.Red, "G" => ImageChannel.Green, "B" => ImageChannel.Blue,
-            "Cb" => ImageChannel.ChromaBlue, "Cr" => ImageChannel.ChromaRed, _ => ImageChannel.Luma
+            "R" => ImageChannel.Red,
+            "G" => ImageChannel.Green,
+            "B" => ImageChannel.Blue,
+            "Cb" => ImageChannel.ChromaBlue,
+            "Cr" => ImageChannel.ChromaRed,
+            _ => ImageChannel.Luma
         };
         return new PeriodicNoiseRecipe(channel, Enum.Parse<PeriodicNotchTransition>(value.Transition),
             value.Radius, value.Strength, value.Order, value.Notches.Select(item => new PeriodicNotch(

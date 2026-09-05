@@ -141,14 +141,14 @@ internal sealed class RobustnessExperimentPlanner(RobustnessRecipeValidator vali
         var points = recipe.Scan.Values.Expand();
         var cases = new List<RobustnessPlannedCase>();
         foreach (var profile in profiles.OrderBy(value => value))
-        foreach (var (point, pointIndex) in points.Select((value, index) => (value, index)))
-        foreach (var trial in Enumerable.Range(0, recipe.TrialCount))
-        {
-            var steps = recipe.Steps.Select(step => step.StepId == recipe.Scan.StepId
-                ? PerturbationParameterEditor.WithScannedValue(step, recipe.Scan.ParameterId, point)
-                : step).ToArray();
-            cases.Add(new(new(profile, pointIndex, point, trial), steps));
-        }
+            foreach (var (point, pointIndex) in points.Select((value, index) => (value, index)))
+                foreach (var trial in Enumerable.Range(0, recipe.TrialCount))
+                {
+                    var steps = recipe.Steps.Select(step => step.StepId == recipe.Scan.StepId
+                        ? PerturbationParameterEditor.WithScannedValue(step, recipe.Scan.ParameterId, point)
+                        : step).ToArray();
+                    cases.Add(new(new(profile, pointIndex, point, trial), steps));
+                }
         return new(recipe, cases, ComputeHash(recipe, profiles, points));
     }
 

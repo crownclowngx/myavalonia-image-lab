@@ -81,15 +81,15 @@ internal sealed class PeriodicPeakDetector(RadialLogPowerBaseline baseline, Peri
         var index = (y * width) + x;
         var center = values[index];
         for (var dy = -1; dy <= 1; dy++)
-        for (var dx = -1; dx <= 1; dx++)
-        {
-            if (dx == 0 && dy == 0) continue;
-            var nx = (x + dx + width) % width;
-            var ny = (y + dy + height) % height;
-            var neighborIndex = (ny * width) + nx;
-            var neighbor = values[neighborIndex];
-            if (neighbor > center || (neighbor == center && neighborIndex < index)) return false;
-        }
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                if (dx == 0 && dy == 0) continue;
+                var nx = (x + dx + width) % width;
+                var ny = (y + dy + height) % height;
+                var neighborIndex = (ny * width) + nx;
+                var neighbor = values[neighborIndex];
+                if (neighbor > center || (neighbor == center && neighborIndex < index)) return false;
+            }
         return true;
     }
 
@@ -98,12 +98,12 @@ internal sealed class PeriodicPeakDetector(RadialLogPowerBaseline baseline, Peri
         double sum = 0d;
         var count = 0;
         for (var dy = -2; dy <= 2; dy++)
-        for (var dx = -2; dx <= 2; dx++)
-        {
-            if (Math.Abs(dx) <= 1 && Math.Abs(dy) <= 1) continue;
-            sum += values[(((y + dy + height) % height) * width) + ((x + dx + width) % width)];
-            count++;
-        }
+            for (var dx = -2; dx <= 2; dx++)
+            {
+                if (Math.Abs(dx) <= 1 && Math.Abs(dy) <= 1) continue;
+                sum += values[(((y + dy + height) % height) * width) + ((x + dx + width) % width)];
+                count++;
+            }
         return values[(y * width) + x] - (sum / count);
     }
 
@@ -115,12 +115,12 @@ internal sealed class PeriodicPeakDetector(RadialLogPowerBaseline baseline, Peri
         var count = 0;
         var threshold = center - Math.Max(0.05d, prominence * 0.5d);
         for (var dy = -2; dy <= 2; dy++)
-        for (var dx = -2; dx <= 2; dx++)
-        {
-            if (dx == 0 && dy == 0) continue;
-            count++;
-            if (values[(((y + dy + height) % height) * width) + ((x + dx + width) % width)] >= threshold) broad++;
-        }
+            for (var dx = -2; dx <= 2; dx++)
+            {
+                if (dx == 0 && dy == 0) continue;
+                count++;
+                if (values[(((y + dy + height) % height) * width) + ((x + dx + width) % width)] >= threshold) broad++;
+            }
         return 1d - (broad / (double)count);
     }
 

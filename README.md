@@ -15,6 +15,10 @@
 G0007 已增加文件式 `apply-art-effects-file` Provider Action，以共享核心按 Blur → Bloom → Grain 固定顺序
 处理 Fractal 或其他合规生产者的 PNG Artifact；详见 [G0007 专项文档](docs/refactoring/G0007/README.md)。
 
+G0013 新增 `apply-art-effects-file-to-directory`，供 Studio ForEach 使用；旧 Action 契约保持兼容。
+同时补强文件预算、所有权、解码前尺寸与最终提交边界，并修复 Standalone 的 Workflow 注册适配。
+见 [G0013 专项文档](docs/refactoring/G0013/README.md)和[测试记录](docs/refactoring/G0013/testing.md)。
+
 ```powershell
 dotnet restore
 dotnet build ImageLabPlugin.slnx -c Debug -warnaserror

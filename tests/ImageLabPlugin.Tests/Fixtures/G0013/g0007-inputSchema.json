@@ -1,0 +1,42 @@
+{
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "contract": { "type": "string", "enum": ["myavalonia.workflow.file-artifact"] },
+                    "version": { "type": "integer", "enum": [1] },
+                    "producerPluginId": { "type": "string", "minLength": 1, "maxLength": 128 },
+                    "producerOperationId": { "type": "string", "minLength": 36, "maxLength": 36 },
+                    "lifetime": { "type": "string", "enum": ["transient", "run"] },
+                    "path": { "type": "string", "minLength": 1, "maxLength": 32767 },
+                    "mediaType": { "type": "string", "enum": ["image/png"] },
+                    "byteLength": { "type": "integer", "minimum": 1, "maximum": 268435456 },
+                    "sha256": { "type": "string", "minLength": 64, "maxLength": 64 }
+                  },
+                  "required": ["contract", "version", "producerPluginId", "producerOperationId", "lifetime", "path", "mediaType", "byteLength", "sha256"],
+                  "additionalProperties": false
+                },
+                "blur": {
+                  "type": "object",
+                  "properties": { "enabled": { "type": "boolean" }, "sigma": { "type": "number", "minimum": 0, "maximum": 10 } },
+                  "required": ["enabled", "sigma"], "additionalProperties": false
+                },
+                "bloom": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": { "type": "boolean" }, "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "sigma": { "type": "number", "minimum": 0.1, "maximum": 10 }, "strength": { "type": "number", "minimum": 0, "maximum": 4 }
+                  },
+                  "required": ["enabled", "threshold", "sigma", "strength"], "additionalProperties": false
+                },
+                "grain": {
+                  "type": "object",
+                  "properties": { "enabled": { "type": "boolean" }, "amount": { "type": "number", "minimum": 0, "maximum": 100 }, "seed": { "type": "integer" } },
+                  "required": ["enabled", "amount", "seed"], "additionalProperties": false
+                },
+                "outputPath": { "type": "string", "minLength": 1, "maxLength": 32767 }
+              },
+              "required": ["source", "blur", "bloom", "grain", "outputPath"],
+              "additionalProperties": false
+            }

@@ -267,18 +267,48 @@ internal sealed partial class RobustnessLabDocument : ObservableObject, IPersist
     private void OnStepPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args) => RecipeChanged();
     internal static (string ParameterId, decimal Value) DefaultFor(string kindId) => PerturbationKindIds.Parse(kindId) switch
     {
-        PerturbationKind.JpegReencode => ("quality", 95), PerturbationKind.Scale => ("scale-x", 1), PerturbationKind.GaussianNoise => ("sigma", 0), PerturbationKind.SaltPepperNoise => ("ratio", 0),
-        PerturbationKind.DeterministicPixel => ("amplitude", 0), PerturbationKind.GaussianBlur => ("sigma", 0), PerturbationKind.MedianBlur => ("kernel-size", 3), PerturbationKind.UnsharpMask => ("amount", 0),
-        PerturbationKind.Crop => ("left", 0), PerturbationKind.Pad => ("left", 0), PerturbationKind.Translate => ("dx", 0), PerturbationKind.Rotate => ("degrees", 0), PerturbationKind.Perspective => ("top-left-x", 0),
-        PerturbationKind.Brightness => ("offset", 0), PerturbationKind.Contrast => ("factor", 1), PerturbationKind.Gamma => ("gamma", 1), PerturbationKind.Saturation => ("factor", 1), PerturbationKind.ColorBias => ("red", 0), _ => throw new ArgumentOutOfRangeException()
+        PerturbationKind.JpegReencode => ("quality", 95),
+        PerturbationKind.Scale => ("scale-x", 1),
+        PerturbationKind.GaussianNoise => ("sigma", 0),
+        PerturbationKind.SaltPepperNoise => ("ratio", 0),
+        PerturbationKind.DeterministicPixel => ("amplitude", 0),
+        PerturbationKind.GaussianBlur => ("sigma", 0),
+        PerturbationKind.MedianBlur => ("kernel-size", 3),
+        PerturbationKind.UnsharpMask => ("amount", 0),
+        PerturbationKind.Crop => ("left", 0),
+        PerturbationKind.Pad => ("left", 0),
+        PerturbationKind.Translate => ("dx", 0),
+        PerturbationKind.Rotate => ("degrees", 0),
+        PerturbationKind.Perspective => ("top-left-x", 0),
+        PerturbationKind.Brightness => ("offset", 0),
+        PerturbationKind.Contrast => ("factor", 1),
+        PerturbationKind.Gamma => ("gamma", 1),
+        PerturbationKind.Saturation => ("factor", 1),
+        PerturbationKind.ColorBias => ("red", 0),
+        _ => throw new ArgumentOutOfRangeException()
     };
     /// <summary>为展示层编辑和契约测试建立领域算子的恒等/默认参数对象。</summary>
     internal static PerturbationParameters CreateParameters(PerturbationKind kind) => kind switch
     {
-        PerturbationKind.JpegReencode => new JpegParameters(), PerturbationKind.Scale => new ScaleParameters(), PerturbationKind.GaussianNoise => new GaussianNoiseParameters(), PerturbationKind.SaltPepperNoise => new SaltPepperParameters(),
-        PerturbationKind.DeterministicPixel => new DeterministicPixelParameters(), PerturbationKind.GaussianBlur => new GaussianBlurParameters(), PerturbationKind.MedianBlur => new MedianBlurParameters(), PerturbationKind.UnsharpMask => new UnsharpMaskParameters(),
-        PerturbationKind.Crop => new CropParameters(), PerturbationKind.Pad => new PadParameters(), PerturbationKind.Translate => new TranslateParameters(), PerturbationKind.Rotate => new RotateParameters(), PerturbationKind.Perspective => new PerspectiveParameters(),
-        PerturbationKind.Brightness => new BrightnessParameters(), PerturbationKind.Contrast => new ContrastParameters(), PerturbationKind.Gamma => new GammaParameters(), PerturbationKind.Saturation => new SaturationParameters(), PerturbationKind.ColorBias => new ColorBiasParameters(), _ => throw new ArgumentOutOfRangeException(nameof(kind))
+        PerturbationKind.JpegReencode => new JpegParameters(),
+        PerturbationKind.Scale => new ScaleParameters(),
+        PerturbationKind.GaussianNoise => new GaussianNoiseParameters(),
+        PerturbationKind.SaltPepperNoise => new SaltPepperParameters(),
+        PerturbationKind.DeterministicPixel => new DeterministicPixelParameters(),
+        PerturbationKind.GaussianBlur => new GaussianBlurParameters(),
+        PerturbationKind.MedianBlur => new MedianBlurParameters(),
+        PerturbationKind.UnsharpMask => new UnsharpMaskParameters(),
+        PerturbationKind.Crop => new CropParameters(),
+        PerturbationKind.Pad => new PadParameters(),
+        PerturbationKind.Translate => new TranslateParameters(),
+        PerturbationKind.Rotate => new RotateParameters(),
+        PerturbationKind.Perspective => new PerspectiveParameters(),
+        PerturbationKind.Brightness => new BrightnessParameters(),
+        PerturbationKind.Contrast => new ContrastParameters(),
+        PerturbationKind.Gamma => new GammaParameters(),
+        PerturbationKind.Saturation => new SaturationParameters(),
+        PerturbationKind.ColorBias => new ColorBiasParameters(),
+        _ => throw new ArgumentOutOfRangeException(nameof(kind))
     };
     private bool CanCommit(long generation) => generation == _generation && !_disposed && !_lifetime.IsClosing;
     private void RecipeChanged() { if (_restoring) return; ++_generation; CancelAndDispose(); InvalidateResult(disposeBaseline: true); MarkChanged(); StatusMessage = "配方已变化；旧结果已失效，请重新预检并运行。"; }

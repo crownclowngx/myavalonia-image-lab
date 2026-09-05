@@ -43,12 +43,12 @@ public sealed class SharedDomainArchitectureTests
         {
             var ownName = Path.GetFileName(capability);
             foreach (var file in Directory.EnumerateFiles(capability, "*.cs", SearchOption.AllDirectories))
-            foreach (Match match in reference.Matches(File.ReadAllText(file)))
-            {
-                var referenced = match.Groups[1].Value;
-                Assert.True(referenced is "Shared" || StringComparer.Ordinal.Equals(referenced, ownName),
-                    $"{Path.GetRelativePath(domain, file)} 不应直接依赖同级 Capability {referenced}。");
-            }
+                foreach (Match match in reference.Matches(File.ReadAllText(file)))
+                {
+                    var referenced = match.Groups[1].Value;
+                    Assert.True(referenced is "Shared" || StringComparer.Ordinal.Equals(referenced, ownName),
+                        $"{Path.GetRelativePath(domain, file)} 不应直接依赖同级 Capability {referenced}。");
+                }
         }
     }
 

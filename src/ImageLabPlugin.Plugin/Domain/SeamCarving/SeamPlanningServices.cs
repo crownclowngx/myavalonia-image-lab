@@ -65,12 +65,12 @@ internal sealed class SeamMaskRasterizer
         var maximumY = Math.Min(mask.Size.Height - 1, (int)Math.Ceiling(centerY + radius));
         var radiusSquared = radius * radius;
         for (var y = minimumY; y <= maximumY; y++)
-        for (var x = minimumX; x <= maximumX; x++)
-        {
-            var deltaX = x - centerX;
-            var deltaY = y - centerY;
-            if ((deltaX * deltaX) + (deltaY * deltaY) <= radiusSquared) mask.Set(x, y, value);
-        }
+            for (var x = minimumX; x <= maximumX; x++)
+            {
+                var deltaX = x - centerX;
+                var deltaY = y - centerY;
+                if ((deltaX * deltaX) + (deltaY * deltaY) <= radiusSquared) mask.Set(x, y, value);
+            }
     }
 }
 

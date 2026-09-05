@@ -22,7 +22,12 @@ public sealed class ImageDifferenceAndHistogramTests
     }
 
     [Theory]
-    [InlineData(1)] [InlineData(2)] [InlineData(4)] [InlineData(8)] [InlineData(16)] [InlineData(32)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(4)]
+    [InlineData(8)]
+    [InlineData(16)]
+    [InlineData(32)]
     public void Rgb差异六档倍率裁切且Alpha固定(int amplification)
     {
         var proxy = new ImageDifferenceProxy(new ImageSize(1, 1), [10], [20], [30], [30], [18]);

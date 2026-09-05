@@ -26,14 +26,14 @@ internal sealed class FrequencyImpulseResponseFactory(Fft2DTransform fft)
         var coefficients = new double[checked(kernelSize * kernelSize)]; var radius = kernelSize / 2;
         double keptL1 = 0d, keptL2 = 0d;
         for (var row = 0; row < kernelSize; row++)
-        for (var column = 0; column < kernelSize; column++)
-        {
-            // IFFT 的空间原点在 (0,0)；循环取模等价于 fftshift 后从图像中心截取窗口。
-            var sourceX = (column - radius + mask.Width) % mask.Width;
-            var sourceY = (row - radius + mask.Height) % mask.Height;
-            var value = spectrum[(sourceY * mask.Width) + sourceX].Real;
-            coefficients[(row * kernelSize) + column] = value; keptL1 += Math.Abs(value); keptL2 += value * value;
-        }
+            for (var column = 0; column < kernelSize; column++)
+            {
+                // IFFT 的空间原点在 (0,0)；循环取模等价于 fftshift 后从图像中心截取窗口。
+                var sourceX = (column - radius + mask.Width) % mask.Width;
+                var sourceY = (row - radius + mask.Height) % mask.Height;
+                var value = spectrum[(sourceY * mask.Width) + sourceX].Real;
+                coefficients[(row * kernelSize) + column] = value; keptL1 += Math.Abs(value); keptL2 += value * value;
+            }
         var before = coefficients.Sum();
         var target = kind is FrequencyFilterKind.LowPass or FrequencyFilterKind.BandStop ? 1d : 0d;
         // DC 差值只加到中心。高通/带通目标和为 0，绝不能用普通 sum normalization 对零和核做除法。

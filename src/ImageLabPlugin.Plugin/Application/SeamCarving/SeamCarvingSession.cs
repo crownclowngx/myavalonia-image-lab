@@ -151,7 +151,7 @@ internal sealed class SeamCarvingSession : IDisposable
         return new(InputFingerprint, InputImage!.Size, Plan.Request.TargetSize, Plan.Request.AxisOrder,
             Plan.Request.ReferenceAlgorithm, State, Plan.ResourceEstimate, _records.ToArray(),
             InputMask!.CountValues(), Comparison?.SeamVsReference, DateTimeOffset.UtcNow,
-            ["内容感知不等于语义理解；保护/删除是有限能量偏置。", "算法间差异指标不是审美或质量排名。"]) ;
+            ["内容感知不等于语义理解；保护/删除是有限能量偏置。", "算法间差异指标不是审美或质量排名。"]);
     }
 
     public void Dispose()

@@ -376,7 +376,7 @@ internal sealed partial class MagnitudePhaseSwapDocument : ObservableObject, IPe
     ];
 
     private async Task<Bitmap[]> CreateResultBitmapsAsync(MagnitudePhaseRenderResult result, CancellationToken token) =>
-    [ await CreateBitmapAsync(result.ResultImage, token), await CreateBitmapAsync(result.ResultMagnitude, token), await CreateBitmapAsync(result.ResultPhase, token) ];
+    [await CreateBitmapAsync(result.ResultImage, token), await CreateBitmapAsync(result.ResultMagnitude, token), await CreateBitmapAsync(result.ResultPhase, token)];
 
     private async Task<Bitmap> CreateBitmapAsync(PixelImage image, CancellationToken token)
     {

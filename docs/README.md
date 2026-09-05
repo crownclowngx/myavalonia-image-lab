@@ -3,6 +3,9 @@
 G0007 新增不占 Document 数量的文件式艺术效果 Provider Action，见
 [ImageLab 共享核心与 Workflow Action](refactoring/G0007/README.md)。
 
+G0013 增加 Studio 批量编排所需的目录输出 Action，并补强文件与取消边界；
+见 [专项入口](refactoring/G0013/README.md)、[接口设计](refactoring/G0013/implementation.md)与[本地测试](refactoring/G0013/testing.md)。
+
 ImageLab 当前提供二十项产品能力：频域隐式水印、频域分析器、图像比较实验室、鲁棒性实验室、感知指纹、位平面观察器、LSB 隐写与统计实验、卷积核实验台、小波实验室、频域滤波、频谱遮罩编辑器、周期噪声与陷波器、奇异值分解重建、调色板与颜色迁移、内容感知缩放、梯度域融合、频谱艺术、混合图像、幅度与相位交换和图像示波器。`docs` 根目录只保留本索引与未来能力清单；所有现有设计、使用和测试资料统一放在 `design` 下。
 
 ## 我是第一次使用

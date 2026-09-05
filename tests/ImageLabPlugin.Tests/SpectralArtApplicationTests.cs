@@ -180,7 +180,7 @@ public sealed class SpectralArtApplicationTests
         {
             CallCount++;
             return Task.FromResult(new PixelImage(new ImageSize(2, 2),
-                [0,0,0,255, 255,255,255,255, 255,255,255,255, 0,0,0,255]));
+                [0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255]));
         }
     }
 }

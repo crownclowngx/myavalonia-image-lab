@@ -51,8 +51,11 @@ internal sealed class MagnitudePhaseRecipeSerializer : IMagnitudePhaseRecipeSeri
             !Enum.TryParse<MagnitudePhaseProjectionKind>(dto.ProjectionKind, false, out var projectionKind))
             throw new InvalidDataException("配方枚举值无效。");
         MagnitudePhaseRecipe recipe;
-        try { recipe = new MagnitudePhaseRecipe(dto.CanvasSize, magnitudeMode, dto.MagnitudeAmount,
-            phaseMode, dto.PhaseAmount, projectionKind); }
+        try
+        {
+            recipe = new MagnitudePhaseRecipe(dto.CanvasSize, magnitudeMode, dto.MagnitudeAmount,
+            phaseMode, dto.PhaseAmount, projectionKind);
+        }
         catch (ArgumentException exception) { throw new InvalidDataException($"配方数值无效：{exception.Message}", exception); }
         if (recipe.Fingerprint() != dto.RecipeFingerprint) throw new InvalidDataException("配方指纹校验失败。");
         fingerprintA = dto.FingerprintA!; fingerprintB = dto.FingerprintB!;

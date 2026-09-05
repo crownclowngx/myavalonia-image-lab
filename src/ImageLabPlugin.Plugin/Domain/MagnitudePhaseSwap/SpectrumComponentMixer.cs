@@ -125,18 +125,18 @@ internal sealed class SpectrumComponentMixer
 
     private static double SelectMagnitude(double a, double b, double thresholdA, double thresholdB,
         MagnitudePhaseRecipe recipe) => recipe.MagnitudeMode switch
-    {
-        MagnitudeComponentMode.SourceA => a,
-        MagnitudeComponentMode.SourceB => b,
-        MagnitudeComponentMode.LinearAtoB => a + ((b - a) * recipe.MagnitudeAmount),
-        MagnitudeComponentMode.UnitNonZero => recipe.PhaseMode switch
         {
-            PhaseComponentMode.SourceA => a > thresholdA ? 1d : 0d,
-            PhaseComponentMode.SourceB => b > thresholdB ? 1d : 0d,
-            _ => 0d
-        },
-        _ => throw new ArgumentOutOfRangeException()
-    };
+            MagnitudeComponentMode.SourceA => a,
+            MagnitudeComponentMode.SourceB => b,
+            MagnitudeComponentMode.LinearAtoB => a + ((b - a) * recipe.MagnitudeAmount),
+            MagnitudeComponentMode.UnitNonZero => recipe.PhaseMode switch
+            {
+                PhaseComponentMode.SourceA => a > thresholdA ? 1d : 0d,
+                PhaseComponentMode.SourceB => b > thresholdB ? 1d : 0d,
+                _ => 0d
+            },
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
     private static (double Phase, bool Undefined, bool PiAmbiguous) SelectPhase(Complex a, Complex b,
         double thresholdA, double thresholdB, MagnitudePhaseRecipe recipe)

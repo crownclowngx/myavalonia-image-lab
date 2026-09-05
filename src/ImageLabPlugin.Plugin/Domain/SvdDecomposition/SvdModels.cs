@@ -87,8 +87,8 @@ internal sealed class DenseMatrix
     {
         var result = new double[_values.Length];
         for (var row = 0; row < Rows; row++)
-        for (var column = 0; column < Columns; column++)
-            result[(column * Rows) + row] = _values[(row * Columns) + column];
+            for (var column = 0; column < Columns; column++)
+                result[(column * Rows) + row] = _values[(row * Columns) + column];
         return FromOwned(Columns, Rows, result);
     }
 

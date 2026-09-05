@@ -24,24 +24,24 @@ internal static class GaussianBlur
         {
             token.ThrowIfCancellationRequested();
             for (var x = 0; x < width; x++)
-            for (var c = 0; c < 3; c++)
-            {
-                var value = 0d;
-                for (var k = -radius; k <= radius; k++) value += sourceBytes[PerturbationPixels.Offset(source.Size, Math.Clamp(x + k, 0, width - 1), y) + c] * kernel[k + radius];
-                horizontal[((y * width + x) * 3) + c] = value;
-            }
+                for (var c = 0; c < 3; c++)
+                {
+                    var value = 0d;
+                    for (var k = -radius; k <= radius; k++) value += sourceBytes[PerturbationPixels.Offset(source.Size, Math.Clamp(x + k, 0, width - 1), y) + c] * kernel[k + radius];
+                    horizontal[((y * width + x) * 3) + c] = value;
+                }
         }
         var output = source.Clone(); var bytes = output.WritableRgba;
         for (var y = 0; y < height; y++)
         {
             token.ThrowIfCancellationRequested();
             for (var x = 0; x < width; x++)
-            for (var c = 0; c < 3; c++)
-            {
-                var value = 0d;
-                for (var k = -radius; k <= radius; k++) value += horizontal[((Math.Clamp(y + k, 0, height - 1) * width + x) * 3) + c] * kernel[k + radius];
-                bytes[PerturbationPixels.Offset(source.Size, x, y) + c] = PerturbationPixels.ClampRound(value);
-            }
+                for (var c = 0; c < 3; c++)
+                {
+                    var value = 0d;
+                    for (var k = -radius; k <= radius; k++) value += horizontal[((Math.Clamp(y + k, 0, height - 1) * width + x) * 3) + c] * kernel[k + radius];
+                    bytes[PerturbationPixels.Offset(source.Size, x, y) + c] = PerturbationPixels.ClampRound(value);
+                }
         }
         return output;
     }
@@ -58,14 +58,14 @@ internal sealed class MedianBlurOperator : SynchronousPerturbationOperator<Media
         {
             token.ThrowIfCancellationRequested();
             for (var x = 0; x < source.Size.Width; x++)
-            for (var c = 0; c < 3; c++)
-            {
-                var count = 0;
-                for (var ky = -radius; ky <= radius; ky++)
-                for (var kx = -radius; kx <= radius; kx++)
-                    samples[count++] = input[PerturbationPixels.Offset(source.Size, Math.Clamp(x + kx, 0, source.Size.Width - 1), Math.Clamp(y + ky, 0, source.Size.Height - 1)) + c];
-                samples[..count].Sort(); bytes[PerturbationPixels.Offset(source.Size, x, y) + c] = samples[count / 2];
-            }
+                for (var c = 0; c < 3; c++)
+                {
+                    var count = 0;
+                    for (var ky = -radius; ky <= radius; ky++)
+                        for (var kx = -radius; kx <= radius; kx++)
+                            samples[count++] = input[PerturbationPixels.Offset(source.Size, Math.Clamp(x + kx, 0, source.Size.Width - 1), Math.Clamp(y + ky, 0, source.Size.Height - 1)) + c];
+                    samples[..count].Sort(); bytes[PerturbationPixels.Offset(source.Size, x, y) + c] = samples[count / 2];
+                }
         }
         return output;
     }

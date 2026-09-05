@@ -51,13 +51,13 @@ internal sealed class FrequencyBandMaskFactory
         if (mask.Length != spectrum.ValueCount) throw new ArgumentException("遮罩尺寸与频谱不一致。", nameof(mask));
         var rgba = new byte[checked(mask.Length * 4)];
         for (var displayY = 0; displayY < spectrum.PaddedHeight; displayY++)
-        for (var displayX = 0; displayX < spectrum.PaddedWidth; displayX++)
-        {
-            var point = FrequencyCoordinates.FromDisplay(displayX, displayY, spectrum.PaddedWidth, spectrum.PaddedHeight);
-            var level = mask[(point.InternalY * spectrum.PaddedWidth) + point.InternalX] == 0 ? (byte)0 : (byte)255;
-            var offset = ((displayY * spectrum.PaddedWidth) + displayX) * 4;
-            rgba[offset] = rgba[offset + 1] = rgba[offset + 2] = level; rgba[offset + 3] = 255;
-        }
+            for (var displayX = 0; displayX < spectrum.PaddedWidth; displayX++)
+            {
+                var point = FrequencyCoordinates.FromDisplay(displayX, displayY, spectrum.PaddedWidth, spectrum.PaddedHeight);
+                var level = mask[(point.InternalY * spectrum.PaddedWidth) + point.InternalX] == 0 ? (byte)0 : (byte)255;
+                var offset = ((displayY * spectrum.PaddedWidth) + displayX) * 4;
+                rgba[offset] = rgba[offset + 1] = rgba[offset + 2] = level; rgba[offset + 3] = 255;
+            }
         return new PixelImage(new ImageSize(spectrum.PaddedWidth, spectrum.PaddedHeight), rgba);
     }
 }

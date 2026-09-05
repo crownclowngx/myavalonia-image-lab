@@ -36,12 +36,12 @@ internal sealed class WaveletExperimentReportSerializer : IWaveletReportSerializ
                 .Append(Format(item.SsimLuma)).Append(",,,\r\n");
         }
         if (report.WatermarkBenchmark is not null)
-        foreach (var item in report.WatermarkBenchmark.Cases)
-        {
-            builder.Append("watermark,,").Append(Escape(item.CarrierId)).Append(',').Append(Escape(item.CaseId))
-                .Append(",,,,,,,").Append(item.IntegrityValid ? "true" : "false").Append(',')
-                .Append(Format(item.Confidence)).Append(',').Append(Format(item.RawBitErrorRate)).Append("\r\n");
-        }
+            foreach (var item in report.WatermarkBenchmark.Cases)
+            {
+                builder.Append("watermark,,").Append(Escape(item.CarrierId)).Append(',').Append(Escape(item.CaseId))
+                    .Append(",,,,,,,").Append(item.IntegrityValid ? "true" : "false").Append(',')
+                    .Append(Format(item.Confidence)).Append(',').Append(Format(item.RawBitErrorRate)).Append("\r\n");
+            }
         return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(builder.ToString());
     }
 

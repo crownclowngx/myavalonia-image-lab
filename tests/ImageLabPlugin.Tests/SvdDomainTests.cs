@@ -119,12 +119,12 @@ public sealed class SvdDomainTests
         Assert.True(first.DisplayScale >= Math.Max(Math.Abs(first.RawMinimum), Math.Abs(first.RawMaximum)));
         var sum = new double[4];
         for (var row = 0; row < 2; row++)
-        for (var column = 0; column < 2; column++)
-        {
-            var index = (row * 2) + column;
-            sum[index] = factors.SingularValues.Span[0] * factors.GetU(row, 0) * factors.GetV(column, 0) +
-                factors.SingularValues.Span[1] * factors.GetU(row, 1) * factors.GetV(column, 1);
-        }
+            for (var column = 0; column < 2; column++)
+            {
+                var index = (row * 2) + column;
+                sum[index] = factors.SingularValues.Span[0] * factors.GetU(row, 0) * factors.GetV(column, 0) +
+                    factors.SingularValues.Span[1] * factors.GetU(row, 1) * factors.GetV(column, 1);
+            }
         AssertMatrixClose(source, new DenseMatrix(2, 2, sum), 1e-10);
         var zeroPixel = first.Preview.GetPixel(1, 0);
         Assert.Equal(((byte)238, (byte)238, (byte)238), (zeroPixel.R, zeroPixel.G, zeroPixel.B));

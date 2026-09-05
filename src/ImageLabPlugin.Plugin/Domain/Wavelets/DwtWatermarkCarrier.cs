@@ -92,7 +92,7 @@ internal sealed class DwtWatermarkCarrier(
         var payload = frame.AsSpan(HeaderBytes).ToArray();
         var expected = BinaryPrimitives.ReadUInt32LittleEndian(frame.AsSpan(8, 4));
         var valid = expected == Crc32.Compute(payload);
-        return new(true, valid, payload, confidence, valid ? "Payload CRC 完整。" : "Payload CRC 不匹配。" );
+        return new(true, valid, payload, confidence, valid ? "Payload CRC 完整。" : "Payload CRC 不匹配。");
     }
 
     /// <summary>对已知共同 Payload 直接比较每个差分 QIM bit，得到纠错前原始 BER。</summary>
@@ -147,13 +147,13 @@ internal sealed class DwtWatermarkCarrier(
     {
         var indices = new List<int>();
         foreach (var level in pyramid.Levels)
-        foreach (var subband in new[] { WaveletSubband.HorizontalDetail, WaveletSubband.VerticalDetail })
-        {
-            var region = level.GetRegion(subband);
-            for (var y = region.Y; y < region.Bottom; y++)
-                for (var x = region.X; x < region.Right; x++)
-                    indices.Add((y * pyramid.PaddedSize.Width) + x);
-        }
+            foreach (var subband in new[] { WaveletSubband.HorizontalDetail, WaveletSubband.VerticalDetail })
+            {
+                var region = level.GetRegion(subband);
+                for (var y = region.Y; y < region.Bottom; y++)
+                    for (var x = region.X; x < region.Right; x++)
+                        indices.Add((y * pyramid.PaddedSize.Width) + x);
+            }
         var random = new DeterministicInt32(seed);
         for (var i = indices.Count - 1; i > 0; i--)
         {

@@ -49,8 +49,17 @@ public sealed class SpectrumInspectorDocumentTests
         using var document = CreateDocument(calls);
         var payload = JsonSerializer.SerializeToElement(new
         {
-            SourcePath = "D:/missing.png", Channel = "Unknown", MaximumEdge = 999, View = "Unknown",
-            Low = 0.9, High = 0.1, Band = "Unknown", Inner = 0.8, Outer = 0.2, SourceX = -1, SourceY = -2
+            SourcePath = "D:/missing.png",
+            Channel = "Unknown",
+            MaximumEdge = 999,
+            View = "Unknown",
+            Low = 0.9,
+            High = 0.1,
+            Band = "Unknown",
+            Inner = 0.8,
+            Outer = 0.2,
+            SourceX = -1,
+            SourceY = -2
         });
 
         await document.InitializeAsync(

@@ -162,12 +162,12 @@ public sealed class SeamPlaybackUseCaseTests
         var session = new SeamCarvingSession();
         var bytes = new byte[width * height * 4];
         for (var y = 0; y < height; y++)
-        for (var x = 0; x < width; x++)
-        {
-            var offset = ((y * width) + x) * 4;
-            bytes[offset] = (byte)(x * 30); bytes[offset + 1] = (byte)(y * 40);
-            bytes[offset + 2] = (byte)((x + y) * 20); bytes[offset + 3] = 255;
-        }
+            for (var x = 0; x < width; x++)
+            {
+                var offset = ((y * width) + x) * 4;
+                bytes[offset] = (byte)(x * 30); bytes[offset + 1] = (byte)(y * 40);
+                bytes[offset + 2] = (byte)((x + y) * 20); bytes[offset + 3] = 255;
+            }
         session.Initialize("source.png", new PixelImage(new ImageSize(width, height), bytes));
         return session;
     }

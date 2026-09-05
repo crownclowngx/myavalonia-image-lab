@@ -53,12 +53,12 @@ internal sealed class FrequencySideEffectAnalyzer
         if (size.Width < 3 || size.Height < 3) return 0d;
         double energy = 0d; long count = 0;
         for (var y = 1; y < size.Height - 1; y++)
-        for (var x = 1; x < size.Width - 1; x++)
-        {
-            var gx = (values[(y * size.Width) + x + 1] - values[(y * size.Width) + x - 1]) * 0.5d;
-            var gy = (values[((y + 1) * size.Width) + x] - values[((y - 1) * size.Width) + x]) * 0.5d;
-            energy += (gx * gx) + (gy * gy); count++;
-        }
+            for (var x = 1; x < size.Width - 1; x++)
+            {
+                var gx = (values[(y * size.Width) + x + 1] - values[(y * size.Width) + x - 1]) * 0.5d;
+                var gy = (values[((y + 1) * size.Width) + x] - values[((y - 1) * size.Width) + x]) * 0.5d;
+                energy += (gx * gx) + (gy * gy); count++;
+            }
         return count == 0 ? 0d : energy / count;
     }
 

@@ -57,8 +57,8 @@ public sealed class WaveletTransformTests
     {
         var horizontal = new double[16]; var vertical = new double[16];
         for (var y = 0; y < 4; y++)
-        for (var x = 0; x < 4; x++)
-        { horizontal[y * 4 + x] = (y & 1) == 0 ? 1d : -1d; vertical[y * 4 + x] = (x & 1) == 0 ? 1d : -1d; }
+            for (var x = 0; x < 4; x++)
+            { horizontal[y * 4 + x] = (y & 1) == 0 ? 1d : -1d; vertical[y * 4 + x] = (x & 1) == 0 ? 1d : -1d; }
         var transform = new HaarWaveletTransform();
         var hp = transform.Forward(new(new(4, 4), ImageChannel.Luma, horizontal), 1);
         var vp = transform.Forward(new(new(4, 4), ImageChannel.Luma, vertical), 1);

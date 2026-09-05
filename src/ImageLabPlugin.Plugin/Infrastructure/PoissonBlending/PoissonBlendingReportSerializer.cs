@@ -34,10 +34,21 @@ internal sealed class PoissonBlendingReportSerializer : IPoissonBlendingReportSe
             source = new { report.SourceFingerprint, width = report.SourceSize.Width, height = report.SourceSize.Height },
             target = new { report.TargetFingerprint, width = report.TargetSize.Width, height = report.TargetSize.Height },
             offset = new { dx = report.Offset.Dx, dy = report.Offset.Dy },
-            mask = new { report.Topology.UnknownCount, report.Topology.BoundingBox, report.Topology.ComponentCount,
-                report.Topology.HoleCount, report.Topology.BoundaryCount },
-            options = new { report.Options.RmsTolerance, report.Options.MaxAbsTolerance, report.Options.MaxIterations,
-                report.Options.PreviewInterval },
+            mask = new
+            {
+                report.Topology.UnknownCount,
+                report.Topology.BoundingBox,
+                report.Topology.ComponentCount,
+                report.Topology.HoleCount,
+                report.Topology.BoundaryCount
+            },
+            options = new
+            {
+                report.Options.RmsTolerance,
+                report.Options.MaxAbsTolerance,
+                report.Options.MaxIterations,
+                report.Options.PreviewInterval
+            },
             resource = report.ResourceEstimate,
             convergence = new
             {

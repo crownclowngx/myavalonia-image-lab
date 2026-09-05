@@ -122,19 +122,19 @@ internal sealed class RunWaveletQualityScanUseCase(
         try
         {
             foreach (var level in levels.Distinct().Order())
-            foreach (var threshold in thresholds)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var targetLevels = template.TargetLevels.Where(value => value <= level).DefaultIfEmpty(level);
-                var recipe = new WaveletDenoiseRecipe(template.Transform, template.Channel, level, template.Mode,
-                    template.Source, threshold, targetLevels, template.TargetSubbands);
-                var analysis = await decompose.ExecuteAsync(session, recipe, fullSize: false, 1,
-                    WaveletSubband.DiagonalDetail, WaveletProjectionMode.Symmetric, cancellationToken).ConfigureAwait(false);
-                var result = await denoise.ExecuteAsync(session, analysis, recipe, cancellationToken).ConfigureAwait(false);
-                cases.Add(new(cases.Count, level, threshold, result.ThresholdStatistics,
-                    result.Reconstruction.RootMeanSquareError, result.ReferenceQuality?.PsnrLumaDb,
-                    result.ReferenceQuality?.GlobalSsimLuma, result.Elapsed));
-            }
+                foreach (var threshold in thresholds)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var targetLevels = template.TargetLevels.Where(value => value <= level).DefaultIfEmpty(level);
+                    var recipe = new WaveletDenoiseRecipe(template.Transform, template.Channel, level, template.Mode,
+                        template.Source, threshold, targetLevels, template.TargetSubbands);
+                    var analysis = await decompose.ExecuteAsync(session, recipe, fullSize: false, 1,
+                        WaveletSubband.DiagonalDetail, WaveletProjectionMode.Symmetric, cancellationToken).ConfigureAwait(false);
+                    var result = await denoise.ExecuteAsync(session, analysis, recipe, cancellationToken).ConfigureAwait(false);
+                    cases.Add(new(cases.Count, level, threshold, result.ThresholdStatistics,
+                        result.Reconstruction.RootMeanSquareError, result.ReferenceQuality?.PsnrLumaDb,
+                        result.ReferenceQuality?.GlobalSsimLuma, result.Elapsed));
+                }
             return new(cases, false, session.ReferenceImage is null
                 ? "无干净参考图：不提供最佳去噪质量排序。"
                 : "扫描在与源图同规则生成的参考代理上计算 PSNR/SSIM；最终导出结论仍应复核完整尺寸结果。");

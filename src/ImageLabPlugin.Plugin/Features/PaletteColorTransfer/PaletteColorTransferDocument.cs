@@ -335,8 +335,10 @@ internal sealed partial class PaletteColorTransferDocument : ObservableObject, I
         var sorted = _paletteSorter.Sort(palette, ResolvePaletteSort());
         PaletteEntries = sorted;
         PaletteRows = sorted.Select(entry =>
-        { var bytes = entry.Srgb.ToBytes(); return $"#{entry.ClusterIndex}  #{bytes.Red:X2}{bytes.Green:X2}{bytes.Blue:X2}  " +
-            $"Lab({entry.Lab.L:F1},{entry.Lab.A:F1},{entry.Lab.B:F1})  占比 {entry.Proportion:P1}  簇内均值 ΔE76 {entry.MeanDeltaE76:F2}"; }).ToArray();
+        {
+            var bytes = entry.Srgb.ToBytes(); return $"#{entry.ClusterIndex}  #{bytes.Red:X2}{bytes.Green:X2}{bytes.Blue:X2}  " +
+            $"Lab({entry.Lab.L:F1},{entry.Lab.A:F1},{entry.Lab.B:F1})  占比 {entry.Proportion:P1}  簇内均值 ΔE76 {entry.MeanDeltaE76:F2}";
+        }).ToArray();
     }
 
     private IReadOnlyList<string> BuildStatisticsRows(ColorOperationResult result)

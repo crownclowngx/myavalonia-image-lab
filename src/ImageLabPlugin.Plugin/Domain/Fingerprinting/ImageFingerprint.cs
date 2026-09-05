@@ -57,8 +57,8 @@ internal static class FingerprintBitmapProjector
     {
         var result = new bool[8, 8];
         for (var y = 0; y < 8; y++)
-        for (var x = 0; x < 8; x++)
-            result[y, x] = fingerprint.GetBit(x, y);
+            for (var x = 0; x < 8; x++)
+                result[y, x] = fingerprint.GetBit(x, y);
         return result;
     }
 }

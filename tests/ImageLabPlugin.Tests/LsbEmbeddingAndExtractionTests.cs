@@ -9,9 +9,9 @@ public sealed class LsbEmbeddingAndExtractionTests
     public static IEnumerable<object[]> Recipes()
     {
         foreach (var channels in Enum.GetValues<LsbChannelStrategy>())
-        foreach (var bit in new[] { 0, 1 })
-        foreach (var placement in Enum.GetValues<LsbPlacementKind>())
-            yield return [(int)channels, bit, (int)placement];
+            foreach (var bit in new[] { 0, 1 })
+                foreach (var placement in Enum.GetValues<LsbPlacementKind>())
+                    yield return [(int)channels, bit, (int)placement];
     }
 
     [Theory]

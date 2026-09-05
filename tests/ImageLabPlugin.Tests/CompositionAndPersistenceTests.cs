@@ -41,7 +41,7 @@ namespace ImageLabPlugin.Tests;
 public sealed class CompositionAndPersistenceTests
 {
     [Fact]
-    public void Module贡献二十一个稳定PersistableDocument和一个WorkflowAction且不贡献Tool()
+    public void Module贡献二十一个稳定PersistableDocument和两个WorkflowAction且不贡献Tool()
     {
         var registration = new RecordingRegistration();
 
@@ -52,8 +52,8 @@ public sealed class CompositionAndPersistenceTests
             registration.PersistableDocumentIds);
         Assert.Empty(registration.DocumentIds);
         Assert.Empty(registration.ToolIds);
-        var action = Assert.Single(registration.WorkflowActions);
-        Assert.Equal("myavalonia.plugin.image.lab.workflow.apply-art-effects-file", action.Id.Value);
+        Assert.Equal(new[] { "myavalonia.plugin.image.lab.workflow.apply-art-effects-file",
+            "myavalonia.plugin.image.lab.workflow.apply-art-effects-file-to-directory" }, registration.WorkflowActions.Select(action => action.Id.Value));
         Assert.False(registration.GatewayRequested);
     }
 

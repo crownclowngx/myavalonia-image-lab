@@ -106,7 +106,8 @@ public sealed class FrequencyFilterUseCaseTests
     }
     private sealed class MemoryWriter : IAtomicFileWriter
     {
-        public int WriteCount { get; private set; } public byte[] Content { get; private set; } = [];
+        public int WriteCount { get; private set; }
+        public byte[] Content { get; private set; } = [];
         public Task WriteAsync(string targetPath, ReadOnlyMemory<byte> content, CancellationToken cancellationToken)
         { WriteCount++; Content = content.ToArray(); return Task.CompletedTask; }
     }

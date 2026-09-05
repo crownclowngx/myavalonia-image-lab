@@ -28,6 +28,7 @@ internal sealed class RobustnessMatrixControl : Control
     {
         var columns = Math.Max(1, Points.Select(p => p.Profile).Distinct().Count()); var count = Math.Max(1, Points.Count);
         _selected = e.Key switch { Key.Left => Math.Max(0, _selected - 1), Key.Right => Math.Min(count - 1, _selected + 1), Key.Up => Math.Max(0, _selected - columns), Key.Down => Math.Min(count - 1, _selected + columns), _ => _selected };
-        if (e.Key is Key.Left or Key.Right or Key.Up or Key.Down) { e.Handled = true; InvalidateVisual(); } base.OnKeyDown(e);
+        if (e.Key is Key.Left or Key.Right or Key.Up or Key.Down) { e.Handled = true; InvalidateVisual(); }
+        base.OnKeyDown(e);
     }
 }

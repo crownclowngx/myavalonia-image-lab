@@ -47,9 +47,12 @@ internal sealed class InspectConvolutionPixelUseCase(
             throw new InvalidOperationException("探针结果已过期，请先重新生成当前配方预览。");
         var channel = recipe.Channel switch
         {
-            ConvolutionChannelMode.Green => ImageChannel.Green, ConvolutionChannelMode.Blue => ImageChannel.Blue,
-            ConvolutionChannelMode.Luma => ImageChannel.Luma, ConvolutionChannelMode.ChromaBlue => ImageChannel.ChromaBlue,
-            ConvolutionChannelMode.ChromaRed => ImageChannel.ChromaRed, _ => ImageChannel.Red
+            ConvolutionChannelMode.Green => ImageChannel.Green,
+            ConvolutionChannelMode.Blue => ImageChannel.Blue,
+            ConvolutionChannelMode.Luma => ImageChannel.Luma,
+            ConvolutionChannelMode.ChromaBlue => ImageChannel.ChromaBlue,
+            ConvolutionChannelMode.ChromaRed => ImageChannel.ChromaRed,
+            _ => ImageChannel.Red
         };
         var plane = channelConverter.Extract(session.AnalysisProxy, channel);
         if (recipe.Operator.Kind == ConvolutionOperatorKind.GradientPair && recipe.GradientOutput == GradientOutputMode.Magnitude)

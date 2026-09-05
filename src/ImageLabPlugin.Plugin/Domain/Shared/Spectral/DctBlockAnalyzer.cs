@@ -34,7 +34,7 @@ internal sealed class DctBlockAnalyzer(ImageChannelConverter channelConverter, D
         var reconstructed = new double[64];
         var errors = new double[64];
         for (var y = 0; y < 8; y++)
-        for (var x = 0; x < 8; x++) pixels[(y * 8) + x] = plane[origin.X + x, origin.Y + y];
+            for (var x = 0; x < 8; x++) pixels[(y * 8) + x] = plane[origin.X + x, origin.Y + y];
         transform.Forward(pixels, coefficients);
         transform.Inverse(coefficients, reconstructed);
         double maximum = 0d;

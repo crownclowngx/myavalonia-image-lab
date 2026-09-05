@@ -47,7 +47,10 @@ internal sealed class SeamCarvingReportSerializer : ISeamCarvingReportSerializer
                 operation = item.Operation.ToString(),
                 before = new { width = item.BeforeSize.Width, height = item.BeforeSize.Height },
                 after = new { width = item.AfterSize.Width, height = item.AfterSize.Height },
-                item.BaseEnergy, item.EffectiveEnergy, item.ProtectHits, item.PreferRemovalHits
+                item.BaseEnergy,
+                item.EffectiveEnergy,
+                item.ProtectHits,
+                item.PreferRemovalHits
             }),
             seamVsReference = BuildQuality(report.SeamVsReference),
             interpretation = "指标只描述 Seam 与普通缩放结果的算法间差异，不构成审美或语义质量排名。",
@@ -89,8 +92,13 @@ internal sealed class SeamCarvingReportSerializer : ISeamCarvingReportSerializer
         ssimY = quality.GlobalSsimLuma,
         quality.MaximumAbsoluteErrorRgb,
         quality.ChangedPixelCountRgb,
-        alpha = new { quality.MeanAbsoluteErrorAlpha, quality.RootMeanSquareErrorAlpha,
-            quality.MaximumAbsoluteErrorAlpha, quality.ChangedPixelCountAlpha }
+        alpha = new
+        {
+            quality.MeanAbsoluteErrorAlpha,
+            quality.RootMeanSquareErrorAlpha,
+            quality.MaximumAbsoluteErrorAlpha,
+            quality.ChangedPixelCountAlpha
+        }
     };
 
     private static double? FiniteOrNull(double value) => double.IsFinite(value) ? value : null;

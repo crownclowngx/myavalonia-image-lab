@@ -23,7 +23,9 @@ public sealed class SpectralArtDomainTests
     }
 
     [Theory]
-    [InlineData(double.NaN)] [InlineData(-0.1d)] [InlineData(1.1d)]
+    [InlineData(double.NaN)]
+    [InlineData(-0.1d)]
+    [InlineData(1.1d)]
     public void Pattern拒绝非法权重(double value) => Assert.ThrowsAny<ArgumentException>(() =>
         new SpectralPattern(1, 1, [value], SpectralPatternSamplingMode.BinaryNearest, SpectralPatternSourceKind.Text));
 
@@ -48,7 +50,7 @@ public sealed class SpectralArtDomainTests
     [Fact]
     public void 灰度面积缩小产生面积平均且反相生效()
     {
-        var image = new PixelImage(new ImageSize(2, 2), [0,0,0,255, 255,255,255,255, 255,255,255,255, 255,255,255,255]);
+        var image = new PixelImage(new ImageSize(2, 2), [0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]);
         var normalizer = new SpectralPatternNormalizer(new ImageAreaResampler());
         var normal = normalizer.Normalize(image, new(SpectralPatternSourceKind.LogoImage, SpectralPatternSamplingMode.GrayscaleArea, 1, 1, .5, false, SpectralPatternBackground.Black));
         var inverted = normalizer.Normalize(image, new(SpectralPatternSourceKind.LogoImage, SpectralPatternSamplingMode.GrayscaleArea, 1, 1, .5, true, SpectralPatternBackground.Black));

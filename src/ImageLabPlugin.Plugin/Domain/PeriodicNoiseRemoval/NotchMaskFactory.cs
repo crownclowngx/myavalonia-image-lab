@@ -76,12 +76,12 @@ internal sealed class NotchMaskFactory(NotchResponse response)
     {
         var centered = new byte[natural.Length];
         for (var displayY = 0; displayY < height; displayY++)
-        for (var displayX = 0; displayX < width; displayX++)
-        {
-            var point = FrequencyCoordinates.FromDisplay(displayX, displayY, width, height);
-            natural.Slice(((point.InternalY * width) + point.InternalX) * 4, 4)
-                .CopyTo(centered.AsSpan(((displayY * width) + displayX) * 4, 4));
-        }
+            for (var displayX = 0; displayX < width; displayX++)
+            {
+                var point = FrequencyCoordinates.FromDisplay(displayX, displayY, width, height);
+                natural.Slice(((point.InternalY * width) + point.InternalX) * 4, 4)
+                    .CopyTo(centered.AsSpan(((displayY * width) + displayX) * 4, 4));
+            }
         return new PixelImage(new ImageSize(width, height), centered);
     }
 }

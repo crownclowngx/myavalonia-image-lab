@@ -105,13 +105,13 @@ internal sealed class FrequencyFilterMaskFactory(RadialFilterResponse response)
         ArgumentNullException.ThrowIfNull(mask);
         var rgba = new byte[checked(mask.Width * mask.Height * 4)];
         for (var displayY = 0; displayY < mask.Height; displayY++)
-        for (var displayX = 0; displayX < mask.Width; displayX++)
-        {
-            var point = FrequencyCoordinates.FromDisplay(displayX, displayY, mask.Width, mask.Height);
-            var level = (byte)Math.Clamp((int)Math.Round(mask[point.InternalX, point.InternalY] * 255d), 0, 255);
-            var offset = ((displayY * mask.Width) + displayX) * 4;
-            rgba[offset] = rgba[offset + 1] = rgba[offset + 2] = level; rgba[offset + 3] = 255;
-        }
+            for (var displayX = 0; displayX < mask.Width; displayX++)
+            {
+                var point = FrequencyCoordinates.FromDisplay(displayX, displayY, mask.Width, mask.Height);
+                var level = (byte)Math.Clamp((int)Math.Round(mask[point.InternalX, point.InternalY] * 255d), 0, 255);
+                var offset = ((displayY * mask.Width) + displayX) * 4;
+                rgba[offset] = rgba[offset + 1] = rgba[offset + 2] = level; rgba[offset + 3] = 255;
+            }
         return new PixelImage(new ImageSize(mask.Width, mask.Height), rgba);
     }
 }

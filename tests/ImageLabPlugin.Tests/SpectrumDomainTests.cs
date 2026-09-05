@@ -105,11 +105,11 @@ public sealed class SpectrumDomainTests
         Assert.True(Math.Abs(spatialEnergy - frequencyEnergy) / spatialEnergy < 1e-8);
         double conjugateError = 0d;
         for (var y = 0; y < height; y++)
-        for (var x = 0; x < width; x++)
-        {
-            var conjugate = FrequencyCoordinates.ConjugateIndex(x, y, width, height);
-            conjugateError = Math.Max(conjugateError, (values[(y * width) + x] - Complex.Conjugate(values[(conjugate.Y * width) + conjugate.X])).Magnitude);
-        }
+            for (var x = 0; x < width; x++)
+            {
+                var conjugate = FrequencyCoordinates.ConjugateIndex(x, y, width, height);
+                conjugateError = Math.Max(conjugateError, (values[(y * width) + x] - Complex.Conjugate(values[(conjugate.Y * width) + conjugate.X])).Magnitude);
+            }
         Assert.True(conjugateError < 1e-8);
         fft.Inverse(values, width, height);
         Assert.True(values.Zip(original).Max(pair => (pair.First - pair.Second).Magnitude) < 1e-8);
@@ -122,14 +122,14 @@ public sealed class SpectrumDomainTests
         var fft = new Fft2DTransform(new Fft1DTransform());
         var sine = new Complex[size * size];
         for (var y = 0; y < size; y++)
-        for (var x = 0; x < size; x++) sine[(y * size) + x] = new Complex(Math.Sin(2d * Math.PI * 3d * x / size), 0d);
+            for (var x = 0; x < size; x++) sine[(y * size) + x] = new Complex(Math.Sin(2d * Math.PI * 3d * x / size), 0d);
         fft.Forward(sine, size, size);
         var peaks = sine.Select((value, index) => (value.Magnitude, Index: index)).OrderByDescending(item => item.Magnitude).Take(2).Select(item => item.Index).Order().ToArray();
         Assert.Equal(new[] { 3, 13 }, peaks);
 
         var checkerboard = new Complex[size * size];
         for (var y = 0; y < size; y++)
-        for (var x = 0; x < size; x++) checkerboard[(y * size) + x] = new Complex(((x + y) & 1) == 0 ? 1d : -1d, 0d);
+            for (var x = 0; x < size; x++) checkerboard[(y * size) + x] = new Complex(((x + y) & 1) == 0 ? 1d : -1d, 0d);
         fft.Forward(checkerboard, size, size);
         var maximum = checkerboard.Select((value, index) => (value.Magnitude, Index: index)).MaxBy(item => item.Magnitude);
         Assert.Equal((size / 2 * size) + (size / 2), maximum.Index);
@@ -154,11 +154,11 @@ public sealed class SpectrumDomainTests
             spectrum,
             new FrequencyBandDefinition(FrequencyBandKind.Custom, FrequencyBandBoundaries.Default, 0.2, 0.7));
         for (var y = 0; y < 8; y++)
-        for (var x = 0; x < 8; x++)
-        {
-            var conjugate = FrequencyCoordinates.ConjugateIndex(x, y, 8, 8);
-            Assert.Equal(mask[(y * 8) + x], mask[(conjugate.Y * 8) + conjugate.X]);
-        }
+            for (var x = 0; x < 8; x++)
+            {
+                var conjugate = FrequencyCoordinates.ConjugateIndex(x, y, 8, 8);
+                Assert.Equal(mask[(y * 8) + x], mask[(conjugate.Y * 8) + conjugate.X]);
+            }
     }
 
     [Fact]

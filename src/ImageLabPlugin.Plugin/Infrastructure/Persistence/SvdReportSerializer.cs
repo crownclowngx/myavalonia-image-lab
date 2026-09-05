@@ -56,9 +56,13 @@ internal sealed class SvdReportSerializer : ISvdReportSerializer
             report.RankResult.Clipping,
             component = report.Component is null ? null : new
             {
-                channel = report.Component.Channel.ToString(), report.Component.ComponentIndex,
-                report.Component.SingularValue, report.Component.EnergyShare, report.Component.RawMinimum,
-                report.Component.RawMaximum, report.Component.DisplayScale,
+                channel = report.Component.Channel.ToString(),
+                report.Component.ComponentIndex,
+                report.Component.SingularValue,
+                report.Component.EnergyShare,
+                report.Component.RawMinimum,
+                report.Component.RawMaximum,
+                report.Component.DisplayScale,
                 limitation = "分量按独立对称色标显示；重复奇异值子空间内的单列方向不唯一。"
             },
             comparison = report.Comparison is null ? null : new
@@ -67,8 +71,12 @@ internal sealed class SvdReportSerializer : ISvdReportSerializer
                 completionStatus = report.Comparison.CompletionStatus.ToString(),
                 cases = report.Comparison.Cases.Select(item => new
                 {
-                    strategy = item.Strategy.ToString(), item.MatrixCount, item.CommonRank,
-                    item.RetainedEnergy, quality = BuildQuality(item.Quality), elapsedMilliseconds = item.Elapsed.TotalMilliseconds
+                    strategy = item.Strategy.ToString(),
+                    item.MatrixCount,
+                    item.CommonRank,
+                    item.RetainedEnergy,
+                    quality = BuildQuality(item.Quality),
+                    elapsedMilliseconds = item.Elapsed.TotalMilliseconds
                 })
             },
             report.Limitations
@@ -100,13 +108,13 @@ internal sealed class SvdReportSerializer : ISvdReportSerializer
                 null, null, null, report.RankResult.Elapsed.TotalMilliseconds);
         }
         if (report.Comparison is not null)
-        foreach (var item in report.Comparison.Cases)
-        {
-            AppendRow(builder, "strategy-case", item.Strategy.ToString(), null, null, item.CommonRank, null, null, null,
-                null, item.RetainedEnergy, null, null, FiniteOrNull(item.Quality.PsnrRgbDb),
-                double.IsPositiveInfinity(item.Quality.PsnrRgbDb), item.Quality.GlobalSsimLuma,
-                null, null, null, item.Elapsed.TotalMilliseconds);
-        }
+            foreach (var item in report.Comparison.Cases)
+            {
+                AppendRow(builder, "strategy-case", item.Strategy.ToString(), null, null, item.CommonRank, null, null, null,
+                    null, item.RetainedEnergy, null, null, FiniteOrNull(item.Quality.PsnrRgbDb),
+                    double.IsPositiveInfinity(item.Quality.PsnrRgbDb), item.Quality.GlobalSsimLuma,
+                    null, null, null, item.Elapsed.TotalMilliseconds);
+            }
         foreach (var channel in report.Decomposition.Channels)
         {
             var diagnostics = channel.Factors.Diagnostics;
@@ -121,8 +129,14 @@ internal sealed class SvdReportSerializer : ISvdReportSerializer
     private static object BuildEnergy(SvdFactors factors)
     {
         var report = new SingularValueEnergyAnalyzer().Analyze(factors);
-        return new { report.TotalEnergy, report.NumericRank, report.NumericRankTolerance,
-            status = report.Status.ToString(), samples = report.Samples };
+        return new
+        {
+            report.TotalEnergy,
+            report.NumericRank,
+            report.NumericRankTolerance,
+            status = report.Status.ToString(),
+            samples = report.Samples
+        };
     }
 
     private static object BuildQuality(FullReferenceQualityMetrics quality) => new

@@ -88,9 +88,12 @@ internal sealed class ConvolutionImageProcessor(
 
     private static ImageChannel ToImageChannel(ConvolutionChannelMode mode) => mode switch
     {
-        ConvolutionChannelMode.Red => ImageChannel.Red, ConvolutionChannelMode.Green => ImageChannel.Green,
-        ConvolutionChannelMode.Blue => ImageChannel.Blue, ConvolutionChannelMode.Luma => ImageChannel.Luma,
-        ConvolutionChannelMode.ChromaBlue => ImageChannel.ChromaBlue, ConvolutionChannelMode.ChromaRed => ImageChannel.ChromaRed,
+        ConvolutionChannelMode.Red => ImageChannel.Red,
+        ConvolutionChannelMode.Green => ImageChannel.Green,
+        ConvolutionChannelMode.Blue => ImageChannel.Blue,
+        ConvolutionChannelMode.Luma => ImageChannel.Luma,
+        ConvolutionChannelMode.ChromaBlue => ImageChannel.ChromaBlue,
+        ConvolutionChannelMode.ChromaRed => ImageChannel.ChromaRed,
         _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "RGB 模式应由三通道路径处理。")
     };
 }

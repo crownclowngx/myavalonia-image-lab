@@ -25,6 +25,9 @@ internal sealed record ApplyArtEffectsFileResult(
     int Width,
     int Height);
 
+/// <summary>尚未写入文件的处理结果；先建立完整响应，再交由提交端口完成唯一的文件写入。</summary>
+internal sealed record PreparedArtEffectsFile(ApplyArtEffectsFileResult Result, ReadOnlyMemory<byte> Png);
+
 /// <summary>只表达“按 Artifact 合同读取并验证一份不可变输入”的窄端口。</summary>
 internal interface IWorkflowArtifactReader
 {
@@ -44,7 +47,7 @@ internal interface IExclusivePngCommitter
 
 internal interface IApplyArtEffectsFileUseCase
 {
-    Task<ApplyArtEffectsFileResult> ExecuteAsync(
+    Task<PreparedArtEffectsFile> PrepareAsync(
         ApplyArtEffectsFileRequest request,
         CancellationToken cancellationToken);
 }
@@ -55,13 +58,13 @@ internal interface IApplyArtEffectsFileUseCase
 internal sealed class ApplyArtEffectsFileUseCase(
     IWorkflowArtifactReader artifactReader,
     IImageCodec imageCodec,
-    ImageArtEffectPipeline pipeline,
-    IExclusivePngCommitter committer) : IApplyArtEffectsFileUseCase
+    ImageArtEffectPipeline pipeline) : IApplyArtEffectsFileUseCase
 {
-    public async Task<ApplyArtEffectsFileResult> ExecuteAsync(
+    public async Task<PreparedArtEffectsFile> PrepareAsync(
         ApplyArtEffectsFileRequest request,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Source);
         ArgumentNullException.ThrowIfNull(request.Effects);
@@ -88,27 +91,28 @@ internal sealed class ApplyArtEffectsFileUseCase(
             throw new InvalidDataException("Workflow 艺术效果输入的单边尺寸不能超过 4096。");
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         var effected = pipeline.Apply(source, request.Effects, cancellationToken);
         var png = await imageCodec
             .EncodeAsync(effected, ImageOutputFormat.Png, 100, cancellationToken)
             .ConfigureAwait(false);
-        var committedPath = await committer
-            .CommitAsync(request.OutputPath, png, cancellationToken)
-            .ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (png.LongLength is < 8 or > 268435456)
+            throw new InvalidDataException("输出 PNG 超过 File Artifact v1 文件预算。");
         var artifact = new WorkflowFileArtifact(
             WorkflowFileArtifactContract.Name,
             WorkflowFileArtifactContract.Version,
             WorkflowFileArtifactContract.ImageLabPluginId,
             request.OutputOperationId,
             WorkflowFileArtifactContract.PersistentLifetime,
-            committedPath,
+            outputPath,
             WorkflowFileArtifactContract.PngMediaType,
             png.LongLength,
             Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(png.AsSpan())));
-        return new ApplyArtEffectsFileResult(
+        return new PreparedArtEffectsFile(new ApplyArtEffectsFileResult(
             artifact,
             effected.Size.Width,
-            effected.Size.Height);
+            effected.Size.Height), png);
     }
 
     private static StringComparison PathComparison => OperatingSystem.IsWindows()

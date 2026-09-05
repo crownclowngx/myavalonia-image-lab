@@ -118,7 +118,7 @@ public sealed class SeamPlanningAndReferenceTests
         var result = resampler.Resize(source, new ImageSize(7, 5));
         Assert.Equal(new ImageSize(7, 5), result.Size);
         for (var y = 0; y < result.Size.Height; y++)
-        for (var x = 0; x < result.Size.Width; x++) Assert.Equal(((byte)12, (byte)34, (byte)56, (byte)78), result.GetPixel(x, y));
+            for (var x = 0; x < result.Size.Width; x++) Assert.Equal(((byte)12, (byte)34, (byte)56, (byte)78), result.GetPixel(x, y));
     }
 
     [Fact]

@@ -92,8 +92,12 @@ internal sealed class MagnitudePhaseSpectrumProjector(SpectrumProjector projecto
         var t = value * (1d - (saturation * (1d - fraction)));
         var (r, g, b) = sector switch
         {
-            0 => (value, t, p), 1 => (q, value, p), 2 => (p, value, t),
-            3 => (p, q, value), 4 => (t, p, value), _ => (value, p, q)
+            0 => (value, t, p),
+            1 => (q, value, p),
+            2 => (p, value, t),
+            3 => (p, q, value),
+            4 => (t, p, value),
+            _ => (value, p, q)
         };
         return ((byte)Math.Round(r * 255d), (byte)Math.Round(g * 255d), (byte)Math.Round(b * 255d));
     }

@@ -33,7 +33,7 @@ internal sealed class JacobiSvdDecomposer
     {
         ArgumentNullException.ThrowIfNull(matrix);
         if (matrix.Rows >= matrix.Columns)
-        return DecomposeTall(matrix, cancellationToken);
+            return DecomposeTall(matrix, cancellationToken);
 
         // Aᵀ=ŨΣṼᵀ => A=ṼΣŨᵀ。因此原矩阵 U=Ṽ、V=Ũ；交换的只是所有权，
         // 奇异值顺序、符号对和诊断仍来自同一次分解，不让调用方感知内部转置。
@@ -64,25 +64,25 @@ internal sealed class JacobiSvdDecomposer
         {
             var rotations = 0;
             for (var p = 0; p < columns - 1; p++)
-            for (var q = p + 1; q < columns; q++)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var (alpha, beta, gamma) = ScaledColumnProducts(work, rows, columns, p, q);
-                if (alpha == 0d || beta == 0d ||
-                    Math.Abs(gamma) <= _relativeOrthogonalityTolerance * Math.Sqrt(alpha * beta))
-                    continue;
+                for (var q = p + 1; q < columns; q++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var (alpha, beta, gamma) = ScaledColumnProducts(work, rows, columns, p, q);
+                    if (alpha == 0d || beta == 0d ||
+                        Math.Abs(gamma) <= _relativeOrthogonalityTolerance * Math.Sqrt(alpha * beta))
+                        continue;
 
-                // 稳定形式避免直接计算 tan(2θ)。当 ζ 很大时，分母的 abs(ζ)+hypot(1,ζ)
-                // 不会发生灾难性相消；γ=0 已在上方跳过。
-                var zeta = (beta - alpha) / (2d * gamma);
-                var tangent = Math.CopySign(1d, zeta) /
-                    (Math.Abs(zeta) + Math.Sqrt(1d + (zeta * zeta)));
-                var cosine = 1d / Math.Sqrt(1d + (tangent * tangent));
-                var sine = cosine * tangent;
-                RotateColumns(work, rows, columns, p, q, cosine, sine, cancellationToken);
-                RotateColumns(right, columns, columns, p, q, cosine, sine, cancellationToken);
-                rotations++;
-            }
+                    // 稳定形式避免直接计算 tan(2θ)。当 ζ 很大时，分母的 abs(ζ)+hypot(1,ζ)
+                    // 不会发生灾难性相消；γ=0 已在上方跳过。
+                    var zeta = (beta - alpha) / (2d * gamma);
+                    var tangent = Math.CopySign(1d, zeta) /
+                        (Math.Abs(zeta) + Math.Sqrt(1d + (zeta * zeta)));
+                    var cosine = 1d / Math.Sqrt(1d + (tangent * tangent));
+                    var sine = cosine * tangent;
+                    RotateColumns(work, rows, columns, p, q, cosine, sine, cancellationToken);
+                    RotateColumns(right, columns, columns, p, q, cosine, sine, cancellationToken);
+                    rotations++;
+                }
 
             completedSweeps = sweep + 1;
             converged = rotations == 0;
@@ -221,14 +221,14 @@ internal sealed class JacobiSvdDecomposer
         double residualScale = 0d, residualSum = 1d, sourceScale = 0d, sourceSum = 1d;
         var original = source.Values.Span;
         for (var row = 0; row < source.Rows; row++)
-        for (var column = 0; column < source.Columns; column++)
-        {
-            double reconstructed = 0d;
-            for (var component = 0; component < rank; component++)
-                reconstructed += sigma[component] * left[(row * rank) + component] * right[(column * rank) + component];
-            AddScaledSquare(original[(row * source.Columns) + column] - reconstructed, ref residualScale, ref residualSum);
-            AddScaledSquare(original[(row * source.Columns) + column], ref sourceScale, ref sourceSum);
-        }
+            for (var column = 0; column < source.Columns; column++)
+            {
+                double reconstructed = 0d;
+                for (var component = 0; component < rank; component++)
+                    reconstructed += sigma[component] * left[(row * rank) + component] * right[(column * rank) + component];
+                AddScaledSquare(original[(row * source.Columns) + column] - reconstructed, ref residualScale, ref residualSum);
+                AddScaledSquare(original[(row * source.Columns) + column], ref sourceScale, ref sourceSum);
+            }
         var residual = residualScale == 0d ? 0d : residualScale * Math.Sqrt(residualSum);
         var sourceNorm = sourceScale == 0d ? 0d : sourceScale * Math.Sqrt(sourceSum);
         var relative = sourceNorm == 0d ? residual : residual / sourceNorm;

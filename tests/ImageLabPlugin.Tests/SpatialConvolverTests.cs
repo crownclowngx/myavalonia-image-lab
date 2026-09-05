@@ -22,7 +22,10 @@ public sealed class SpatialConvolverTests
     }
 
     [Theory]
-    [InlineData(-100)] [InlineData(-1)] [InlineData(0)] [InlineData(100)]
+    [InlineData(-100)]
+    [InlineData(-1)]
+    [InlineData(0)]
+    [InlineData(100)]
     public void Reflect101长度一总是映射零(int index) => Assert.Equal(0, BorderIndexMapper.Map(index, 1, BorderMode.Reflect101).Index);
 
     [Fact]
@@ -52,7 +55,8 @@ public sealed class SpatialConvolverTests
     }
 
     [Theory]
-    [InlineData(1)] [InlineData(2)]
+    [InlineData(1)]
+    [InlineData(2)]
     public void 零核归一化在执行前阻断(int modeValue)
     {
         var kernel = new ConvolutionKernel(3, new double[9]);

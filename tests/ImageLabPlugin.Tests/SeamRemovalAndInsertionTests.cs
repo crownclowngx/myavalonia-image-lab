@@ -111,12 +111,12 @@ public sealed class SeamRemovalAndInsertionTests
     {
         var bytes = new byte[width * height * 4];
         for (var y = 0; y < height; y++)
-        for (var x = 0; x < width; x++)
-        {
-            var offset = ((y * width) + x) * 4;
-            bytes[offset] = (byte)(10 + x); bytes[offset + 1] = (byte)(20 + y);
-            bytes[offset + 2] = (byte)((y * width) + x); bytes[offset + 3] = 255;
-        }
+            for (var x = 0; x < width; x++)
+            {
+                var offset = ((y * width) + x) * 4;
+                bytes[offset] = (byte)(10 + x); bytes[offset + 1] = (byte)(20 + y);
+                bytes[offset + 2] = (byte)((y * width) + x); bytes[offset + 3] = 255;
+            }
         return new PixelImage(new ImageSize(width, height), bytes);
     }
 }

@@ -242,8 +242,12 @@ internal sealed class SpectrumProjector
         var t = value * (1d - (1d - fraction) * saturation);
         var rgb = index switch
         {
-            0 => (value, t, p), 1 => (q, value, p), 2 => (p, value, t),
-            3 => (p, q, value), 4 => (t, p, value), _ => (value, p, q)
+            0 => (value, t, p),
+            1 => (q, value, p),
+            2 => (p, value, t),
+            3 => (p, q, value),
+            4 => (t, p, value),
+            _ => (value, p, q)
         };
         return (ToByte(rgb.Item1 * 255d), ToByte(rgb.Item2 * 255d), ToByte(rgb.Item3 * 255d));
     }

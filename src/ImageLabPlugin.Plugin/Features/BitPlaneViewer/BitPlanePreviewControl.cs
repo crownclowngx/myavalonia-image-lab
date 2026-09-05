@@ -67,10 +67,10 @@ public sealed class BitPlanePreviewControl : Control
     {
         const double cell = 12d;
         for (var y = 0d; y < size.Height; y += cell)
-        for (var x = 0d; x < size.Width; x += cell)
-        {
-            var even = (((int)(x / cell)) + ((int)(y / cell))) % 2 == 0;
-            context.FillRectangle(even ? Brushes.White : Brushes.LightGray, new Rect(x, y, cell, cell));
-        }
+            for (var x = 0d; x < size.Width; x += cell)
+            {
+                var even = (((int)(x / cell)) + ((int)(y / cell))) % 2 == 0;
+                context.FillRectangle(even ? Brushes.White : Brushes.LightGray, new Rect(x, y, cell, cell));
+            }
     }
 }

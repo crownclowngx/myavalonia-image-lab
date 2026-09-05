@@ -24,16 +24,16 @@ internal sealed class FrequencyGainMask
         Height = height;
         _gains = gains.ToArray();
         for (var y = 0; y < height; y++)
-        for (var x = 0; x < width; x++)
-        {
-            var value = _gains[(y * width) + x];
-            if (!double.IsFinite(value) || value is < 0d or > 1d)
-                throw new ArgumentOutOfRangeException(nameof(gains), "增益必须有限且位于 [0,1]。");
-            var conjugate = FrequencyCoordinates.ConjugateIndex(x, y, width, height);
-            var paired = _gains[(conjugate.Y * width) + conjugate.X];
-            if (!double.IsFinite(paired) || Math.Abs(value - paired) > SymmetryTolerance)
-                throw new ArgumentException("增益遮罩不满足自然索引下的共轭对称约束。", nameof(gains));
-        }
+            for (var x = 0; x < width; x++)
+            {
+                var value = _gains[(y * width) + x];
+                if (!double.IsFinite(value) || value is < 0d or > 1d)
+                    throw new ArgumentOutOfRangeException(nameof(gains), "增益必须有限且位于 [0,1]。");
+                var conjugate = FrequencyCoordinates.ConjugateIndex(x, y, width, height);
+                var paired = _gains[(conjugate.Y * width) + conjugate.X];
+                if (!double.IsFinite(paired) || Math.Abs(value - paired) > SymmetryTolerance)
+                    throw new ArgumentException("增益遮罩不满足自然索引下的共轭对称约束。", nameof(gains));
+            }
 
         Fingerprint = string.IsNullOrWhiteSpace(fingerprint) ? ComputeFingerprint(width, height, _gains) : fingerprint;
     }

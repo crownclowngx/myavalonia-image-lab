@@ -46,21 +46,21 @@ internal sealed class LsbEmbeddingEngine(IEnumerable<ILsbSlotOrder> orders)
 
         double squared = 0;
         for (var index = 0; index < source.Size.PixelCount; index++)
-        for (var channel = 0; channel < 3; channel++)
-        {
-            var offset = checked((index * 4) + channel);
-            var delta = target[offset] - sourceBytes[offset];
-            squared += delta * delta;
-        }
+            for (var channel = 0; channel < 3; channel++)
+            {
+                var offset = checked((index * 4) + channel);
+                var delta = target[offset] - sourceBytes[offset];
+                squared += delta * delta;
+            }
         var mse = squared / (source.Size.PixelCount * 3d);
         double? psnr = mse == 0 ? null : 10d * Math.Log10((255d * 255d) / mse);
         var grid = new List<LsbChangeCell>(columns * rows);
         for (var row = 0; row < rows; row++)
-        for (var column = 0; column < columns; column++)
-        {
-            var index = (row * columns) + column;
-            grid.Add(new(column, row, selectedGrid[index], changedGrid[index]));
-        }
+            for (var column = 0; column < columns; column++)
+            {
+                var index = (row * columns) + column;
+                grid.Add(new(column, row, selectedGrid[index], changedGrid[index]));
+            }
         var facts = new LsbEmbeddingFacts(requiredBits, LsbFrameCodec.HeaderLength * 8, Math.Max(0, requiredBits - (LsbFrameCodec.HeaderLength * 8)),
             selected, changed, selected.Length - changed, negative, positive,
             new Dictionary<LsbChannel, long> { [LsbChannel.Red] = byChannel[0], [LsbChannel.Green] = byChannel[1], [LsbChannel.Blue] = byChannel[2] }, grid, mse, psnr);

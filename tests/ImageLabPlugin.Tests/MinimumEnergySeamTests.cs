@@ -89,12 +89,12 @@ public sealed class MinimumEnergySeamTests
     {
         var effective = source.BaseEnergy.ToArray();
         for (var y = 0; y < source.Size.Height; y++)
-        for (var x = 0; x < source.Size.Width; x++)
-        {
-            var index = (y * source.Size.Width) + x;
-            effective[index] += mask.Get(x, y) switch
-            { SeamMaskValue.Protect => 1000, SeamMaskValue.PreferRemoval => -1000, _ => 0 };
-        }
+            for (var x = 0; x < source.Size.Width; x++)
+            {
+                var index = (y * source.Size.Width) + x;
+                effective[index] += mask.Get(x, y) switch
+                { SeamMaskValue.Protect => 1000, SeamMaskValue.PreferRemoval => -1000, _ => 0 };
+            }
         return new(source.Size, source.BaseEnergy.Span, effective, source.Summary);
     }
 

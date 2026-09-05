@@ -145,8 +145,8 @@ public sealed class ArtEffectWorkflowTests
                 outputPath,
             });
             var useCase = new ApplyArtEffectsFileUseCase(
-                new WorkflowArtifactReader(), codec, Pipeline(), new ExclusivePngCommitter());
-            var handler = new ApplyArtEffectsFileWorkflowActionHandler(useCase);
+                new WorkflowArtifactReader(), codec, Pipeline());
+            var handler = new ApplyArtEffectsFileWorkflowActionHandler(useCase, new ExclusivePngCommitter());
 
             var result = await handler.InvokeAsync(input,
                 new WorkflowActionContext(

@@ -19,8 +19,8 @@ internal sealed class LowFrequencyDctTransform
             {
                 double sum = 0d;
                 for (var y = 0; y < InputSize; y++)
-                for (var x = 0; x < InputSize; x++)
-                    sum += spatial[(y * InputSize) + x] * _basis.Cosine(x, u) * _basis.Cosine(y, v);
+                    for (var x = 0; x < InputSize; x++)
+                        sum += spatial[(y * InputSize) + x] * _basis.Cosine(x, u) * _basis.Cosine(y, v);
                 result[(v * OutputSize) + u] = _basis.Scale(u) * _basis.Scale(v) * sum;
             }
         }

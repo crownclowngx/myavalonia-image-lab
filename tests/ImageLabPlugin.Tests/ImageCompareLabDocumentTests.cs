@@ -48,9 +48,20 @@ public sealed class ImageCompareLabDocumentTests
         using var document = CreateDocument(new CountingPrepare());
         var payload = JsonSerializer.SerializeToElement(new
         {
-            ReferencePath = "r", CandidatePath = "c", Mode = "未知", SplitRatio = 4d, OverlayOpacity = -2d,
-            BlinkIntervalMilliseconds = 1, DifferenceAmplification = 3, HeatmapSource = "未知", HistogramChannel = "未知",
-            UseLogarithmicHistogram = true, Zoom = 99d, CenterX = -1d, CenterY = 4d, ShowCrosshair = true
+            ReferencePath = "r",
+            CandidatePath = "c",
+            Mode = "未知",
+            SplitRatio = 4d,
+            OverlayOpacity = -2d,
+            BlinkIntervalMilliseconds = 1,
+            DifferenceAmplification = 3,
+            HeatmapSource = "未知",
+            HistogramChannel = "未知",
+            UseLogarithmicHistogram = true,
+            Zoom = 99d,
+            CenterX = -1d,
+            CenterY = 4d,
+            ShowCrosshair = true
         });
         await document.InitializeAsync(new RestoreDocumentActivation("非法", new DocumentContent(1, payload)), CancellationToken.None);
 

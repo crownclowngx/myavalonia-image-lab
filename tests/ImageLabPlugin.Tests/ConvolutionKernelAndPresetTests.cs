@@ -8,12 +8,16 @@ namespace ImageLabPlugin.Tests;
 public sealed class ConvolutionKernelAndPresetTests
 {
     [Theory]
-    [InlineData(2)] [InlineData(4)] [InlineData(32)]
+    [InlineData(2)]
+    [InlineData(4)]
+    [InlineData(32)]
     public void 核拒绝偶数或越界尺寸(int size) =>
         Assert.Throws<ArgumentOutOfRangeException>(() => new ConvolutionKernel(size, new double[Math.Max(0, size * size)]));
 
     [Theory]
-    [InlineData(double.NaN)] [InlineData(double.PositiveInfinity)] [InlineData(1024.01)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    [InlineData(1024.01)]
     public void 核拒绝非有限或绝对值越界系数(double value)
     {
         var coefficients = new double[9]; coefficients[4] = value;
@@ -68,7 +72,9 @@ public sealed class ConvolutionKernelAndPresetTests
     }
 
     [Theory]
-    [InlineData("sobel")] [InlineData("prewitt")] [InlineData("scharr")]
+    [InlineData("sobel")]
+    [InlineData("prewitt")]
+    [InlineData("scharr")]
     public void 梯度预设提供两个零和核(string id)
     {
         var value = new ConvolutionPresetFactory().Create(id);
@@ -77,7 +83,8 @@ public sealed class ConvolutionKernelAndPresetTests
     }
 
     [Theory]
-    [InlineData("laplacian-4")] [InlineData("laplacian-8")]
+    [InlineData("laplacian-4")]
+    [InlineData("laplacian-8")]
     public void Laplacian是零和并建议有符号显示偏置(string id)
     {
         var value = new ConvolutionPresetFactory().Create(id);

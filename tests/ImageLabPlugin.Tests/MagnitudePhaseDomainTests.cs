@@ -59,12 +59,12 @@ public sealed class MagnitudePhaseDomainTests
     {
         var bytes = new byte[512 * 512 * 4];
         for (var y = 0; y < 512; y++)
-        for (var x = 0; x < 512; x++)
-        {
-            var level = ((x + y) & 1) == 0 ? (byte)0 : (byte)255;
-            var offset = ((y * 512) + x) * 4;
-            bytes[offset] = bytes[offset + 1] = bytes[offset + 2] = level; bytes[offset + 3] = 255;
-        }
+            for (var x = 0; x < 512; x++)
+            {
+                var level = ((x + y) & 1) == 0 ? (byte)0 : (byte)255;
+                var offset = ((y * 512) + x) * 4;
+                bytes[offset] = bytes[offset + 1] = bytes[offset + 2] = level; bytes[offset + 3] = 255;
+            }
         var canvas = new FrequencyPairCanvasProjector().Project(new PixelImage(new ImageSize(512, 512), bytes), 256);
         Assert.InRange(canvas.Values.Span[0], 127.49d, 127.51d);
         Assert.All(canvas.Values.ToArray(), value => Assert.InRange(value, 127.49d, 127.51d));

@@ -18,6 +18,7 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(artifact);
+        cancellationToken.ThrowIfCancellationRequested();
         ValidateShape(artifact);
         var operationRoot = BuildOperationRoot(artifact);
         var expectedPath = Path.Combine(operationRoot, "source.png");
@@ -27,12 +28,8 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
             throw new InvalidDataException("Artifact 路径与生产者操作目录不匹配。");
         }
 
-        RejectReparsePoints(
-            WorkflowFileArtifactContract.RootPath,
-            Path.GetDirectoryName(operationRoot)!,
-            operationRoot,
-            Path.Combine(operationRoot, ".owner.json"),
-            actualPath);
+        WorkflowFileValidation.RejectReparseAncestors(actualPath);
+        WorkflowFileValidation.RejectReparseAncestors(Path.Combine(operationRoot, ".owner.json"));
         await ValidateOwnerMarkerAsync(operationRoot, artifact, cancellationToken).ConfigureAwait(false);
         var information = new FileInfo(actualPath);
         if (!information.Exists || information.Length != artifact.ByteLength ||
@@ -41,28 +38,11 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
             throw new InvalidDataException("Artifact 文件不存在，或长度未通过验证。");
         }
 
-        byte[] bytes;
-        await using (var stream = new FileStream(
-                         actualPath,
-                         FileMode.Open,
-                         FileAccess.Read,
-                         FileShare.Read,
-                         64 * 1024,
-                         FileOptions.Asynchronous | FileOptions.SequentialScan))
-        {
-            if (stream.Length != artifact.ByteLength)
-            {
-                throw new InvalidDataException("Artifact 文件长度在读取前发生变化。");
-            }
-            bytes = new byte[checked((int)stream.Length)];
-            await stream.ReadExactlyAsync(bytes, cancellationToken).ConfigureAwait(false);
-        }
-
-        ReadOnlySpan<byte> pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
-        if (!bytes.AsSpan(0, 8).SequenceEqual(pngSignature))
-        {
-            throw new InvalidDataException("Artifact 内容不是 PNG。");
-        }
+        var bytes = await WorkflowFileValidation.ReadBoundedAsync(actualPath,
+            checked((int)artifact.ByteLength), cancellationToken).ConfigureAwait(false);
+        if (bytes.LongLength != artifact.ByteLength)
+            throw new InvalidDataException("Artifact 实际读取长度发生变化。");
+        WorkflowFileValidation.ValidatePngHeader(bytes);
         var actualHash = Convert.ToHexString(SHA256.HashData(bytes));
         if (!string.Equals(actualHash, artifact.Sha256, StringComparison.Ordinal))
         {
@@ -79,8 +59,8 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
             artifact.MediaType != WorkflowFileArtifactContract.PngMediaType ||
             artifact.Lifetime is not (WorkflowFileArtifactContract.TransientLifetime or
                 WorkflowFileArtifactContract.RunLifetime) ||
-            artifact.ByteLength <= 0 ||
-            artifact.Sha256.Length != 64 ||
+            artifact.ByteLength is < 8 or > MaximumEncodedBytes ||
+            artifact.Sha256 is null || artifact.Sha256.Length != 64 ||
             artifact.Sha256.Any(character => !Uri.IsHexDigit(character) || char.IsLower(character)))
         {
             throw new InvalidDataException("File Artifact v1 字段未通过验证。");
@@ -118,7 +98,14 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
         {
             throw new InvalidDataException("Artifact 所有权标记不存在或超限。");
         }
-        var markerBytes = await File.ReadAllBytesAsync(markerPath, cancellationToken).ConfigureAwait(false);
+        var markerBytes = await WorkflowFileValidation.ReadBoundedAsync(markerPath,
+            MaximumOwnerMarkerBytes, cancellationToken).ConfigureAwait(false);
+        using var markerJson = JsonDocument.Parse(markerBytes);
+        var markerNames = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var property in markerJson.RootElement.EnumerateObject())
+            if (!markerNames.Add(property.Name) || property.Name is not
+                ("contract" or "version" or "producerPluginId" or "producerOperationId" or "createdAtUtc" or "invocationId" or "itemId"))
+                throw new InvalidDataException("所有权标记包含未知或重复字段。");
         var marker = JsonSerializer.Deserialize<OwnerMarker>(markerBytes) ??
                      throw new InvalidDataException("Artifact 所有权标记无法解析。");
         if (marker.Contract != WorkflowFileArtifactContract.Name ||
@@ -129,18 +116,6 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
             marker.CreatedAtUtc > DateTimeOffset.UtcNow.AddMinutes(5))
         {
             throw new InvalidDataException("Artifact 所有权标记不匹配。");
-        }
-    }
-
-    private static void RejectReparsePoints(params string[] paths)
-    {
-        foreach (var path in paths)
-        {
-            var attributes = File.GetAttributes(path);
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
-            {
-                throw new InvalidDataException("Artifact 路径不能包含重解析点。");
-            }
         }
     }
 
@@ -167,30 +142,33 @@ internal sealed class WorkflowArtifactReader : IWorkflowArtifactReader
 /// <summary>在用户已经存在的目录中创建最终 PNG；冲突时失败，永不覆盖旧文件。</summary>
 internal sealed class ExclusivePngCommitter : IExclusivePngCommitter
 {
+    /// <summary>无副作用预检；提交前仍重复检查，不能把预检当作独占文件系统的承诺。</summary>
+    internal static string ValidateTarget(string outputPath)
+    {
+        if (string.IsNullOrWhiteSpace(outputPath) || outputPath.Length > 32767 ||
+            !Path.IsPathFullyQualified(outputPath) ||
+            !string.Equals(Path.GetExtension(outputPath), ".png", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("输出必须是绝对 PNG 路径。");
+        var target = Path.GetFullPath(outputPath);
+        var directory = Path.GetDirectoryName(target)!;
+        if (!Directory.Exists(directory) || IsWithin(WorkflowFileArtifactContract.RootPath, target))
+            throw new InvalidDataException("输出目录不存在，或输出位于 Workflow 临时目录中。");
+        WorkflowFileValidation.RejectReparseAncestors(directory);
+        if (Path.Exists(target)) throw new IOException("输出文件已经存在，不允许覆盖。");
+        return target;
+    }
+
     public async Task<string> CommitAsync(
         string outputPath,
         ReadOnlyMemory<byte> png,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
-        if (!Path.IsPathFullyQualified(outputPath) ||
-            !string.Equals(Path.GetExtension(outputPath), ".png", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidDataException("输出必须是绝对 PNG 路径。");
-        }
-        var target = Path.GetFullPath(outputPath);
-        var directory = Path.GetDirectoryName(target) ??
-                        throw new InvalidDataException("输出路径没有父目录。");
-        if (!Directory.Exists(directory) || IsWithin(WorkflowFileArtifactContract.RootPath, target))
-        {
-            throw new InvalidDataException("输出目录不存在，或输出位于 Workflow 临时目录中。");
-        }
-        if (File.Exists(target))
-        {
-            throw new IOException("输出文件已经存在，不允许覆盖。");
-        }
+        cancellationToken.ThrowIfCancellationRequested();
+        var target = ValidateTarget(outputPath);
+        var directory = Path.GetDirectoryName(target)!;
 
         var temporary = Path.Combine(directory, $".{Path.GetFileName(target)}.{Guid.NewGuid():N}.partial");
+        var committed = false;
         try
         {
             await using (var stream = new FileStream(
@@ -205,12 +183,14 @@ internal sealed class ExclusivePngCommitter : IExclusivePngCommitter
                 await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
             cancellationToken.ThrowIfCancellationRequested();
+            ValidateTarget(target);
             File.Move(temporary, target, overwrite: false);
+            committed = true;
             return target;
         }
         finally
         {
-            if (File.Exists(temporary))
+            if (!committed && File.Exists(temporary))
             {
                 File.Delete(temporary);
             }
@@ -323,7 +303,8 @@ internal static class ApplyArtEffectsFileWorkflowAction
 }
 
 internal sealed class ApplyArtEffectsFileWorkflowActionHandler(
-    IApplyArtEffectsFileUseCase useCase) : IWorkflowActionHandler
+    IApplyArtEffectsFileUseCase useCase,
+    IExclusivePngCommitter committer) : IWorkflowActionHandler
 {
     public async ValueTask<JsonElement> InvokeAsync(
         JsonElement arguments,
@@ -331,18 +312,40 @@ internal sealed class ApplyArtEffectsFileWorkflowActionHandler(
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
+        cancellationToken.ThrowIfCancellationRequested();
+        ValidateArguments(arguments);
         var input = arguments.Deserialize<ActionArguments>() ??
                     throw new ArgumentException("ImageLab 艺术效果参数无法解析。", nameof(arguments));
         context.Progress.Report(new WorkflowActionProgress("validating", 5, "正在验证输入文件。"));
         var request = input.ToRequest(context.InvocationId);
+        request.Effects.Validate();
+        ExclusivePngCommitter.ValidateTarget(request.OutputPath);
         context.Progress.Report(new WorkflowActionProgress("processing", 20, "正在应用艺术效果。"));
-        var result = await useCase.ExecuteAsync(request, cancellationToken).ConfigureAwait(false);
-        context.Progress.Report(new WorkflowActionProgress("succeeded", 100, "艺术效果 PNG 已提交。"));
-        return JsonSerializer.SerializeToElement(new
+        var prepared = await useCase.PrepareAsync(request, cancellationToken).ConfigureAwait(false);
+        var result = prepared.Result;
+        var output = JsonSerializer.SerializeToElement(new
         {
             artifact = ToJson(result.Artifact),
             image = new { width = result.Width, height = result.Height },
         });
+        // 所有可能失败的序列化、通知与取消检查均在提交之前。原子改名后直接移交预构造响应，
+        // 不再用迟到取消把已提交文件报告为本地失败；Host 最终拒绝仍属于协议无法消除的窗口。
+        context.Progress.Report(new WorkflowActionProgress("committing", 95, "正在提交新的 PNG。"));
+        cancellationToken.ThrowIfCancellationRequested();
+        await committer.CommitAsync(result.Artifact.Path, prepared.Png, cancellationToken).ConfigureAwait(false);
+        return output;
+    }
+
+    internal static void ValidateArguments(JsonElement arguments)
+    {
+        if (System.Text.Encoding.UTF8.GetByteCount(arguments.GetRawText()) > 256 * 1024)
+            throw new InvalidDataException("参数超过 Workflow 输入预算。");
+        WorkflowFileValidation.RequireProperties(arguments, "source", "blur", "bloom", "grain", "outputPath");
+        WorkflowFileValidation.RequireProperties(arguments.GetProperty("source"), "contract", "version",
+            "producerPluginId", "producerOperationId", "lifetime", "path", "mediaType", "byteLength", "sha256");
+        WorkflowFileValidation.RequireProperties(arguments.GetProperty("blur"), "enabled", "sigma");
+        WorkflowFileValidation.RequireProperties(arguments.GetProperty("bloom"), "enabled", "threshold", "sigma", "strength");
+        WorkflowFileValidation.RequireProperties(arguments.GetProperty("grain"), "enabled", "amount", "seed");
     }
 
     internal static object ToJson(WorkflowFileArtifact artifact) => new

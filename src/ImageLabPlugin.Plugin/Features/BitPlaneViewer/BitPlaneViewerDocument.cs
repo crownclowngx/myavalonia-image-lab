@@ -347,8 +347,11 @@ internal sealed partial class BitPlaneViewerDocument : ObservableObject, IPersis
 
     private BitPlaneChannel ResolveChannel() => SelectedChannel switch
     {
-        "R" => BitPlaneChannel.Red, "G" => BitPlaneChannel.Green, "B" => BitPlaneChannel.Blue,
-        "Alpha" => BitPlaneChannel.Alpha, _ => BitPlaneChannel.Luma
+        "R" => BitPlaneChannel.Red,
+        "G" => BitPlaneChannel.Green,
+        "B" => BitPlaneChannel.Blue,
+        "Alpha" => BitPlaneChannel.Alpha,
+        _ => BitPlaneChannel.Luma
     };
 
     private bool CanCommitSource(long generation) => generation == _sourceGeneration && !_lifetime.IsClosing && !_disposed;

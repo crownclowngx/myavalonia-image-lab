@@ -48,12 +48,12 @@ public sealed class SeamEnergyTests
     {
         var pixels = new byte[3 * 3 * 4];
         for (var y = 0; y < 3; y++)
-        for (var x = 0; x < 3; x++)
-        {
-            var value = x == 0 ? (byte)0 : (byte)255;
-            var offset = ((y * 3) + x) * 4;
-            pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = value; pixels[offset + 3] = 255;
-        }
+            for (var x = 0; x < 3; x++)
+            {
+                var value = x == 0 ? (byte)0 : (byte)255;
+                var offset = ((y * 3) + x) * 4;
+                pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = value; pixels[offset + 3] = 255;
+            }
         var map = Calculator().Calculate(new PixelImage(new ImageSize(3, 3), pixels), new SeamMask(new ImageSize(3, 3)));
         Assert.Equal(1d / Math.Sqrt(2d), map.GetBase(1, 1), 10);
         Assert.All(map.BaseEnergy.ToArray(), value => Assert.InRange(value, 0d, 1d));
